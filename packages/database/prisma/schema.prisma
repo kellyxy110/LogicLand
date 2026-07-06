@@ -1,0 +1,295 @@
+// LogicLand database schema (PostgreSQL via Prisma)
+//
+// Design goals: clean relationships, scalable from 1 student to thousands,
+// and a vocabulary that mirrors the product (Worlds/Missions, not "Lesson 1").
+// Clerk owns authentication; `User.clerkId` links a Clerk identity to a role.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  PARENT
+  STUDENT
+  ADMIN // reserved for future
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  REPORT
+  BADGE
+  MESSAGE
+  SYSTEM
+}
+
+// ---------------------------------------------------------------------------
+// Identity
+// ---------------------------------------------------------------------------
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String
+  role      Role
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher Teacher?
+  parent  Parent?
+  student Student?
+
+  sentNotifications     Notification[] @relation("NotificationSender")
+  receivedNotifications Notification[] @relation("NotificationRecipient")
+}
+
+model Teacher {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio    String?
+
+  courses       Course[]
+  announcements Announcement[]
+  weeklyReports WeeklyReport[]
+}
+
+model Parent {
+  id       String    @id @default(cuid())
+  userId   String    @unique
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students Student[]
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String
+  ageYears    Int?
+  xp          Int      @default(0)
+  coins       Int      @default(0)
+  stars       Int      @default(0)
+  level       Int      @default(1)
+  dailyStreak Int      @default(0)
+  // FK-free progress: mission + badge slugs the student has earned. The
+  // normalized Submission/StudentBadge tables remain for richer reporting; this
+  // denormalization lets progress persist without seeding the whole curriculum.
+  completedMissions String[] @default([])
+  earnedBadges      String[] @default([])
+  lastActiveOn      DateTime?
+  parentId    String?
+  parent      Parent?  @relation(fields: [parentId], references: [id])
+  createdAt   DateTime @default(now())
+
+  submissions   Submission[]
+  certificates  Certificate[]
+  badges        StudentBadge[]
+  attendance    Attendance[]
+  weeklyReports WeeklyReport[]
+  projects      Project[]
+  rewards       Reward[]
+}
+
+// ---------------------------------------------------------------------------
+// Curriculum: Course -> World -> Mission -> Lesson, plus Quiz/Worksheet
+// ---------------------------------------------------------------------------
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  teacherId   String
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  createdAt   DateTime @default(now())
+
+  worlds World[]
+}
+
+model World {
+  id         String  @id @default(cuid())
+  slug       String  @unique
+  title      String
+  themeSkill String
+  order      Int
+  courseId   String
+  course     Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  missions Mission[]
+}
+
+model Mission {
+  id            String  @id @default(cuid())
+  slug          String  @unique
+  title         String
+  skill         String
+  story         String
+  objective     String
+  order         Int
+  estimatedMins Int     @default(45)
+  worldId       String
+  world         World   @relation(fields: [worldId], references: [id], onDelete: Cascade)
+
+  lessons     Lesson[]
+  quizzes     Quiz[]
+  worksheets  Worksheet[]
+  submissions Submission[]
+  badge       Badge?      @relation(fields: [badgeId], references: [id])
+  badgeId     String?
+}
+
+model Lesson {
+  id        String  @id @default(cuid())
+  title     String
+  content   String
+  order     Int
+  missionId String
+  mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id        String  @id @default(cuid())
+  title     String
+  questions Json // [{question, options[], correctIndex}]
+  missionId String
+  mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+model Worksheet {
+  id        String  @id @default(cuid())
+  title     String
+  items     Json // [{prompt, answer?}]
+  missionId String
+  mission   Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Student output & progress
+// ---------------------------------------------------------------------------
+model Submission {
+  id        String           @id @default(cuid())
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  missionId String
+  mission   Mission          @relation(fields: [missionId], references: [id])
+  content   Json
+  status    SubmissionStatus @default(SUBMITTED)
+  feedback  String?
+  createdAt DateTime         @default(now())
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  assetUrl    String?
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  kind        String // mission | world | graduation
+  achievement String
+  citation    String
+  issuedAt    DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Gamification
+// ---------------------------------------------------------------------------
+model Badge {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  description String?
+  iconUrl     String?
+
+  missions Mission[]
+  students StudentBadge[]
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt  DateTime @default(now())
+
+  @@unique([studentId, badgeId])
+}
+
+model Reward {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  kind      String // coins | stars | unlock
+  amount    Int      @default(0)
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Classroom operations
+// ---------------------------------------------------------------------------
+model Attendance {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime
+  present   Boolean  @default(true)
+
+  @@unique([studentId, date])
+}
+
+model WeeklyReport {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  week      Int
+  summary   String
+  highlights Json
+  nextSteps  Json
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, week])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  type        NotificationType
+  title       String
+  body        String
+  read        Boolean          @default(false)
+  senderId    String?
+  sender      User?            @relation("NotificationSender", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+}

@@ -1,0 +1,21 @@
+{
+  "name": "logicland",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.6.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @logicland/database db:generate",
+    "db:migrate": "pnpm --filter @logicland/database db:migrate",
+    "engine:dev": "cd logicland-engine && uvicorn main:app --reload --port 8000"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}

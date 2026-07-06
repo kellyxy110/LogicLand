@@ -1,0 +1,28 @@
+# Node
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Env & secrets (NEVER commit)
+.env
+.env.local
+.env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma
+packages/database/prisma/*.db
