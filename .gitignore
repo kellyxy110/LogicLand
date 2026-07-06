@@ -26,3 +26,6 @@ Thumbs.db
 
 # Prisma
 packages/database/prisma/*.db
+
+# Vercel
+.vercel
