@@ -34,7 +34,7 @@ export default function Home() {
         </SignedOut>
         <SignedIn>
           <a
-            href="/student"
+            href="/dashboard"
             className="rounded-2xl bg-brand px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105"
           >
             Go to my dashboard →
