@@ -1,0 +1,19 @@
+name: Keep engine warm
+# Render's free tier spins the engine down after ~15 min idle, so the first
+# request cold-starts (~50s) and dashboards look blank. Ping /health every
+# ~10 min to keep it awake. Remove this once the engine moves off the free tier.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping engine health
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 \
+            https://logicland-engine.onrender.com/health)
+          echo "health -> $code"
+          test "$code" = "200"
