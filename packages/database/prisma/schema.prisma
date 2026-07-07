@@ -10,7 +10,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // Runtime uses the pooled connection. On Neon this is POSTGRES_PRISMA_URL,
+  // which carries `?pgbouncer=true` so Prisma disables prepared statements
+  // (PgBouncer transaction pooling can't reuse them -> "prepared statement
+  // already exists" under concurrency). `directUrl` is the unpooled endpoint,
+  // used only by migrations / `prisma db push`.
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 enum Role {
