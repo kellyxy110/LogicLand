@@ -14,9 +14,13 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 
 from config.settings import Settings, get_settings
+
+if TYPE_CHECKING:
+    from openai import AsyncOpenAI
+    from openai.types.chat import ChatCompletionMessageParam
 
 
 @dataclass(slots=True)
@@ -50,9 +54,10 @@ class OpenAICompatibleProvider:
 
     def __init__(self, settings: Settings | None = None) -> None:
         self._settings = settings or get_settings()
-        self._client = None  # lazily constructed AsyncOpenAI client
+        # lazily constructed AsyncOpenAI client
+        self._client: AsyncOpenAI | None = None
 
-    def _get_client(self):  # pragma: no cover - thin adapter
+    def _get_client(self) -> AsyncOpenAI:  # pragma: no cover - thin adapter
         if self._client is None:
             from openai import AsyncOpenAI
 
@@ -67,10 +72,17 @@ class OpenAICompatibleProvider:
         resp = await client.chat.completions.create(
             model=str(overrides.get("model", self._settings.llm_model)),
             temperature=float(
-                overrides.get("temperature", self._settings.llm_temperature)
+                cast(
+                    float, overrides.get("temperature", self._settings.llm_temperature)
+                )
             ),
-            max_tokens=int(overrides.get("max_tokens", self._settings.llm_max_tokens)),
-            messages=[{"role": m.role, "content": m.content} for m in messages],
+            max_tokens=int(
+                cast(int, overrides.get("max_tokens", self._settings.llm_max_tokens))
+            ),
+            messages=cast(
+                "list[ChatCompletionMessageParam]",
+                [{"role": m.role, "content": m.content} for m in messages],
+            ),
         )
         return resp.choices[0].message.content or ""
 
@@ -81,10 +93,17 @@ class OpenAICompatibleProvider:
         stream = await client.chat.completions.create(
             model=str(overrides.get("model", self._settings.llm_model)),
             temperature=float(
-                overrides.get("temperature", self._settings.llm_temperature)
+                cast(
+                    float, overrides.get("temperature", self._settings.llm_temperature)
+                )
             ),
-            max_tokens=int(overrides.get("max_tokens", self._settings.llm_max_tokens)),
-            messages=[{"role": m.role, "content": m.content} for m in messages],
+            max_tokens=int(
+                cast(int, overrides.get("max_tokens", self._settings.llm_max_tokens))
+            ),
+            messages=cast(
+                "list[ChatCompletionMessageParam]",
+                [{"role": m.role, "content": m.content} for m in messages],
+            ),
             stream=True,
         )
         async for chunk in stream:

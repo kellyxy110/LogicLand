@@ -11,6 +11,7 @@ Run locally:
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -29,7 +30,7 @@ logger = logging.getLogger("logicland")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info("Starting %s in %s mode", settings.app_name, settings.environment)
     yield
     logger.info("Shutting down %s", settings.app_name)
