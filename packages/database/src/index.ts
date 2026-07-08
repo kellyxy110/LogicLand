@@ -15,3 +15,8 @@ export {
   type EnsureUserInput,
   type StudentTotals,
 } from "./students";
+export {
+  listClassroomStudents,
+  getParentChildren,
+  type StudentProgress,
+} from "./dashboards";

@@ -20,9 +20,9 @@ const TOOLS = [
     icon: Wand2,
     live: true,
   },
-  { href: "/teacher", title: "Students & Parents", desc: "Manage your roster.", icon: Users, live: false },
+  { href: "/teacher/roster", title: "Students", desc: "Live roster & progress.", icon: Users, live: true },
+  { href: "/teacher/analytics", title: "Analytics", desc: "Mastery, engagement, streaks.", icon: BarChart3, live: true },
   { href: "/teacher", title: "Weekly Reports", desc: "Draft-then-send parent summaries.", icon: FileText, live: false },
-  { href: "/teacher", title: "Analytics", desc: "Mastery, engagement, streaks.", icon: BarChart3, live: false },
   { href: "/teacher", title: "Announcements", desc: "Broadcast to your classroom.", icon: Megaphone, live: false },
 ];
 
