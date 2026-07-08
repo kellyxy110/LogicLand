@@ -15,21 +15,27 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AiHelper } from "@/components/AiHelper";
+import { CodingLab } from "@/components/lab/CodingLab";
 import { engine, type MissionDetail, type MissionReward } from "@/lib/engine";
+import { puzzleFor } from "@/lib/puzzles";
 import { useStudent } from "@/lib/student-store";
 
 type StepKey =
   | "story"
   | "objective"
   | "activity"
+  | "lab"
   | "challenge"
   | "project"
   | "homework";
 
-const STEPS: { key: StepKey; label: string; robo: "idle" | "thinking" | "happy" }[] = [
+type Step = { key: StepKey; label: string; robo: "idle" | "thinking" | "happy" };
+
+const STEPS: Step[] = [
   { key: "story", label: "The Story", robo: "idle" },
   { key: "objective", label: "Your Goal", robo: "idle" },
   { key: "activity", label: "Let's Play", robo: "thinking" },
+  { key: "lab", label: "Coding Lab", robo: "thinking" },
   { key: "challenge", label: "Challenge", robo: "thinking" },
   { key: "project", label: "Build It", robo: "happy" },
   { key: "homework", label: "Take Home", robo: "happy" },
@@ -44,10 +50,18 @@ export default function MissionPlayer() {
   const [reward, setReward] = useState<MissionReward | null>(null);
   const [burst, setBurst] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [labSolved, setLabSolved] = useState(false);
 
   useEffect(() => {
     engine.getMission(slug).then(setMission).catch(() => setMission(null));
   }, [slug]);
+
+  // Missions with a grid puzzle get a hands-on Coding Lab step; others skip it.
+  const puzzle = useMemo(() => puzzleFor(slug), [slug]);
+  const steps = useMemo(
+    () => (puzzle ? STEPS : STEPS.filter((s) => s.key !== "lab")),
+    [puzzle],
+  );
 
   const alreadyDone = useMemo(
     () => ready && state.completedMissions.includes(slug),
@@ -56,8 +70,10 @@ export default function MissionPlayer() {
 
   if (!mission) return <MissionSkeleton />;
 
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
+  const current = steps[step];
+  const isLast = step === steps.length - 1;
+  // On the Lab step, block progression until Robo solves it (unless replaying).
+  const labLocked = current.key === "lab" && !labSolved && !alreadyDone;
 
   async function finish() {
     if (saving || !mission) return;
@@ -106,7 +122,7 @@ export default function MissionPlayer() {
           ← Map
         </Link>
         <div className="flex gap-1.5">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <span
               key={s.key}
               className={`h-2 w-2 rounded-full ${
@@ -133,7 +149,13 @@ export default function MissionPlayer() {
               <RoboAvatar mood={current.robo} size={48} />
               <CardTitle>{current.label}</CardTitle>
             </div>
-            <p className="text-lg leading-relaxed">{mission[current.key]}</p>
+            {current.key === "lab" && puzzle ? (
+              <CodingLab puzzle={puzzle} onSolved={() => setLabSolved(true)} />
+            ) : (
+              <p className="text-lg leading-relaxed">
+                {mission[current.key as keyof MissionDetail]}
+              </p>
+            )}
           </Card>
         </motion.div>
       </AnimatePresence>
@@ -151,8 +173,12 @@ export default function MissionPlayer() {
             {alreadyDone ? "Play Again" : saving ? "Saving…" : "Finish Mission 🎉"}
           </Button>
         ) : (
-          <Button size="lg" onClick={() => setStep((s) => s + 1)}>
-            Next →
+          <Button
+            size="lg"
+            onClick={() => setStep((s) => s + 1)}
+            disabled={labLocked}
+          >
+            {labLocked ? "Solve to continue 🔒" : "Next →"}
           </Button>
         )}
       </div>
