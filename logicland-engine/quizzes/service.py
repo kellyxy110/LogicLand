@@ -38,15 +38,20 @@ def _parse(req: GenerateRequest, raw: str) -> QuizResponse | None:
             continue
         opts = entry.get("options")
         idx = entry.get("correct_index")
-        if entry.get("question") and isinstance(opts, list) and len(opts) >= 2 and isinstance(idx, int):
-            if 0 <= idx < len(opts):
-                questions.append(
-                    QuizQuestion(
-                        question=sanitize_for_child(str(entry["question"])),
-                        options=[str(o) for o in opts],
-                        correct_index=idx,
-                    )
+        if (
+            entry.get("question")
+            and isinstance(opts, list)
+            and len(opts) >= 2
+            and isinstance(idx, int)
+            and 0 <= idx < len(opts)
+        ):
+            questions.append(
+                QuizQuestion(
+                    question=sanitize_for_child(str(entry["question"])),
+                    options=[str(o) for o in opts],
+                    correct_index=idx,
                 )
+            )
     return QuizResponse(title=f"{req.skill} Quiz", questions=questions) if questions else None
 
 
@@ -55,7 +60,7 @@ def grade(quiz: QuizResponse, answers: list[int]) -> tuple[int, int]:
     total = len(quiz.questions)
     correct = sum(
         1
-        for q, a in zip(quiz.questions, answers)
+        for q, a in zip(quiz.questions, answers, strict=False)
         if 0 <= a < len(q.options) and a == q.correct_index
     )
     return correct, total
