@@ -43,9 +43,11 @@ CERTIFICATE_SYSTEM = (
 
 
 def tutor_user_prompt(question: str, mission_slug: str | None, hint_level: int) -> str:
-    context = f" The child is working on mission '{mission_slug}'." if mission_slug else ""
+    context = (
+        f" The child is working on mission '{mission_slug}'." if mission_slug else ""
+    )
     strength = {1: "a tiny nudge", 2: "a medium hint", 3: "a strong hint"}[hint_level]
     return (
-        f"The child asks: \"{question}\".{context} "
+        f'The child asks: "{question}".{context} '
         f"Give {strength} that helps them think, without solving it for them."
     )

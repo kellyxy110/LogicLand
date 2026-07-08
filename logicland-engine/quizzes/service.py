@@ -52,7 +52,11 @@ def _parse(req: GenerateRequest, raw: str) -> QuizResponse | None:
                     correct_index=idx,
                 )
             )
-    return QuizResponse(title=f"{req.skill} Quiz", questions=questions) if questions else None
+    return (
+        QuizResponse(title=f"{req.skill} Quiz", questions=questions)
+        if questions
+        else None
+    )
 
 
 def grade(quiz: QuizResponse, answers: list[int]) -> tuple[int, int]:

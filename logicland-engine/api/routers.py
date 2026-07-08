@@ -51,7 +51,12 @@ async def get_journey() -> dict[str, object]:
                 "week": w.week,
                 "skill": w.theme_skill,
                 "missions": [
-                    {"slug": m.slug, "title": m.title, "skill": m.skill, "badge": m.badge}
+                    {
+                        "slug": m.slug,
+                        "title": m.title,
+                        "skill": m.skill,
+                        "badge": m.badge,
+                    }
                     for m in w.missions
                 ],
             }
@@ -105,7 +110,8 @@ async def weekly_report(req: WeeklyReportRequest) -> WeeklyReportResponse:
             f"{req.student_name} completed {len(req.completed_missions)} mission(s) "
             f"in week {req.week} and earned {len(req.badges_earned)} badge(s)."
         ),
-        highlights=[f"Earned: {b}" for b in req.badges_earned] or ["Showed up and tried!"],
+        highlights=[f"Earned: {b}" for b in req.badges_earned]
+        or ["Showed up and tried!"],
         next_steps=["Keep exploring next week's world 🌟"],
     )
 

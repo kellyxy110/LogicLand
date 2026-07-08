@@ -43,7 +43,9 @@ def _parse(req: GenerateRequest, raw: str) -> WorksheetResponse | None:
                     answer=(str(entry["answer"]) if entry.get("answer") else None),
                 )
             )
-    return WorksheetResponse(title=f"{req.skill} Practice", items=items) if items else None
+    return (
+        WorksheetResponse(title=f"{req.skill} Practice", items=items) if items else None
+    )
 
 
 class WorksheetService:

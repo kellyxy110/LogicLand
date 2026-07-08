@@ -33,7 +33,9 @@ def mission_badge(mission_slug: str) -> BadgeAward | None:
         for m in world.missions:
             if m.slug == mission_slug:
                 slug = m.badge.lower().replace(" ", "-").replace("!", "")
-                return BadgeAward(slug=slug, name=m.badge, reason=f"Completed {m.title}")
+                return BadgeAward(
+                    slug=slug, name=m.badge, reason=f"Completed {m.title}"
+                )
     return None
 
 

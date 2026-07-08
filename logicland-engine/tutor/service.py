@@ -23,7 +23,9 @@ class TutorService:
             Message(role="system", content=TUTOR_SYSTEM),
             Message(
                 role="user",
-                content=tutor_user_prompt(req.question, req.mission_slug, req.hint_level),
+                content=tutor_user_prompt(
+                    req.question, req.mission_slug, req.hint_level
+                ),
             ),
         ]
         raw = await self._provider.complete(messages)

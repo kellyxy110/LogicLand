@@ -75,9 +75,13 @@ BEGINNER_JOURNEY: list[World] = [
         1,
         "Algorithms",
         [
-            _m("robo-hello", "Meet Robo", "Algorithms",
-               "A friendly robot named Robo wakes up and needs a friend to guide him.",
-               "First Friend"),
+            _m(
+                "robo-hello",
+                "Meet Robo",
+                "Algorithms",
+                "A friendly robot named Robo wakes up and needs a friend to guide him.",
+                "First Friend",
+            ),
         ],
     ),
     World(
@@ -86,9 +90,13 @@ BEGINNER_JOURNEY: list[World] = [
         2,
         "Sequencing & Directions",
         [
-            _m("robo-directions", "Which Way, Robo?", "Directions",
-               "Robo is lost in the meadow. Give him step-by-step directions home.",
-               "Pathfinder"),
+            _m(
+                "robo-directions",
+                "Which Way, Robo?",
+                "Directions",
+                "Robo is lost in the meadow. Give him step-by-step directions home.",
+                "Pathfinder",
+            ),
         ],
     ),
     World(
@@ -97,9 +105,13 @@ BEGINNER_JOURNEY: list[World] = [
         3,
         "Patterns",
         [
-            _m("pattern-forest", "The Pattern Forest", "Patterns",
-               "Magical trees glow in repeating patterns Robo must complete.",
-               "Pattern Wizard"),
+            _m(
+                "pattern-forest",
+                "The Pattern Forest",
+                "Patterns",
+                "Magical trees glow in repeating patterns Robo must complete.",
+                "Pattern Wizard",
+            ),
         ],
     ),
     World(
@@ -108,9 +120,13 @@ BEGINNER_JOURNEY: list[World] = [
         4,
         "Loops",
         [
-            _m("collect-stars", "Collect the Stars", "Loops",
-               "There are too many stars to grab one by one — teach Robo to loop!",
-               "Loop Hero"),
+            _m(
+                "collect-stars",
+                "Collect the Stars",
+                "Loops",
+                "There are too many stars to grab one by one — teach Robo to loop!",
+                "Loop Hero",
+            ),
         ],
     ),
     World(
@@ -119,9 +135,13 @@ BEGINNER_JOURNEY: list[World] = [
         5,
         "Events",
         [
-            _m("button-kingdom", "The Button Kingdom", "Events",
-               "In a kingdom of buttons, every press makes something wonderful happen.",
-               "Event Master"),
+            _m(
+                "button-kingdom",
+                "The Button Kingdom",
+                "Events",
+                "In a kingdom of buttons, every press makes something wonderful happen.",
+                "Event Master",
+            ),
         ],
     ),
     World(
@@ -130,9 +150,13 @@ BEGINNER_JOURNEY: list[World] = [
         6,
         "Conditions",
         [
-            _m("avoid-obstacles", "Avoid the Obstacles", "Conditions",
-               "IF there is a rock, THEN Robo must jump. Help him choose wisely.",
-               "Choice Champion"),
+            _m(
+                "avoid-obstacles",
+                "Avoid the Obstacles",
+                "Conditions",
+                "IF there is a rock, THEN Robo must jump. Help him choose wisely.",
+                "Choice Champion",
+            ),
         ],
     ),
     World(
@@ -141,9 +165,13 @@ BEGINNER_JOURNEY: list[World] = [
         7,
         "Debugging",
         [
-            _m("glitch-cave", "The Glitch Cave", "Debugging",
-               "Something is wrong with Robo's plan. Become a bug detective!",
-               "Bug Detective"),
+            _m(
+                "glitch-cave",
+                "The Glitch Cave",
+                "Debugging",
+                "Something is wrong with Robo's plan. Become a bug detective!",
+                "Bug Detective",
+            ),
         ],
     ),
     World(
@@ -152,9 +180,13 @@ BEGINNER_JOURNEY: list[World] = [
         8,
         "Animation",
         [
-            _m("dancing-robot", "The Dancing Robot", "Animation",
-               "Make Robo dance by changing how he looks over time.",
-               "Animator"),
+            _m(
+                "dancing-robot",
+                "The Dancing Robot",
+                "Animation",
+                "Make Robo dance by changing how he looks over time.",
+                "Animator",
+            ),
         ],
     ),
     World(
@@ -163,9 +195,13 @@ BEGINNER_JOURNEY: list[World] = [
         9,
         "Interactive Stories",
         [
-            _m("robo-storybook", "Robo's Storybook", "Interactive Stories",
-               "Build a story where the reader chooses what Robo does next.",
-               "Storyteller"),
+            _m(
+                "robo-storybook",
+                "Robo's Storybook",
+                "Interactive Stories",
+                "Build a story where the reader chooses what Robo does next.",
+                "Storyteller",
+            ),
         ],
     ),
     World(
@@ -174,9 +210,14 @@ BEGINNER_JOURNEY: list[World] = [
         10,
         "Combining Skills",
         [
-            _m("star-chase", "Build a Mini Game", "Combining Skills",
-               "Put loops, events, and conditions together into a real game.",
-               "Game Maker", minutes=60),
+            _m(
+                "star-chase",
+                "Build a Mini Game",
+                "Combining Skills",
+                "Put loops, events, and conditions together into a real game.",
+                "Game Maker",
+                minutes=60,
+            ),
         ],
     ),
     World(
@@ -185,9 +226,14 @@ BEGINNER_JOURNEY: list[World] = [
         11,
         "Project Building",
         [
-            _m("big-idea", "Build Your Big Idea", "Project Building",
-               "Dream up your own project and bring it to life with Robo.",
-               "Creator", minutes=60),
+            _m(
+                "big-idea",
+                "Build Your Big Idea",
+                "Project Building",
+                "Dream up your own project and bring it to life with Robo.",
+                "Creator",
+                minutes=60,
+            ),
         ],
     ),
     World(
@@ -196,9 +242,14 @@ BEGINNER_JOURNEY: list[World] = [
         12,
         "Showcase & Reflection",
         [
-            _m("showcase", "Graduation Showcase", "Showcase & Reflection",
-               "Present everything you built. You are officially a LogicLand coder!",
-               "LogicLand Graduate", minutes=60),
+            _m(
+                "showcase",
+                "Graduation Showcase",
+                "Showcase & Reflection",
+                "Present everything you built. You are officially a LogicLand coder!",
+                "LogicLand Graduate",
+                minutes=60,
+            ),
         ],
     ),
 ]

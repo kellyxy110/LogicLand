@@ -60,7 +60,9 @@ def stars_for_performance(correct: int, total: int) -> int:
     return 1
 
 
-def award_for_mission(correct: int = 0, total: int = 0, with_project: bool = False) -> Award:
+def award_for_mission(
+    correct: int = 0, total: int = 0, with_project: bool = False
+) -> Award:
     """Compute the reward for completing a mission."""
     xp = XP_PER_MISSION + XP_PER_CHALLENGE
     if with_project:
