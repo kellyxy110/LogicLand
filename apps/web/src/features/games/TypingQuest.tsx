@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { COMMAND_GRAMMAR } from "@/data/commands";
 import { friendlyHint, parseCommands } from "@/lib/engines/command-parser";
 import type { TypingQuestData } from "@/types/game";
+import { SpeakerButton } from "@/features/voice/SpeakerButton";
 import { CommandChip } from "./CommandChip";
 import { MazeBoard } from "./MazeBoard";
 import { useMazeRun } from "./useMazeRun";
@@ -75,11 +76,12 @@ export function TypingQuest({ slug, data, onWin }: TypingQuestProps) {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="text-sm font-semibold"
+            className="flex-1 text-sm font-semibold"
           >
             {speech}
           </motion.p>
         </AnimatePresence>
+        <SpeakerButton text={speech} label="Hear Robo" size="sm" />
       </div>
 
       {building && (

@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Play, RotateCcw, Undo2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { RobotMazeData } from "@/types/game";
+import { SpeakerButton } from "@/features/voice/SpeakerButton";
 import { CommandChip } from "./CommandChip";
 import { MazeBoard } from "./MazeBoard";
 import { useMazeRun } from "./useMazeRun";
@@ -61,11 +62,12 @@ export function RobotMaze({ slug, data, onWin }: RobotMazeProps) {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="text-sm font-semibold"
+            className="flex-1 text-sm font-semibold"
           >
             {speech}
           </motion.p>
         </AnimatePresence>
+        <SpeakerButton text={speech} label="Hear Robo" size="sm" />
       </div>
 
       {/* Program row */}

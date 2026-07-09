@@ -2,7 +2,7 @@
 // A World's home — the mission trail. Themed banner, the explorer's progress in
 // this realm, and the ordered list of missions. Live missions launch the game;
 // "soon" ones stay visible to show the road ahead.
-import { RoboAvatar, Skeleton } from "@logicland/ui";
+import { Card, RoboAvatar, Skeleton } from "@logicland/ui";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -80,7 +80,23 @@ export function WorldHome({ world }: { world: LandWorld }) {
         ))}
       </div>
 
-      <div className="mt-8 flex items-center gap-3 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
+      {/* Word Wall — learn the world's coding words */}
+      <Link href={`/worlds/${world.slug}/vocabulary`} className="mt-6 block">
+        <Card className="flex items-center gap-4 transition-transform hover:scale-[1.01]">
+          <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl ${skin.wash}`}>
+            📚
+          </div>
+          <div className="flex-1">
+            <h3 className="font-display text-lg font-bold">Word Wall</h3>
+            <p className="text-sm opacity-70">
+              Learn the coding words of {world.title} — with pictures and voice.
+            </p>
+          </div>
+          <span className="text-2xl">🔊</span>
+        </Card>
+      </Link>
+
+      <div className="mt-6 flex items-center gap-3 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
         <RoboAvatar mood="idle" size={44} />
         <p className="text-sm opacity-80">
           Finish every mission to earn all of {world.title}&apos;s badges!
