@@ -24,12 +24,18 @@ def test_six_worlds_only_logic_forest_unlocked() -> None:
     assert [w.slug for w in unlocked] == ["logic-forest"]
 
 
-def test_logic_forest_has_five_missions_two_live() -> None:
+def test_logic_forest_is_fully_playable() -> None:
     forest = find_land_world("logic-forest")
     assert forest is not None
     assert len(forest.missions) == 5
     live = [m.slug for m in forest.missions if m.status == "live"]
-    assert set(live) == {"robot-path", "typing-quest"}
+    assert set(live) == {
+        "robot-path",
+        "shape-match",
+        "memory-game",
+        "pattern-builder",
+        "typing-quest",
+    }
 
 
 def test_worlds_endpoint_shape() -> None:

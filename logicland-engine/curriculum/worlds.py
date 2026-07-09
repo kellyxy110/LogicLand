@@ -81,7 +81,7 @@ _LOGIC_FOREST_MISSIONS: list[LandMission] = [
         order=2,
         story="The forest shapes are all mixed up. Can you match them?",
         objective="Sort shapes to build pattern-recognition skills.",
-        status="soon",
+        status="live",
     ),
     LandMission(
         slug="memory-game",
@@ -92,7 +92,7 @@ _LOGIC_FOREST_MISSIONS: list[LandMission] = [
         order=3,
         story="Robo hid some treasures. Remember where they are!",
         objective="Strengthen working memory by matching hidden pairs.",
-        status="soon",
+        status="live",
     ),
     LandMission(
         slug="pattern-builder",
@@ -103,7 +103,7 @@ _LOGIC_FOREST_MISSIONS: list[LandMission] = [
         order=4,
         story="Build the forest patterns to wake the sleeping flowers.",
         objective="Recreate and extend patterns — the seed of loops.",
-        status="soon",
+        status="live",
     ),
     LandMission(
         slug="typing-quest",

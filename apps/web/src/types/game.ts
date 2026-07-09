@@ -113,4 +113,47 @@ export interface TypingQuestData {
   palette: CommandId[];
 }
 
-export type MissionGameData = RobotMazeData | TypingQuestData;
+// --- Shape Match (pattern recognition) ------------------------------------
+export interface ShapeMatchRound {
+  /** The shape to find (emoji). */
+  target: string;
+  /** Choices shown to the child — includes the target plus distractors. */
+  options: string[];
+}
+
+export interface ShapeMatchData {
+  kind: "shape-match";
+  prompt: string;
+  rounds: ShapeMatchRound[];
+}
+
+// --- Memory (matching hidden pairs) ---------------------------------------
+export interface MemoryData {
+  kind: "memory";
+  /** Distinct faces; each appears twice on the board. Keep to 6–8 for age ~6. */
+  faces: string[];
+  /** Mistakes allowed while still earning the bonus star. */
+  starThreshold: number;
+}
+
+// --- Pattern Builder (patterns & loops) -----------------------------------
+export interface PatternRound {
+  /** The visible pattern with exactly one blank marked by "?". */
+  sequence: string[];
+  /** Palette the child chooses from to fill the blank. */
+  options: string[];
+  /** The correct fill for the blank. */
+  answer: string;
+}
+
+export interface PatternBuilderData {
+  kind: "pattern-builder";
+  rounds: PatternRound[];
+}
+
+export type MissionGameData =
+  | RobotMazeData
+  | TypingQuestData
+  | ShapeMatchData
+  | MemoryData
+  | PatternBuilderData;

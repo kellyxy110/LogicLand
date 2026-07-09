@@ -15,7 +15,10 @@ import { useStudent } from "@/lib/student-store";
 import type { LandMission } from "@/types/world";
 import type { MissionGameData } from "@/types/game";
 import { RewardModal } from "@/features/rewards/RewardModal";
+import { MemoryGame } from "./MemoryGame";
+import { PatternBuilder } from "./PatternBuilder";
 import { RobotMaze } from "./RobotMaze";
+import { ShapeMatch } from "./ShapeMatch";
 import { TypingQuest } from "./TypingQuest";
 import { useGameSession } from "./useGameSession";
 
@@ -82,11 +85,7 @@ export function MissionRunner({
         </div>
       </div>
 
-      {gameData.kind === "robot-maze" ? (
-        <RobotMaze slug={mission.slug} data={gameData} onWin={handleWin} />
-      ) : (
-        <TypingQuest slug={mission.slug} data={gameData} onWin={handleWin} />
-      )}
+      {renderGame(gameData, mission.slug, handleWin)}
 
       <AnimatePresence>
         {reward && (
@@ -103,4 +102,27 @@ export function MissionRunner({
       </AnimatePresence>
     </main>
   );
+}
+
+/** The game-kind switch: the one place a new game type plugs in. TypeScript
+ *  narrows `gameData` per case, so each game gets exactly its own data shape. */
+function renderGame(
+  gameData: MissionGameData,
+  slug: string,
+  onWin: (stars: number) => void,
+) {
+  switch (gameData.kind) {
+    case "robot-maze":
+      return <RobotMaze slug={slug} data={gameData} onWin={onWin} />;
+    case "typing-quest":
+      return <TypingQuest slug={slug} data={gameData} onWin={onWin} />;
+    case "shape-match":
+      return <ShapeMatch slug={slug} data={gameData} onWin={onWin} />;
+    case "memory":
+      return <MemoryGame slug={slug} data={gameData} onWin={onWin} />;
+    case "pattern-builder":
+      return <PatternBuilder slug={slug} data={gameData} onWin={onWin} />;
+    default:
+      return null;
+  }
 }

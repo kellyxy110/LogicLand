@@ -102,6 +102,7 @@ describe("runProgram — stars & treasure", () => {
 describe("runProgram — mission data is solvable", () => {
   it("Robot Path is completable and yields its star", () => {
     const data = gameDataFor("robot-path")!;
+    if (data.kind !== "robot-maze") throw new Error("expected robot-maze");
     const solution = ["UP", "UP", "RIGHT", "RIGHT", "UP", "UP", "RIGHT", "RIGHT"] as const;
     const r = runProgram([...solution], data.maze);
     expect(r.success).toBe(true);
