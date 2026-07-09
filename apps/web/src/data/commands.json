@@ -1,0 +1,13 @@
+{
+  "commands": [
+    { "id": "GO", "label": "GO", "aliases": ["go", "forward", "move", "step"], "icon": "⬆️", "hint": "Move Robo forward one step." },
+    { "id": "UP", "label": "UP", "aliases": ["up", "north"], "icon": "⬆️", "hint": "Move Robo up." },
+    { "id": "DOWN", "label": "DOWN", "aliases": ["down", "south"], "icon": "⬇️", "hint": "Move Robo down." },
+    { "id": "LEFT", "label": "LEFT", "aliases": ["left", "west"], "icon": "⬅️", "hint": "Move Robo to the left." },
+    { "id": "RIGHT", "label": "RIGHT", "aliases": ["right", "east"], "icon": "➡️", "hint": "Move Robo to the right." },
+    { "id": "TURN", "label": "TURN", "aliases": ["turn", "rotate", "spin"], "icon": "🔄", "hint": "Turn Robo to face a new way." },
+    { "id": "JUMP", "label": "JUMP", "aliases": ["jump", "hop", "leap"], "icon": "🦘", "hint": "Hop over the space ahead." },
+    { "id": "RUN", "label": "RUN", "aliases": ["run", "dash", "fast"], "icon": "💨", "hint": "Run forward two steps." },
+    { "id": "STOP", "label": "STOP", "aliases": ["stop", "halt", "wait"], "icon": "🛑", "hint": "Stop and stay still." }
+  ]
+}

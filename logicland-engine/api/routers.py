@@ -11,6 +11,7 @@ from fastapi import APIRouter, HTTPException
 
 from badges import service as badges_service
 from curriculum.beginner_journey import BEGINNER_JOURNEY, find_mission, total_weeks
+from curriculum.worlds import all_worlds
 from flashcards.service import FlashcardService
 from gamification import service as game
 from models.schemas import (
@@ -61,6 +62,44 @@ async def get_journey() -> dict[str, object]:
                 ],
             }
             for w in BEGINNER_JOURNEY
+        ],
+    }
+
+
+@curriculum_router.get("/worlds")
+async def get_worlds() -> dict[str, object]:
+    """Return the six-realm World Map (the production top-level catalog).
+
+    Missions are inlined so the frontend map + world home render from one fetch.
+    Lock state is server-owned here; the frontend never decides what's unlocked.
+    """
+    return {
+        "worlds": [
+            {
+                "slug": w.slug,
+                "title": w.title,
+                "subtitle": w.subtitle,
+                "theme": w.theme,
+                "order": w.order,
+                "locked": w.locked,
+                "skills": w.skills,
+                "missions": [
+                    {
+                        "slug": m.slug,
+                        "title": m.title,
+                        "skill": m.skill,
+                        "badge": m.badge,
+                        "game": m.game,
+                        "order": m.order,
+                        "story": m.story,
+                        "objective": m.objective,
+                        "status": m.status,
+                        "estimated_minutes": m.estimated_minutes,
+                    }
+                    for m in sorted(w.missions, key=lambda m: m.order)
+                ],
+            }
+            for w in sorted(all_worlds(), key=lambda w: w.order)
         ],
     }
 

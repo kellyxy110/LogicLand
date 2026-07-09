@@ -106,7 +106,37 @@ export interface FlashcardDeck {
   cards: Flashcard[];
 }
 
+// The six-realm World Map (production catalog). Shapes mirror
+// logicland-engine/curriculum/worlds.py.
+export interface WorldMissionSummary {
+  slug: string;
+  title: string;
+  skill: string;
+  badge: string;
+  game: string;
+  order: number;
+  story: string;
+  objective: string;
+  status: "live" | "soon";
+  estimated_minutes: number;
+}
+export interface LandWorldSummary {
+  slug: string;
+  title: string;
+  subtitle: string;
+  theme: string;
+  order: number;
+  locked: boolean;
+  skills: string[];
+  missions: WorldMissionSummary[];
+}
+
 export const engine = {
+  getWorlds: () =>
+    engineFetch<{ worlds: LandWorldSummary[] }>("/curriculum/worlds").then(
+      (r) => r.worlds,
+    ),
+
   getJourney: () => engineFetch<Journey>("/curriculum/journey"),
 
   getMission: (slug: string) =>

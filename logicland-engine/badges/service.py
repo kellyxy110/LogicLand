@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from curriculum.beginner_journey import BEGINNER_JOURNEY
+from curriculum.worlds import find_land_mission
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,14 +28,30 @@ _STREAK_BADGES = {
 }
 
 
+def _badge_slug(name: str) -> str:
+    return name.lower().replace(" ", "-").replace("!", "")
+
+
 def mission_badge(mission_slug: str) -> BadgeAward | None:
-    """Return the badge granted for completing a specific mission."""
+    """Return the badge granted for completing a specific mission.
+
+    Checks the six-World map first (the production catalog), then falls back to
+    the legacy beginner journey so both curricula award correctly.
+    """
+    land = find_land_mission(mission_slug)
+    if land is not None:
+        return BadgeAward(
+            slug=_badge_slug(land.badge),
+            name=land.badge,
+            reason=f"Completed {land.title}",
+        )
     for world in BEGINNER_JOURNEY:
         for m in world.missions:
             if m.slug == mission_slug:
-                slug = m.badge.lower().replace(" ", "-").replace("!", "")
                 return BadgeAward(
-                    slug=slug, name=m.badge, reason=f"Completed {m.title}"
+                    slug=_badge_slug(m.badge),
+                    name=m.badge,
+                    reason=f"Completed {m.title}",
                 )
     return None
 
