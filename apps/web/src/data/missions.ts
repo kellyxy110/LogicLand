@@ -8,6 +8,7 @@ import type {
   ShapeMatchData,
   MemoryData,
 } from "@/types/game";
+import { studioDataFor } from "./studio";
 
 // Compact helpers so the grids below stay readable.
 const _ = "empty" as CellKind;
@@ -98,7 +99,8 @@ const MISSION_GAME_DATA: Record<string, MissionGameData> = {
   "pattern-builder": PATTERN_BUILDER,
 };
 
-/** Game data for a mission slug, or null if the mission isn't playable yet. */
+/** Game data for a mission slug, or null if the mission isn't playable yet.
+ *  HTML Studio content lives in its own module (it's richer than a tap game). */
 export function gameDataFor(slug: string): MissionGameData | null {
-  return MISSION_GAME_DATA[slug] ?? null;
+  return MISSION_GAME_DATA[slug] ?? studioDataFor(slug) ?? null;
 }

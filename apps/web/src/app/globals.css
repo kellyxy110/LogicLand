@@ -16,3 +16,25 @@ body {
   background: rgb(var(--background));
   color: rgb(var(--foreground));
 }
+
+/* Keyboard-first: a clear, consistent focus ring for anything focusable, so
+   children (and assistive-tech users) can always see where they are. Pointer
+   users don't see it thanks to :focus-visible. */
+:focus-visible {
+  outline: 3px solid #6c5ce7; /* brand */
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Honor the OS "reduce motion" preference for CSS animations/transitions too
+   (Framer Motion is handled separately by MotionProvider). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

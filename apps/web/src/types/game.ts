@@ -1,6 +1,7 @@
 // Shared contracts for the game engines (command parsing, robot maze, typing).
 // Pure data types — no React, no side effects — so the engines stay testable
 // and reusable across worlds.
+import type { HtmlStudioData } from "./studio";
 
 // --- Commands -------------------------------------------------------------
 export type CommandId =
@@ -156,4 +157,5 @@ export type MissionGameData =
   | TypingQuestData
   | ShapeMatchData
   | MemoryData
-  | PatternBuilderData;
+  | PatternBuilderData
+  | HtmlStudioData;

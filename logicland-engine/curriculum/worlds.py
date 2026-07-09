@@ -122,6 +122,50 @@ _LOGIC_FOREST_MISSIONS: list[LandMission] = [
 ]
 
 
+# --- Coding City missions (World 3) ---------------------------------------
+# The first taste of *real* code: a kid-sized VS Code workflow (folder -> file
+# -> HTML) played through the html-studio game.
+_CODING_CITY_MISSIONS: list[LandMission] = [
+    LandMission(
+        slug="first-web-page",
+        title="My First Web Page",
+        skill="Web Basics (HTML)",
+        badge="Web Weaver",
+        game="html-studio",
+        order=1,
+        story=(
+            "Welcome to Coding City! Real coders build web pages. Make a folder, "
+            "create a file, and write your very first HTML."
+        ),
+        objective="Create a folder and an index.html file, then write HTML.",
+        status="live",
+        estimated_minutes=20,
+    ),
+    LandMission(
+        slug="style-it",
+        title="Style It",
+        skill="Styling (CSS)",
+        badge="Style Star",
+        game="html-studio",
+        order=2,
+        story="Give your web page colors and style with CSS.",
+        objective="Add colors and styles to your page.",
+        status="soon",
+    ),
+    LandMission(
+        slug="make-a-list",
+        title="Make a List",
+        skill="HTML Lists",
+        badge="List Legend",
+        game="html-studio",
+        order=3,
+        story="Show off your favorite things in a tidy list.",
+        objective="Build a list on your web page.",
+        status="soon",
+    ),
+]
+
+
 # --- The six Worlds --------------------------------------------------------
 LOGICLAND_WORLDS: list[LandWorld] = [
     LandWorld(
@@ -146,11 +190,12 @@ LOGICLAND_WORLDS: list[LandWorld] = [
     LandWorld(
         slug="coding-city",
         title="Coding City",
-        subtitle="Build programs, brick by brick",
+        subtitle="Build real web pages with code",
         theme="city",
         order=3,
-        locked=True,
-        skills=["Loops", "Conditions", "Functions"],
+        locked=False,
+        skills=["HTML", "CSS", "Web Design"],
+        missions=_CODING_CITY_MISSIONS,
     ),
     LandWorld(
         slug="robot-factory",

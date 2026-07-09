@@ -18,10 +18,19 @@ from main import app
 client = TestClient(app)
 
 
-def test_six_worlds_only_logic_forest_unlocked() -> None:
+def test_six_worlds_logic_forest_and_coding_city_unlocked() -> None:
     assert len(LOGICLAND_WORLDS) == 6
-    unlocked = [w for w in LOGICLAND_WORLDS if not w.locked]
-    assert [w.slug for w in unlocked] == ["logic-forest"]
+    unlocked = [w.slug for w in LOGICLAND_WORLDS if not w.locked]
+    assert unlocked == ["logic-forest", "coding-city"]
+
+
+def test_coding_city_has_live_html_studio_mission() -> None:
+    city = find_land_world("coding-city")
+    assert city is not None
+    first = next(m for m in city.missions if m.slug == "first-web-page")
+    assert first.game == "html-studio"
+    assert first.status == "live"
+    assert badges.mission_badge("first-web-page").name == "Web Weaver"  # type: ignore[union-attr]
 
 
 def test_logic_forest_is_fully_playable() -> None:

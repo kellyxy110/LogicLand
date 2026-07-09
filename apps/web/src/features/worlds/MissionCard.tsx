@@ -15,6 +15,7 @@ const GAME_EMOJI: Record<string, string> = {
   "shape-match": "🔷",
   memory: "🧠",
   "pattern-builder": "🎨",
+  "html-studio": "💻",
 };
 
 interface MissionCardProps {

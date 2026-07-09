@@ -15,6 +15,7 @@ import { useStudent } from "@/lib/student-store";
 import type { LandMission } from "@/types/world";
 import type { MissionGameData } from "@/types/game";
 import { RewardModal } from "@/features/rewards/RewardModal";
+import { HtmlStudio } from "@/features/studio/HtmlStudio";
 import { MemoryGame } from "./MemoryGame";
 import { PatternBuilder } from "./PatternBuilder";
 import { RobotMaze } from "./RobotMaze";
@@ -66,8 +67,11 @@ export function MissionRunner({
     restart();
   }, [restart]);
 
+  // The studio needs room for three panes; the tap games stay cozy and centered.
+  const wide = gameData.kind === "html-studio";
+
   return (
-    <main className="mx-auto max-w-lg px-5 py-6">
+    <main className={`mx-auto ${wide ? "max-w-5xl" : "max-w-lg"} px-5 py-6`}>
       <header className="mb-4 flex items-center gap-3">
         <Link
           href={`/worlds/${worldSlug}`}
@@ -122,6 +126,8 @@ function renderGame(
       return <MemoryGame slug={slug} data={gameData} onWin={onWin} />;
     case "pattern-builder":
       return <PatternBuilder slug={slug} data={gameData} onWin={onWin} />;
+    case "html-studio":
+      return <HtmlStudio slug={slug} data={gameData} onWin={onWin} />;
     default:
       return null;
   }

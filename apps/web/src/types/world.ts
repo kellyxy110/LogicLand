@@ -10,7 +10,8 @@ export type GameKind =
   | "typing-quest"
   | "shape-match"
   | "memory"
-  | "pattern-builder";
+  | "pattern-builder"
+  | "html-studio";
 
 /** "live" is playable now; "soon" appears on the map to preserve the roadmap
  *  but is not yet playable (honest — never a fake button). */
