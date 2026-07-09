@@ -24,6 +24,8 @@ interface MissionRunnerProps {
   worldTitle: string;
   mission: LandMission;
   gameData: MissionGameData;
+  /** The next playable mission in this world, for reward-screen continuity. */
+  nextMission: { slug: string; title: string } | null;
 }
 
 export function MissionRunner({
@@ -31,6 +33,7 @@ export function MissionRunner({
   worldTitle,
   mission,
   gameData,
+  nextMission,
 }: MissionRunnerProps) {
   const { completeMission } = useStudent();
   const restart = useGameSession((s) => s.restart);
@@ -93,6 +96,7 @@ export function MissionRunner({
             starsCollected={stars}
             worldSlug={worldSlug}
             worldTitle={worldTitle}
+            nextMission={nextMission}
             onReplay={handleReplay}
           />
         )}

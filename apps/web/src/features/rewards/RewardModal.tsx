@@ -15,6 +15,8 @@ interface RewardModalProps {
   starsCollected: number;
   worldSlug: string;
   worldTitle: string;
+  /** The next playable mission in this world, for a forward "keep going" flow. */
+  nextMission: { slug: string; title: string } | null;
   /** Replay the same mission (resets the game). */
   onReplay: () => void;
 }
@@ -25,6 +27,7 @@ export function RewardModal({
   starsCollected,
   worldSlug,
   worldTitle,
+  nextMission,
   onReplay,
 }: RewardModalProps) {
   const [burst, setBurst] = useState(true);
@@ -72,15 +75,42 @@ export function RewardModal({
           <p className="mt-1 text-xs font-semibold opacity-60">New badge earned!</p>
         </div>
 
+        {nextMission ? (
+          <p className="mb-3 text-sm font-semibold opacity-70">
+            Next up: <span className="text-brand">{nextMission.title}</span>
+          </p>
+        ) : (
+          <p className="mb-3 text-sm font-semibold opacity-70">
+            You&apos;ve cleared every mission in {worldTitle}! 🌟
+          </p>
+        )}
+
         <div className="flex flex-col gap-2">
-          <Link href={`/worlds/${worldSlug}`}>
-            <Button size="lg" className="w-full">
-              Back to {worldTitle} →
+          {nextMission ? (
+            <Link href={`/play/${worldSlug}/${nextMission.slug}`}>
+              <Button size="lg" className="w-full">
+                Next Mission: {nextMission.title} →
+              </Button>
+            </Link>
+          ) : (
+            <Link href={`/worlds/${worldSlug}`}>
+              <Button size="lg" className="w-full">
+                Back to {worldTitle} →
+              </Button>
+            </Link>
+          )}
+          <div className="flex gap-2">
+            <Button variant="ghost" className="flex-1" onClick={onReplay}>
+              Play Again
             </Button>
-          </Link>
-          <Button variant="ghost" onClick={onReplay}>
-            Play Again
-          </Button>
+            {nextMission && (
+              <Link href={`/worlds/${worldSlug}`} className="flex-1">
+                <Button variant="ghost" className="w-full">
+                  World Map
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </motion.div>
     </motion.div>

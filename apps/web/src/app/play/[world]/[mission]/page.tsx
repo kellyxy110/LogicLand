@@ -30,12 +30,20 @@ export default async function PlayPage({ params }: Params) {
   const gameData = gameDataFor(mission.slug);
   if (!gameData) notFound();
 
+  // The next playable mission in this world (live + has game data), so the
+  // reward screen can carry the explorer straight into their next adventure.
+  const ordered = [...world.missions].sort((a, b) => a.order - b.order);
+  const fromHere = ordered.slice(ordered.findIndex((m) => m.slug === mission.slug) + 1);
+  const next = fromHere.find((m) => m.status === "live" && gameDataFor(m.slug));
+  const nextMission = next ? { slug: next.slug, title: next.title } : null;
+
   return (
     <MissionRunner
       worldSlug={world.slug}
       worldTitle={world.title}
       mission={mission}
       gameData={gameData}
+      nextMission={nextMission}
     />
   );
 }
