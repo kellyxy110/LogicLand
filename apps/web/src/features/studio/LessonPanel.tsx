@@ -18,7 +18,7 @@ export function LessonPanel({
   const complete = currentIndex >= steps.length;
   const step = complete ? null : steps[currentIndex];
   const speech = complete
-    ? "You built your first web page! You're a real coder now! 🎉"
+    ? "Class complete — amazing coding! Ready for the next one? 🎉"
     : (step?.instruction ?? "");
 
   return (

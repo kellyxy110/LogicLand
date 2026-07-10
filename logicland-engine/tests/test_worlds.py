@@ -33,6 +33,24 @@ def test_coding_city_has_live_html_studio_mission() -> None:
     assert badges.mission_badge("first-web-page").name == "Web Weaver"  # type: ignore[union-attr]
 
 
+def test_coding_city_is_a_full_playable_html_course() -> None:
+    """The HTML course is a real, continuing curriculum: 15 ordered modules,
+    every one live and playable — never a 'coming soon' dead-end."""
+    city = find_land_world("coding-city")
+    assert city is not None
+    assert len(city.missions) == 15
+    # Ordered 1..15 with no gaps.
+    assert [m.order for m in city.missions] == list(range(1, 16))
+    # Every module is a live html-studio class with its own badge.
+    for m in city.missions:
+        assert m.game == "html-studio"
+        assert m.status == "live"
+        assert m.badge
+    # No two modules share a badge (each is its own reward).
+    badge_names = [m.badge for m in city.missions]
+    assert len(set(badge_names)) == len(badge_names)
+
+
 def test_logic_forest_is_fully_playable() -> None:
     forest = find_land_world("logic-forest")
     assert forest is not None

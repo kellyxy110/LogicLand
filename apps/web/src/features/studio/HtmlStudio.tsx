@@ -19,21 +19,34 @@ interface HtmlStudioProps {
 }
 
 export function HtmlStudio({ slug, data, onWin }: HtmlStudioProps) {
-  const { nodes, load } = useStudio();
+  const nodes = useStudio((s) => s.nodes);
+  const load = useStudio((s) => s.load);
+  // True once this mission's workspace is prepared (draft resumed or starter
+  // seeded). We only judge completion after this, so a resumed draft never looks
+  // momentarily empty and a *finished* module (revisited) isn't re-celebrated.
+  const loaded = useStudio((s) => s.slug === slug);
   const notified = useRef(false);
+  const sawIncomplete = useRef(false);
 
   useEffect(() => {
-    load(slug);
-  }, [slug, load]);
+    load(slug, data);
+  }, [slug, data, load]);
 
   const stepIndex = currentStepIndex(nodes, data.steps);
 
   useEffect(() => {
-    if (isClassComplete(nodes, data.steps) && !notified.current) {
+    if (!loaded) return;
+    if (!isClassComplete(nodes, data.steps)) {
+      sawIncomplete.current = true;
+      return;
+    }
+    // Only celebrate a class the learner actually finished this visit — not one
+    // that was already complete when they reopened it.
+    if (sawIncomplete.current && !notified.current) {
       notified.current = true;
       onWin(1);
     }
-  }, [nodes, data.steps, onWin]);
+  }, [loaded, nodes, data.steps, onWin]);
 
   return (
     <div className="space-y-4">

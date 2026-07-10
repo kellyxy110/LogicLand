@@ -38,6 +38,14 @@ describe("checkStep", () => {
     expect(checkStep(nodes, { type: "content-has", file: "index.html", needle: "<h1" })).toBe(true);
     expect(checkStep(nodes, { type: "content-has", file: "index.html", needle: "<p" })).toBe(false);
   });
+  it("counts occurrences for content-count (meaning, not exact match)", () => {
+    const nodes = [file("x", "index.html", "<li>Milk</li>\n<LI>Bread</LI>\n<li>Eggs</li>")];
+    expect(checkStep(nodes, { type: "content-count", file: "index.html", needle: "<li", min: 3 })).toBe(true);
+    expect(checkStep(nodes, { type: "content-count", file: "index.html", needle: "<li", min: 4 })).toBe(false);
+    // whitespace/newlines between tags don't matter — three items either way
+    const spaced = [file("y", "index.html", "<li>\n  a\n</li> <li>b</li> <li>c</li>")];
+    expect(checkStep(spaced, { type: "content-count", file: "index.html", needle: "<li", min: 3 })).toBe(true);
+  });
 });
 
 describe("findFile", () => {

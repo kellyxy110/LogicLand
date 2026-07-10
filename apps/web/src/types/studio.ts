@@ -16,11 +16,20 @@ export interface FsNode {
 }
 
 /** Declarative checks the guided lesson evaluates against the file tree, so
- *  content stays data and the validator stays pure. */
+ *  content stays data and the validator stays pure. Meaning over exact strings:
+ *  `content-count` verifies "add three list items" without a single answer key. */
 export type StepCheck =
   | { type: "has-folder" }
   | { type: "has-file"; name: string }
-  | { type: "content-has"; file: string; needle: string };
+  | { type: "content-has"; file: string; needle: string }
+  | { type: "content-count"; file: string; needle: string; min: number };
+
+/** A file the studio pre-creates for a module, so later modules build on earlier
+ *  work instead of starting from an empty page (the spec's "starter template"). */
+export interface StarterFile {
+  name: string;
+  content: string;
+}
 
 export interface HtmlLessonStep {
   id: string;
@@ -34,7 +43,12 @@ export interface HtmlLessonStep {
 export interface HtmlStudioData {
   kind: "html-studio";
   title: string;
+  /** A one-line framing of the module, read aloud to set the scene. */
+  intro?: string;
   /** The file whose contents render in the live preview. */
   previewFile: string;
+  /** Files pre-created for this module so learners build on earlier work. Absent
+   *  for Module 1, which teaches creating the folder and file from scratch. */
+  starter?: StarterFile[];
   steps: HtmlLessonStep[];
 }

@@ -11,7 +11,23 @@ export function findFile(nodes: FsNode[], name: string): FsNode | undefined {
   );
 }
 
-/** Whether a single declarative check passes against the tree. */
+/** Count case-insensitive, possibly-overlapping-free occurrences of a needle. */
+function countOccurrences(haystack: string, needle: string): number {
+  if (!needle) return 0;
+  const hay = haystack.toLowerCase();
+  const nee = needle.toLowerCase();
+  let count = 0;
+  let i = hay.indexOf(nee);
+  while (i !== -1) {
+    count += 1;
+    i = hay.indexOf(nee, i + nee.length);
+  }
+  return count;
+}
+
+/** Whether a single declarative check passes against the tree. Checks verify
+ *  *meaning* (an element is present, or present N times) rather than one exact
+ *  answer string, so <h1>My Cat</h1> and a multi-line version both pass. */
 export function checkStep(nodes: FsNode[], check: StepCheck): boolean {
   switch (check.type) {
     case "has-folder":
@@ -23,6 +39,13 @@ export function checkStep(nodes: FsNode[], check: StepCheck): boolean {
       return (
         file !== undefined &&
         file.content.toLowerCase().includes(check.needle.toLowerCase())
+      );
+    }
+    case "content-count": {
+      const file = findFile(nodes, check.file);
+      return (
+        file !== undefined &&
+        countOccurrences(file.content, check.needle) >= check.min
       );
     }
     default:
