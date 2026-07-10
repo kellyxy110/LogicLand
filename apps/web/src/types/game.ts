@@ -114,6 +114,21 @@ export interface TypingQuestData {
   palette: CommandId[];
 }
 
+// --- Leveling ------------------------------------------------------------
+// Every tap game is a ladder of levels of increasing difficulty (spec: ≥7).
+// A level bundles its playable content with kid-facing framing. Progress across
+// levels (unlock, best stars, resume) is handled generically — see
+// lib/engines/level-progress.ts and features/games/LeveledGame.tsx.
+export interface GameLevel<C> {
+  /** Stable id used as the progress key — never reuse across levels. */
+  id: string;
+  /** Short difficulty name shown on the ladder, e.g. "Discovery", "Mastery". */
+  title: string;
+  /** Kid-friendly goal for this level, read aloud. */
+  objective: string;
+  content: C;
+}
+
 // --- Shape Match (pattern recognition) ------------------------------------
 export interface ShapeMatchRound {
   /** The shape to find (emoji). */
@@ -122,19 +137,27 @@ export interface ShapeMatchRound {
   options: string[];
 }
 
-export interface ShapeMatchData {
-  kind: "shape-match";
+export interface ShapeMatchLevel {
   prompt: string;
   rounds: ShapeMatchRound[];
 }
 
+export interface ShapeMatchData {
+  kind: "shape-match";
+  levels: GameLevel<ShapeMatchLevel>[];
+}
+
 // --- Memory (matching hidden pairs) ---------------------------------------
-export interface MemoryData {
-  kind: "memory";
-  /** Distinct faces; each appears twice on the board. Keep to 6–8 for age ~6. */
+export interface MemoryLevel {
+  /** Distinct faces; each appears twice on the board. Grows 3→8 with level. */
   faces: string[];
   /** Mistakes allowed while still earning the bonus star. */
   starThreshold: number;
+}
+
+export interface MemoryData {
+  kind: "memory";
+  levels: GameLevel<MemoryLevel>[];
 }
 
 // --- Pattern Builder (patterns & loops) -----------------------------------
@@ -147,9 +170,13 @@ export interface PatternRound {
   answer: string;
 }
 
+export interface PatternLevel {
+  rounds: PatternRound[];
+}
+
 export interface PatternBuilderData {
   kind: "pattern-builder";
-  rounds: PatternRound[];
+  levels: GameLevel<PatternLevel>[];
 }
 
 export type MissionGameData =

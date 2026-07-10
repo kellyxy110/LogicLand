@@ -56,38 +56,263 @@ const TYPING_QUEST: MissionGameData = {
   },
 };
 
-/** Mission 2 — Shape Match: find the shape that matches the target. Builds
- *  visual discrimination, the root of pattern recognition. */
+/** Mission 2 — Shape Match: a 7-level ladder of visual discrimination, the root
+ *  of pattern recognition. Difficulty grows via more options, closer
+ *  distractors, and more rounds — never just "more of the same". */
 const SHAPE_MATCH: ShapeMatchData = {
   kind: "shape-match",
-  prompt: "Tap the shape that matches!",
-  rounds: [
-    { target: "🔺", options: ["🔵", "🔺", "🟩"] },
-    { target: "🟨", options: ["🟨", "🔶", "🔴"] },
-    { target: "🔵", options: ["🟩", "🔶", "🔵", "🔺"] },
-    { target: "⭐", options: ["🔶", "⭐", "🟨", "🔵"] },
-    { target: "🟩", options: ["🔺", "🔵", "🟨", "🟩"] },
+  levels: [
+    {
+      id: "sm-1",
+      title: "Discovery",
+      objective: "Find the shape that matches — just two to pick from.",
+      content: {
+        prompt: "Tap the shape that matches!",
+        rounds: [
+          { target: "🔴", options: ["🔴", "🔵"] },
+          { target: "🟡", options: ["🟢", "🟡"] },
+          { target: "⭐", options: ["⭐", "🔵"] },
+        ],
+      },
+    },
+    {
+      id: "sm-2",
+      title: "Guided Practice",
+      objective: "Now pick from three shapes.",
+      content: {
+        prompt: "Which one is the same?",
+        rounds: [
+          { target: "🔺", options: ["🔵", "🔺", "🟩"] },
+          { target: "🟨", options: ["🟨", "🔶", "🔴"] },
+          { target: "🔵", options: ["🟩", "🔵", "🔺"] },
+        ],
+      },
+    },
+    {
+      id: "sm-3",
+      title: "Independent",
+      objective: "Four shapes now — look closely!",
+      content: {
+        prompt: "Find the match!",
+        rounds: [
+          { target: "🔵", options: ["🟩", "🔶", "🔵", "🔺"] },
+          { target: "⭐", options: ["🔶", "⭐", "🟨", "🔵"] },
+          { target: "🟩", options: ["🔺", "🔵", "🟨", "🟩"] },
+          { target: "🔴", options: ["🔴", "🟠", "🟣", "🔵"] },
+        ],
+      },
+    },
+    {
+      id: "sm-4",
+      title: "Combination",
+      objective: "Some colors look alike — pick carefully.",
+      content: {
+        prompt: "Careful — which is exactly right?",
+        rounds: [
+          { target: "🟠", options: ["🔴", "🟠", "🟡", "🟣"] },
+          { target: "🟣", options: ["🔵", "🟣", "🟠", "🔴"] },
+          { target: "🟢", options: ["🟢", "🟩", "🔵", "🟡"] },
+          { target: "🔶", options: ["🔶", "🔺", "⭐", "🟨"] },
+        ],
+      },
+    },
+    {
+      id: "sm-5",
+      title: "Problem Solving",
+      objective: "Five choices — trust your eyes.",
+      content: {
+        prompt: "Find the one that matches!",
+        rounds: [
+          { target: "🔺", options: ["🔵", "🔺", "🟩", "🟨", "🔶"] },
+          { target: "🟪", options: ["🟪", "🟦", "🟩", "🟨", "🟧"] },
+          { target: "🔴", options: ["🟠", "🔴", "🟣", "🔵", "🟢"] },
+          { target: "⭐", options: ["🔶", "⭐", "🟨", "🔵", "🔺"] },
+          { target: "🟢", options: ["🔵", "🟢", "🟡", "🔴", "🟣"] },
+        ],
+      },
+    },
+    {
+      id: "sm-6",
+      title: "Accuracy",
+      objective: "Six choices — go for no misses!",
+      content: {
+        prompt: "Match it — no misses for a star!",
+        rounds: [
+          { target: "🔵", options: ["🔵", "🟢", "🟣", "🔴", "🟠", "🟡"] },
+          { target: "🟩", options: ["🟩", "🟦", "🟨", "🟧", "🟪", "🟥"] },
+          { target: "⭐", options: ["⭐", "🔶", "🔵", "🟩", "🔺", "🟨"] },
+          { target: "🔴", options: ["🟠", "🟡", "🔴", "🟢", "🔵", "🟣"] },
+          { target: "🔶", options: ["🔷", "🔶", "🔺", "🟨", "🟩", "🔵"] },
+          { target: "🟠", options: ["🔴", "🟠", "🟡", "🟣", "🟢", "🔵"] },
+        ],
+      },
+    },
+    {
+      id: "sm-7",
+      title: "Mastery",
+      objective: "The final challenge — every kind of shape!",
+      content: {
+        prompt: "Master matcher — find them all!",
+        rounds: [
+          { target: "🟣", options: ["🟤", "🟣", "🔵", "🟪", "🔴", "🟢"] },
+          { target: "🔶", options: ["🔶", "🟨", "🔷", "⭐", "🔺", "🟧"] },
+          { target: "🟦", options: ["🟦", "🟩", "🟪", "🟫", "⬜", "🟨"] },
+          { target: "❤️", options: ["🧡", "❤️", "💛", "💙", "💜", "💚"] },
+          { target: "⭐", options: ["🌙", "⭐", "☀️", "⚡", "🌈", "❄️"] },
+          { target: "🟠", options: ["🔴", "🟠", "🟡", "🟣", "🔵", "🟢"] },
+        ],
+      },
+    },
   ],
 };
 
-/** Mission 3 — Memory Game: flip cards to find matching pairs. Six forest
- *  faces (12 cards) fit a friendly 4×3 board for age ~6. */
+/** Mission 3 — Memory Game: a 7-level ladder growing from 3 pairs to 8, with
+ *  tighter no-miss star thresholds along the way. Forest faces on a 4-wide board. */
 const MEMORY_GAME: MemoryData = {
   kind: "memory",
-  faces: ["🌲", "🍄", "🦊", "🐰", "⭐", "🍎"],
-  starThreshold: 4,
+  levels: [
+    {
+      id: "mem-1",
+      title: "Discovery",
+      objective: "Find three matching pairs.",
+      content: { faces: ["🌲", "🍄", "🦊"], starThreshold: 3 },
+    },
+    {
+      id: "mem-2",
+      title: "Guided Practice",
+      objective: "Four pairs to remember.",
+      content: { faces: ["🌲", "🍄", "🦊", "🐰"], starThreshold: 4 },
+    },
+    {
+      id: "mem-3",
+      title: "Independent",
+      objective: "New forest friends — four pairs.",
+      content: { faces: ["🐻", "🦉", "🐿️", "🍁"], starThreshold: 3 },
+    },
+    {
+      id: "mem-4",
+      title: "Combination",
+      objective: "Five pairs now!",
+      content: { faces: ["🌲", "🍄", "🦊", "🐰", "⭐"], starThreshold: 4 },
+    },
+    {
+      id: "mem-5",
+      title: "Problem Solving",
+      objective: "Six pairs — keep them in mind.",
+      content: { faces: ["🌲", "🍄", "🦊", "🐰", "⭐", "🍎"], starThreshold: 5 },
+    },
+    {
+      id: "mem-6",
+      title: "Accuracy",
+      objective: "Six pairs — few misses for a star!",
+      content: { faces: ["🐝", "🦋", "🐞", "🐌", "🐛", "🌻"], starThreshold: 3 },
+    },
+    {
+      id: "mem-7",
+      title: "Mastery",
+      objective: "Eight pairs — the memory master challenge!",
+      content: {
+        faces: ["🌲", "🍄", "🦊", "🐰", "⭐", "🍎", "🦉", "🐻"],
+        starThreshold: 5,
+      },
+    },
+  ],
 };
 
-/** Mission 4 — Pattern Builder: fill the missing piece to complete the pattern.
- *  The gentle on-ramp to loops (repetition with structure). */
+/** Mission 4 — Pattern Builder: fill the missing piece to complete the pattern —
+ *  the gentle on-ramp to loops. Seven levels grow the pattern length, symbol
+ *  count, and palette size. */
 const PATTERN_BUILDER: PatternBuilderData = {
   kind: "pattern-builder",
-  rounds: [
-    { sequence: ["🔴", "🔵", "🔴", "?"], options: ["🔴", "🔵"], answer: "🔵" },
-    { sequence: ["🟢", "🟢", "🟡", "?"], options: ["🟢", "🟡"], answer: "🟡" },
-    { sequence: ["🔴", "🔵", "🟡", "🔴", "🔵", "?"], options: ["🔴", "🔵", "🟡"], answer: "🟡" },
-    { sequence: ["⭐", "🌙", "⭐", "🌙", "?"], options: ["⭐", "🌙"], answer: "⭐" },
-    { sequence: ["🔵", "🔵", "🔴", "🔵", "🔵", "?"], options: ["🔵", "🔴"], answer: "🔴" },
+  levels: [
+    {
+      id: "pat-1",
+      title: "Discovery",
+      objective: "Finish a simple A-B-A-B pattern.",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🔴", "?"], options: ["🔴", "🔵"], answer: "🔵" },
+          { sequence: ["🟡", "🟢", "🟡", "?"], options: ["🟡", "🟢"], answer: "🟢" },
+        ],
+      },
+    },
+    {
+      id: "pat-2",
+      title: "Guided Practice",
+      objective: "Patterns that repeat in groups.",
+      content: {
+        rounds: [
+          { sequence: ["🔵", "🔵", "🔴", "🔵", "🔵", "?"], options: ["🔵", "🔴"], answer: "🔴" },
+          { sequence: ["⭐", "🌙", "⭐", "🌙", "?"], options: ["⭐", "🌙"], answer: "⭐" },
+          { sequence: ["🟢", "🟢", "🟡", "?"], options: ["🟢", "🟡"], answer: "🟡" },
+        ],
+      },
+    },
+    {
+      id: "pat-3",
+      title: "Independent",
+      objective: "Three-symbol patterns now.",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🟡", "🔴", "🔵", "?"], options: ["🔴", "🔵", "🟡"], answer: "🟡" },
+          { sequence: ["🔺", "🔵", "🟩", "🔺", "🔵", "?"], options: ["🔺", "🔵", "🟩"], answer: "🟩" },
+          { sequence: ["🍎", "🍌", "🍇", "🍎", "🍌", "?"], options: ["🍎", "🍌", "🍇"], answer: "🍇" },
+        ],
+      },
+    },
+    {
+      id: "pat-4",
+      title: "Combination",
+      objective: "Longer patterns — watch the whole strip.",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🔴", "🔵", "🔴", "?"], options: ["🔴", "🔵", "🟡"], answer: "🔵" },
+          { sequence: ["🟢", "🟡", "🟡", "🟢", "🟡", "?"], options: ["🟢", "🟡", "🔴"], answer: "🟡" },
+          { sequence: ["⭐", "⭐", "🌙", "⭐", "⭐", "?"], options: ["⭐", "🌙", "☀️"], answer: "🌙" },
+        ],
+      },
+    },
+    {
+      id: "pat-5",
+      title: "Problem Solving",
+      objective: "Trickier repeats — think it through.",
+      content: {
+        rounds: [
+          { sequence: ["🔺", "🔵", "🔺", "🔵", "🔺", "?"], options: ["🔺", "🔵", "🟩"], answer: "🔵" },
+          { sequence: ["🟥", "🟧", "🟨", "🟥", "🟧", "?"], options: ["🟥", "🟧", "🟨"], answer: "🟨" },
+          { sequence: ["🐶", "🐱", "🐭", "🐶", "🐱", "?"], options: ["🐶", "🐱", "🐭"], answer: "🐭" },
+          { sequence: ["🔵", "🔴", "🔴", "🔵", "🔴", "🔴", "🔵", "?"], options: ["🔵", "🔴"], answer: "🔴" },
+        ],
+      },
+    },
+    {
+      id: "pat-6",
+      title: "Accuracy",
+      objective: "Four choices — go for no misses!",
+      content: {
+        rounds: [
+          { sequence: ["🟠", "🟣", "🟢", "🟠", "🟣", "?"], options: ["🟠", "🟣", "🟢", "🔵"], answer: "🟢" },
+          { sequence: ["1️⃣", "2️⃣", "3️⃣", "1️⃣", "2️⃣", "?"], options: ["1️⃣", "2️⃣", "3️⃣", "4️⃣"], answer: "3️⃣" },
+          { sequence: ["🔴", "🟡", "🔵", "🟢", "🔴", "🟡", "🔵", "?"], options: ["🔴", "🟡", "🔵", "🟢"], answer: "🟢" },
+          { sequence: ["⬆️", "➡️", "⬇️", "⬆️", "➡️", "?"], options: ["⬆️", "➡️", "⬇️", "⬅️"], answer: "⬇️" },
+          { sequence: ["🌸", "🌼", "🌸", "🌼", "🌸", "?"], options: ["🌸", "🌼", "🌷", "🌹"], answer: "🌼" },
+        ],
+      },
+    },
+    {
+      id: "pat-7",
+      title: "Mastery",
+      objective: "The longest patterns — pattern master!",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🟡", "🟢", "🔴", "🔵", "🟡", "?"], options: ["🔴", "🔵", "🟡", "🟢"], answer: "🟢" },
+          { sequence: ["🐶", "🐶", "🐱", "🐶", "🐶", "🐱", "🐶", "?"], options: ["🐶", "🐱", "🐭", "🐰"], answer: "🐶" },
+          { sequence: ["🟥", "🟧", "🟨", "🟩", "🟦", "🟥", "🟧", "?"], options: ["🟨", "🟩", "🟦", "🟥"], answer: "🟨" },
+          { sequence: ["🌙", "⭐", "⭐", "🌙", "⭐", "⭐", "🌙", "?"], options: ["🌙", "⭐", "☀️", "🌈"], answer: "⭐" },
+          { sequence: ["🚗", "🚕", "🚙", "🚗", "🚕", "🚙", "🚗", "?"], options: ["🚗", "🚕", "🚙", "🚌"], answer: "🚕" },
+        ],
+      },
+    },
   ],
 };
 

@@ -1,7 +1,9 @@
 "use client";
 // Memory Game — flip cards to find matching pairs. Classic working-memory play,
-// forest-themed. Cards are dealt after mount (the shuffle is random, so dealing
-// during SSR would cause a hydration mismatch). Wrong pairs flip back gently.
+// forest-themed. A 7-level ladder (LeveledGame) growing from 3 pairs to 8; this
+// file plays ONE level and reports its stars when the board is cleared. Cards are
+// dealt after mount (the shuffle is random, so dealing during SSR would cause a
+// hydration mismatch); LeveledGame remounts this per level with a fresh key.
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -11,8 +13,9 @@ import {
   starForMistakes,
   type MemoryCard,
 } from "@/lib/engines/minigames";
-import type { MemoryData } from "@/types/game";
+import type { MemoryData, MemoryLevel } from "@/types/game";
 import { GameSpeech } from "./GameSpeech";
+import { LeveledGame } from "./LeveledGame";
 
 interface MemoryGameProps {
   slug: string;
@@ -20,7 +23,26 @@ interface MemoryGameProps {
   onWin: (stars: number) => void;
 }
 
-export function MemoryGame({ data, onWin }: MemoryGameProps) {
+export function MemoryGame({ slug, data, onWin }: MemoryGameProps) {
+  return (
+    <LeveledGame
+      slug={slug}
+      levels={data.levels}
+      onWin={onWin}
+      renderLevel={(content, onComplete) => (
+        <MemoryBoard content={content} onComplete={onComplete} />
+      )}
+    />
+  );
+}
+
+function MemoryBoard({
+  content,
+  onComplete,
+}: {
+  content: MemoryLevel;
+  onComplete: (stars: number) => void;
+}) {
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<Set<number>>(new Set());
@@ -30,20 +52,20 @@ export function MemoryGame({ data, onWin }: MemoryGameProps) {
   const notified = useRef(false);
 
   useEffect(() => {
-    setCards(dealMemoryCards(data.faces));
-  }, [data.faces]);
+    setCards(dealMemoryCards(content.faces));
+  }, [content.faces]);
 
   useEffect(() => {
     if (
       cards.length > 0 &&
-      boardCleared(matched.size / 2, data.faces.length) &&
+      boardCleared(matched.size / 2, content.faces.length) &&
       !notified.current
     ) {
       notified.current = true;
       setDone(true);
-      onWin(starForMistakes(mistakes.current, data.starThreshold));
+      onComplete(starForMistakes(mistakes.current, content.starThreshold));
     }
-  }, [matched, cards, data.faces.length, data.starThreshold, onWin]);
+  }, [matched, cards, content.faces.length, content.starThreshold, onComplete]);
 
   function flip(card: MemoryCard) {
     if (locked || done || matched.has(card.id) || flipped.includes(card.id)) return;
@@ -77,7 +99,7 @@ export function MemoryGame({ data, onWin }: MemoryGameProps) {
       <GameSpeech text={speech} mood={done ? "happy" : "idle"} />
 
       <div className="mx-auto grid max-w-sm grid-cols-4 gap-2.5">
-        {(cards.length ? cards : Array.from({ length: data.faces.length * 2 })).map(
+        {(cards.length ? cards : Array.from({ length: content.faces.length * 2 })).map(
           (card, i) => {
             const c = card as MemoryCard | undefined;
             const faceUp = !!c && (flipped.includes(c.id) || matched.has(c.id));
