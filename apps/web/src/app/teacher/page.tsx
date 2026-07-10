@@ -4,6 +4,7 @@ import { Card, CardTitle } from "@logicland/ui";
 import {
   BarChart3,
   FileText,
+  Inbox,
   Megaphone,
   Sparkles,
   Users,
@@ -21,6 +22,7 @@ const TOOLS = [
     live: true,
   },
   { href: "/teacher/roster", title: "Students", desc: "Live roster & progress.", icon: Users, live: true },
+  { href: "/teacher/submissions", title: "Submissions", desc: "Review coding homework students hand in.", icon: Inbox, live: true },
   { href: "/teacher/analytics", title: "Analytics", desc: "Mastery, engagement, streaks.", icon: BarChart3, live: true },
   { href: "/teacher", title: "Weekly Reports", desc: "Draft-then-send parent summaries.", icon: FileText, live: false },
   { href: "/teacher", title: "Announcements", desc: "Broadcast to your classroom.", icon: Megaphone, live: false },

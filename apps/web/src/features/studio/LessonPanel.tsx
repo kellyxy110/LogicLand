@@ -27,6 +27,9 @@ export function LessonPanel({
         <RoboAvatar mood={complete ? "happy" : "thinking"} size={48} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
+            <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-brand">
+              Classwork
+            </span>
             <span className="text-xs font-bold uppercase tracking-wide text-brand">
               {complete ? "Class complete!" : `Step ${currentIndex + 1} of ${steps.length}`}
             </span>

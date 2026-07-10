@@ -5,6 +5,7 @@ import {
   currentLevelIndex,
   isLevelUnlocked,
   levelStatus,
+  mergeProgress,
   recordCompletion,
   totalStars,
   type LevelProgress,
@@ -84,5 +85,23 @@ describe("mastery + scoring", () => {
       l3: { done: true, stars: 1, attempts: 1 },
     };
     expect(totalStars(levels, p)).toBe(2);
+  });
+});
+
+describe("mergeProgress (local cache + server)", () => {
+  it("keeps the best of both and is order-independent", () => {
+    const local: LevelProgress = {
+      l1: { done: true, stars: 0, attempts: 2 },
+      l2: { done: false, stars: 0, attempts: 1 },
+    };
+    const server: LevelProgress = {
+      l1: { done: true, stars: 1, attempts: 1 }, // server saw a no-miss run
+      l3: { done: true, stars: 1, attempts: 1 }, // only on server (other device)
+    };
+    const merged = mergeProgress(local, server);
+    expect(merged.l1).toEqual({ done: true, stars: 1, attempts: 2 });
+    expect(merged.l2).toEqual({ done: false, stars: 0, attempts: 1 });
+    expect(merged.l3).toEqual({ done: true, stars: 1, attempts: 1 });
+    expect(mergeProgress(server, local)).toEqual(merged);
   });
 });

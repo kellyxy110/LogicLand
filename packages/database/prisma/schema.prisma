@@ -107,6 +107,8 @@ model Student {
   weeklyReports WeeklyReport[]
   projects      Project[]
   rewards       Reward[]
+  levelProgress     LevelProgress[]
+  studioSubmissions StudioSubmission[]
 }
 
 // ---------------------------------------------------------------------------
@@ -193,6 +195,48 @@ model Submission {
   status    SubmissionStatus @default(SUBMITTED)
   feedback  String?
   createdAt DateTime         @default(now())
+}
+
+// Per-level progress for a game's ladder, keyed by curriculum slugs. The catalog
+// lives in the engine (not the DB), so this is FK-free by slug — same
+// denormalization as Student.completedMissions. One row per (student, mission,
+// level); the client cache (localStorage) syncs into this for cross-device +
+// parent/teacher visibility.
+model LevelProgress {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  missionSlug String
+  levelId     String
+  bestStars   Int      @default(0)
+  attempts    Int      @default(0)
+  completed   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studentId, missionSlug, levelId])
+  @@index([studentId, missionSlug])
+}
+
+// A child's coding-studio work submitted for teacher review ("build it, bring it
+// next class"). `code` snapshots the file tree; `checklist` is the auto-check
+// result captured at submit time. Slug-keyed and FK-free like the rest of
+// progress, so no curriculum seeding is required.
+model StudioSubmission {
+  id          String           @id @default(cuid())
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  missionSlug String
+  title       String
+  code        Json // [{ name, content }]
+  checklist   Json // [{ label, passed }]
+  status      SubmissionStatus @default(SUBMITTED)
+  feedback    String?
+  submittedAt DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([studentId, missionSlug])
+  @@index([status])
 }
 
 model Project {

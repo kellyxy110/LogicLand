@@ -11,7 +11,12 @@
 //     focus on the new concept instead of retyping a whole page.
 //   • The live preview runs in a script-free sandboxed iframe (HtmlPreview), so
 //     <script>, event handlers, and remote code can never execute.
-import type { HtmlLessonStep, HtmlStudioData, StarterFile } from "@/types/studio";
+import type {
+  HtmlLessonStep,
+  HtmlStudioData,
+  StarterFile,
+  StudioAssignment,
+} from "@/types/studio";
 
 // --- tiny authoring helpers (all checks target index.html) -----------------
 const FILE = "index.html";
@@ -373,8 +378,151 @@ const M15: HtmlStudioData = {
   ],
 };
 
-/** The full HTML course, in module order. Slugs must match curriculum/worlds.py. */
-const STUDIO_DATA: Record<string, HtmlStudioData> = {
+// --- Take-home assessments ------------------------------------------------
+// Each module ends with an open-ended "homework" brief the child builds in their
+// own studio and submits for the teacher to review next class. Checks reuse the
+// same declarative validator as the guided classwork.
+function assignment(
+  title: string,
+  brief: string,
+  checklist: HtmlLessonStep[],
+): StudioAssignment {
+  return { title, brief, checklist };
+}
+
+const ASSIGNMENTS: Record<string, StudioAssignment> = {
+  "first-web-page": assignment(
+    "My First Page",
+    "Build a tiny page about yourself: a title and a sentence.",
+    [
+      has("a1", "<html", "Wrap it in <html>", ""),
+      has("a2", "<h1", "A title with <h1>", ""),
+      has("a3", "<p", "A sentence with <p>", ""),
+    ],
+  ),
+  headings: assignment(
+    "Favourite Animal Page",
+    "Make a page about your favourite animal with a main title and two subtitles.",
+    [
+      has("a1", "<h1", "One main <h1>", ""),
+      count("a2", "<h2", 2, "Two subtitles (<h2>)", ""),
+    ],
+  ),
+  "text-and-paragraphs": assignment(
+    "About Me Page",
+    "Write three sentences about you, and make one word important.",
+    [
+      count("a1", "<p", 3, "Three paragraphs", ""),
+      has("a2", "<strong", "One important word (<strong>)", ""),
+    ],
+  ),
+  links: assignment(
+    "My Favourite Websites",
+    "Make a page that links to two websites you like.",
+    [
+      count("a1", "href", 2, "Two links with href", ""),
+      has("a2", "</a>", "Link text inside <a> ... </a>", ""),
+    ],
+  ),
+  images: assignment(
+    "My Picture Gallery",
+    "Build a gallery with two pictures — each with alt text.",
+    [
+      count("a1", "<img", 2, "Two pictures", ""),
+      count("a2", "alt", 2, "Alt text on each", ""),
+    ],
+  ),
+  lists: assignment(
+    "My Daily Plan",
+    "Write your day as a list of five things.",
+    [
+      has("a1", "<ul", "A list (<ul> or <ol>)", ""),
+      count("a2", "<li", 5, "Five list items", ""),
+    ],
+  ),
+  "page-sections": assignment(
+    "My Club Page",
+    "Give your page a header, a main area, and a footer.",
+    [
+      has("a1", "<header", "A <header>", ""),
+      has("a2", "<main", "A <main>", ""),
+      has("a3", "<footer", "A <footer>", ""),
+    ],
+  ),
+  buttons: assignment(
+    "Control Panel",
+    "Make a control panel with three buttons that have words.",
+    [
+      count("a1", "<button", 3, "Three buttons", ""),
+      has("a2", "</button>", "Words inside each button", ""),
+    ],
+  ),
+  tables: assignment(
+    "Weekly Table",
+    "Make a table with heading cells and some data.",
+    [
+      has("a1", "<table", "A <table>", ""),
+      has("a2", "<th", "Heading cells (<th>)", ""),
+      count("a3", "<td", 4, "Four data cells", ""),
+    ],
+  ),
+  forms: assignment(
+    "My Survey",
+    "Build a survey with a labelled text box and a dropdown.",
+    [
+      has("a1", "<form", "A <form>", ""),
+      has("a2", "<label", "A <label>", ""),
+      has("a3", "<select", "A dropdown (<select>)", ""),
+    ],
+  ),
+  media: assignment(
+    "My Media Page",
+    "Add an audio player people can press play on.",
+    [
+      has("a1", "<audio", "An <audio> player", ""),
+      has("a2", "controls", "With controls", ""),
+    ],
+  ),
+  accessibility: assignment(
+    "Friendly Page",
+    "Make a page everyone can use: add alt text, a label, and a language.",
+    [
+      has("a1", "alt", "Alt text on a picture", ""),
+      has("a2", "<label", "A label for an input", ""),
+      has("a3", "lang", "A language on <html>", ""),
+    ],
+  ),
+  metadata: assignment(
+    "Page Setup",
+    "Set up your page's head with a title and character info.",
+    [
+      has("a1", "<title", "A <title>", ""),
+      has("a2", "charset", "A charset meta tag", ""),
+    ],
+  ),
+  debugging: assignment(
+    "Repair Mission",
+    "Fix a page: close the heading, and add alt text and a link address.",
+    [
+      has("a1", "</h1>", "Close the <h1>", ""),
+      has("a2", "alt", "Add alt text", ""),
+      has("a3", "href", "Add an href", ""),
+    ],
+  ),
+  "website-project": assignment(
+    "My Complete Website",
+    "Your big project: a full page with a title, heading, picture, link, and a list.",
+    [
+      has("a1", "<h1", "A heading", ""),
+      has("a2", "<img", "A picture", ""),
+      has("a3", "href", "A link", ""),
+      has("a4", "<li", "A list", ""),
+      has("a5", "<footer", "A footer", ""),
+    ],
+  ),
+};
+
+const BASE_MODULES: Record<string, HtmlStudioData> = {
   "first-web-page": M1,
   headings: M2,
   "text-and-paragraphs": M3,
@@ -391,6 +539,15 @@ const STUDIO_DATA: Record<string, HtmlStudioData> = {
   debugging: M14,
   "website-project": M15,
 };
+
+/** The full HTML course, in module order, each with its take-home assessment.
+ *  Slugs must match curriculum/worlds.py. */
+const STUDIO_DATA: Record<string, HtmlStudioData> = Object.fromEntries(
+  Object.entries(BASE_MODULES).map(([slug, data]) => [
+    slug,
+    ASSIGNMENTS[slug] ? { ...data, assignment: ASSIGNMENTS[slug] } : data,
+  ]),
+);
 
 /** HTML Studio data for a mission slug, or null if it isn't a studio mission. */
 export function studioDataFor(slug: string): HtmlStudioData | null {

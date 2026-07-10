@@ -6,6 +6,7 @@
 import { useEffect, useRef } from "react";
 import { currentStepIndex, isClassComplete } from "@/lib/engines/html-lesson";
 import type { HtmlStudioData } from "@/types/studio";
+import { AssignmentPanel } from "./AssignmentPanel";
 import { CodeEditor } from "./CodeEditor";
 import { FileExplorer } from "./FileExplorer";
 import { HtmlPreview } from "./HtmlPreview";
@@ -63,6 +64,10 @@ export function HtmlStudio({ slug, data, onWin }: HtmlStudioProps) {
           <HtmlPreview previewFile={data.previewFile} />
         </div>
       </div>
+
+      {data.assignment && (
+        <AssignmentPanel slug={slug} assignment={data.assignment} />
+      )}
     </div>
   );
 }

@@ -40,6 +40,16 @@ export interface HtmlLessonStep {
   check: StepCheck;
 }
 
+/** A take-home assessment: an open-ended brief the child builds in the studio
+ *  and submits for the teacher to review next class. The checklist reuses lesson
+ *  steps — each is auto-checked at submit time, but a teacher still reviews. */
+export interface StudioAssignment {
+  title: string;
+  /** What to build, in kid words. */
+  brief: string;
+  checklist: HtmlLessonStep[];
+}
+
 export interface HtmlStudioData {
   kind: "html-studio";
   title: string;
@@ -50,5 +60,8 @@ export interface HtmlStudioData {
   /** Files pre-created for this module so learners build on earlier work. Absent
    *  for Module 1, which teaches creating the folder and file from scratch. */
   starter?: StarterFile[];
+  /** Guided, in-class steps ("classwork") the child completes with Robo's help. */
   steps: HtmlLessonStep[];
+  /** Optional take-home assessment submitted for teacher review. */
+  assignment?: StudioAssignment;
 }

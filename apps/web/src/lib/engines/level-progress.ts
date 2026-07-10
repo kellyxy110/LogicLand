@@ -85,3 +85,23 @@ export function totalStars<C>(
 ): number {
   return levels.reduce((sum, l) => sum + (progress[l.id]?.stars ?? 0), 0);
 }
+
+/** Reconcile two progress maps (e.g. local cache + server record). For each
+ *  level: done if either says done, best stars kept, highest attempt count.
+ *  Commutative, so sync order never matters. */
+export function mergeProgress(
+  a: LevelProgress,
+  b: LevelProgress,
+): LevelProgress {
+  const out: LevelProgress = {};
+  for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    const x = a[id];
+    const y = b[id];
+    out[id] = {
+      done: !!x?.done || !!y?.done,
+      stars: Math.max(x?.stars ?? 0, y?.stars ?? 0),
+      attempts: Math.max(x?.attempts ?? 0, y?.attempts ?? 0),
+    };
+  }
+  return out;
+}

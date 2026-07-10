@@ -2,13 +2,8 @@
 // Server actions: the persistence bridge between Clerk identity, the FastAPI
 // intelligence engine, and Prisma. Called directly from client components; they
 // replace the old localStorage demo store.
-import { currentUser } from "@clerk/nextjs/server";
-import { getCurrentRole } from "@logicland/auth/server";
-import {
-  ensureStudent,
-  saveMissionCompletion,
-  type Student,
-} from "@logicland/database";
+import { saveMissionCompletion, type Student } from "@logicland/database";
+import { currentStudent } from "@/lib/current-student";
 import { engine, type MissionReward } from "@/lib/engine";
 import type { StudentState } from "@/lib/student-types";
 
@@ -24,20 +19,6 @@ function toState(s: Student): StudentState {
     completedMissions: s.completedMissions,
     badges: s.earnedBadges,
   };
-}
-
-async function currentStudent(): Promise<Student> {
-  const user = await currentUser();
-  if (!user) throw new Error("Not authenticated");
-  const role = (await getCurrentRole()) ?? "STUDENT";
-  const email =
-    user.primaryEmailAddress?.emailAddress ?? `${user.id}@logicland.local`;
-  return ensureStudent({
-    clerkId: user.id,
-    email,
-    name: user.firstName ?? "Explorer",
-    role,
-  });
 }
 
 /** Load (creating if needed) the signed-in student's persisted state. */

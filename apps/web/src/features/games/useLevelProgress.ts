@@ -1,10 +1,18 @@
 "use client";
-// Per-mission level progress, cached to localStorage so a returning learner
-// resumes at their last unfinished level and keeps their best stars — the ladder
-// never restarts. Mission *completion* stays server-authoritative (see
-// MissionRunner → completeMission); this caches the finer-grained level state.
+// Per-mission level progress. Two layers, best-of-both:
+//   • localStorage — instant and offline: the ladder never stalls on the network.
+//   • server (Prisma) — durable and cross-device, and what the parent/teacher
+//     dashboards read.
+// On mount we show the local cache immediately, then hydrate from the server and
+// merge (keeping the best of each). On each clear we update local *and* mirror
+// it to the server (fire-and-forget — a failed sync just leaves the local cache).
 import { useCallback, useEffect, useState } from "react";
 import {
+  getLevelRecords,
+  saveLevelResult,
+} from "@/app/actions/levels";
+import {
+  mergeProgress,
   recordCompletion,
   type LevelProgress,
 } from "@/lib/engines/level-progress";
@@ -33,13 +41,30 @@ function save(slug: string, progress: LevelProgress) {
 
 export function useLevelProgress(slug: string) {
   const [progress, setProgress] = useState<LevelProgress>({});
-  // Hydrate after mount so SSR and first client render agree (localStorage is
-  // client-only). `ready` lets the UI hold until the real state is known.
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setProgress(load(slug));
+    let active = true;
+    // 1) Show the local cache right away.
+    const local = load(slug);
+    setProgress(local);
     setReady(true);
+    // 2) Hydrate from the server and merge in the best of both.
+    getLevelRecords(slug)
+      .then((server) => {
+        if (!active) return;
+        setProgress((prev) => {
+          const merged = mergeProgress(prev, server);
+          save(slug, merged);
+          return merged;
+        });
+      })
+      .catch(() => {
+        /* offline / unauthenticated — the local cache stands */
+      });
+    return () => {
+      active = false;
+    };
   }, [slug]);
 
   const record = useCallback(
@@ -49,6 +74,8 @@ export function useLevelProgress(slug: string) {
         save(slug, next);
         return next;
       });
+      // Mirror to the server without blocking play.
+      void saveLevelResult(slug, levelId, stars).catch(() => {});
     },
     [slug],
   );
