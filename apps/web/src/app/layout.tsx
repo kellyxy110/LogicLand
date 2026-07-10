@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { APP_NAME, TAGLINE } from "@logicland/shared";
+import { AppHeader } from "@/components/AppHeader";
 import { MotionProvider } from "@/components/MotionProvider";
 import "./globals.css";
 
@@ -14,7 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className="min-h-screen font-sans antialiased">
-          <MotionProvider>{children}</MotionProvider>
+          <MotionProvider>
+            <AppHeader />
+            {children}
+          </MotionProvider>
         </body>
       </html>
     </ClerkProvider>
