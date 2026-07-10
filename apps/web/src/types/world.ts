@@ -11,6 +11,7 @@ export type GameKind =
   | "shape-match"
   | "memory"
   | "pattern-builder"
+  | "key-quest"
   | "html-studio";
 
 /** "live" is playable now; "soon" appears on the map to preserve the roadmap
@@ -38,7 +39,8 @@ export type WorldTheme =
   | "city"
   | "factory"
   | "mountain"
-  | "space";
+  | "space"
+  | "keyboard";
 
 export interface LandWorld {
   slug: string;

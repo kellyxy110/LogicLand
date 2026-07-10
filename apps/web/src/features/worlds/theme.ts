@@ -3,7 +3,7 @@
 // palette. Keeping it in one map means a new World is a data change on the
 // server plus one entry here; no component edits.
 import type { LucideIcon } from "lucide-react";
-import { Building2, Crown, Factory, Mountain, Rocket, TreePine } from "lucide-react";
+import { Building2, Crown, Factory, Keyboard, Mountain, Rocket, TreePine } from "lucide-react";
 import type { WorldTheme } from "@/types/world";
 
 export interface WorldSkin {
@@ -61,6 +61,13 @@ export const WORLD_SKINS: Record<WorldTheme, WorldSkin> = {
     accent: "text-indigo-500",
     wash: "bg-indigo-50 dark:bg-indigo-500/10",
     teaser: "Invent something no one has dreamed.",
+  },
+  keyboard: {
+    emblem: Keyboard,
+    gradient: "from-rose-400 via-pink-500 to-fuchsia-600",
+    accent: "text-rose-600",
+    wash: "bg-rose-50 dark:bg-rose-500/10",
+    teaser: "Learn the keys. Type your way to real code.",
   },
 };
 

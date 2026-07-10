@@ -13,6 +13,7 @@ import {
   Clock,
   Code2,
   Keyboard,
+  KeyRound,
   Lock,
   Palette,
   Play,
@@ -29,6 +30,7 @@ const GAME_ICON: Record<string, LucideIcon> = {
   "shape-match": Shapes,
   memory: Brain,
   "pattern-builder": Palette,
+  "key-quest": KeyRound,
   "html-studio": Code2,
 };
 

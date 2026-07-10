@@ -179,10 +179,27 @@ export interface PatternBuilderData {
   levels: GameLevel<PatternLevel>[];
 }
 
+// --- Keyboard Kingdom / Typing Town (keyboard fluency) --------------------
+export interface KeyQuestLevel {
+  /** Kid-friendly instruction, read aloud (e.g. "Find and press each letter!"). */
+  prompt: string;
+  /** Tokens to type in order — a single key, a letter, a word, or a short
+   *  sentence each. Matching is case-insensitive; a space is a real target. */
+  targets: string[];
+  /** Max total mistakes still allowed to earn the mastery star for the level. */
+  starThreshold: number;
+}
+
+export interface KeyQuestData {
+  kind: "key-quest";
+  levels: GameLevel<KeyQuestLevel>[];
+}
+
 export type MissionGameData =
   | RobotMazeData
   | TypingQuestData
   | ShapeMatchData
   | MemoryData
   | PatternBuilderData
+  | KeyQuestData
   | HtmlStudioData;

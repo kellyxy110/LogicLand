@@ -8,6 +8,7 @@ import type {
   ShapeMatchData,
   MemoryData,
 } from "@/types/game";
+import { KEYBOARD_GAME_DATA } from "./keyboard";
 import { studioDataFor } from "./studio";
 
 // Compact helpers so the grids below stay readable.
@@ -322,6 +323,7 @@ const MISSION_GAME_DATA: Record<string, MissionGameData> = {
   "shape-match": SHAPE_MATCH,
   "memory-game": MEMORY_GAME,
   "pattern-builder": PATTERN_BUILDER,
+  ...KEYBOARD_GAME_DATA,
 };
 
 /** Game data for a mission slug, or null if the mission isn't playable yet.

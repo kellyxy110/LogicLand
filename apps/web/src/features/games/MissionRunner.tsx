@@ -16,6 +16,7 @@ import type { LandMission } from "@/types/world";
 import type { MissionGameData } from "@/types/game";
 import { RewardModal } from "@/features/rewards/RewardModal";
 import { HtmlStudio } from "@/features/studio/HtmlStudio";
+import { KeyboardQuest } from "./KeyboardQuest";
 import { MemoryGame } from "./MemoryGame";
 import { PatternBuilder } from "./PatternBuilder";
 import { RobotMaze } from "./RobotMaze";
@@ -126,6 +127,8 @@ function renderGame(
       return <MemoryGame slug={slug} data={gameData} onWin={onWin} />;
     case "pattern-builder":
       return <PatternBuilder slug={slug} data={gameData} onWin={onWin} />;
+    case "key-quest":
+      return <KeyboardQuest slug={slug} data={gameData} onWin={onWin} />;
     case "html-studio":
       return <HtmlStudio slug={slug} data={gameData} onWin={onWin} />;
     default:
