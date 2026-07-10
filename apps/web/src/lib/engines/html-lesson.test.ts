@@ -67,4 +67,39 @@ describe("lesson progression", () => {
     expect(isClassComplete(withH1, steps)).toBe(true);
     expect(isClassComplete(withFile, steps)).toBe(false);
   });
+
+  it("does not restart: extra content past the last step stays complete", () => {
+    const rich = [
+      folder("f1", "site"),
+      file("a", "index.html", "<h1>Hi</h1>\n<h2>More</h2>\n<p>Even more.</p>"),
+    ];
+    expect(currentStepIndex(rich, steps)).toBe(steps.length);
+    expect(isClassComplete(rich, steps)).toBe(true);
+  });
+});
+
+describe("validation semantics", () => {
+  it("accepts valid HTML regardless of spacing/newlines/case", () => {
+    const tight = [file("a", "index.html", "<h1>Cat</h1>")];
+    const loose = [file("b", "index.html", "  <H1>\n   Cat\n  </H1>  ")];
+    const check = { type: "content-has", file: "index.html", needle: "<h1" } as const;
+    expect(checkStep(tight, check)).toBe(true);
+    expect(checkStep(loose, check)).toBe(true);
+  });
+
+  it("fails when a required closing tag is missing", () => {
+    const open = [file("a", "index.html", "<h1>Cat")];
+    const closed = [file("b", "index.html", "<h1>Cat</h1>")];
+    const needsClose = { type: "content-has", file: "index.html", needle: "</h1>" } as const;
+    expect(checkStep(open, needsClose)).toBe(false);
+    expect(checkStep(closed, needsClose)).toBe(true);
+  });
+
+  it("checks required accessibility attributes (alt text on images)", () => {
+    const noAlt = [file("a", "index.html", '<img src="cat.png">')];
+    const withAlt = [file("b", "index.html", '<img src="cat.png" alt="my cat">')];
+    const needsAlt = { type: "content-has", file: "index.html", needle: "alt" } as const;
+    expect(checkStep(noAlt, needsAlt)).toBe(false);
+    expect(checkStep(withAlt, needsAlt)).toBe(true);
+  });
 });

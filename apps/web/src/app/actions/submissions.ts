@@ -21,13 +21,37 @@ export interface SubmitAssignmentInput {
   checklist: ChecklistResult[];
 }
 
+/** Result of a submit attempt. A discriminated union (rather than a thrown
+ *  error) so the client can show a precise, friendly message and the learner's
+ *  work is never lost — they can always retry. */
+export type SubmitAssignmentResult =
+  | { ok: true; id: string; submittedAt: string }
+  | { ok: false; reason: "unauthenticated" | "error" };
+
 /** A student submits their current studio work for review. */
 export async function submitAssignment(
   input: SubmitAssignmentInput,
-): Promise<{ id: string; submittedAt: string }> {
-  const student = await currentStudent();
-  const { id } = await submitStudio(student.id, input);
-  return { id, submittedAt: new Date().toISOString() };
+): Promise<SubmitAssignmentResult> {
+  let studentId: string;
+  try {
+    studentId = (await currentStudent()).id;
+  } catch {
+    // Signed out / session expired — the work stays in the browser; ask them
+    // to sign in and try again.
+    return { ok: false, reason: "unauthenticated" };
+  }
+  try {
+    const { id } = await submitStudio(studentId, input);
+    return { ok: true, id, submittedAt: new Date().toISOString() };
+  } catch (err) {
+    // Log the real cause server-side (message only, no secrets) so we can see
+    // DB issues in the logs; the learner just sees a friendly retry.
+    console.error(
+      "[submitAssignment] could not save submission:",
+      err instanceof Error ? err.message : String(err),
+    );
+    return { ok: false, reason: "error" };
+  }
 }
 
 /** The signed-in student's own submissions (for their history + resume state). */

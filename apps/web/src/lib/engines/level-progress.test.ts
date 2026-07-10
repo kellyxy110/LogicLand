@@ -88,6 +88,39 @@ describe("mastery + scoring", () => {
   });
 });
 
+describe("sequential unlocking + resume (acceptance)", () => {
+  it("unlocks one level at a time: L1→L2→L3, and resumes at the right spot", () => {
+    // Fresh learner: only L1 open, resume at index 0.
+    expect(isLevelUnlocked(levels, {}, 1)).toBe(false);
+    expect(currentLevelIndex(levels, {})).toBe(0);
+
+    // Clear L1 → L2 unlocks, L3 still locked, resume at L2.
+    const afterL1 = recordCompletion({}, "l1", 1);
+    expect(isLevelUnlocked(levels, afterL1, 1)).toBe(true);
+    expect(isLevelUnlocked(levels, afterL1, 2)).toBe(false);
+    expect(currentLevelIndex(levels, afterL1)).toBe(1);
+
+    // Clear L2 → L3 unlocks, resume at L3.
+    const afterL2 = recordCompletion(afterL1, "l2", 0);
+    expect(isLevelUnlocked(levels, afterL2, 2)).toBe(true);
+    expect(currentLevelIndex(levels, afterL2)).toBe(2);
+
+    // Completed levels stay completed after later play.
+    const afterL3 = recordCompletion(afterL2, "l3", 1);
+    expect(afterL3.l1.done).toBe(true);
+    expect(afterL3.l2.done).toBe(true);
+    expect(allLevelsComplete(levels, afterL3)).toBe(true);
+  });
+
+  it("replaying a cleared level never erases its best score", () => {
+    const best = recordCompletion({}, "l1", 1); // no-miss run
+    const replay = recordCompletion(best, "l1", 0); // sloppy replay
+    expect(replay.l1.stars).toBe(1); // best kept
+    expect(replay.l1.done).toBe(true); // still done
+    expect(replay.l1.attempts).toBe(2);
+  });
+});
+
 describe("mergeProgress (local cache + server)", () => {
   it("keeps the best of both and is order-independent", () => {
     const local: LevelProgress = {

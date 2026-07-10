@@ -553,3 +553,7 @@ const STUDIO_DATA: Record<string, HtmlStudioData> = Object.fromEntries(
 export function studioDataFor(slug: string): HtmlStudioData | null {
   return STUDIO_DATA[slug] ?? null;
 }
+
+/** Every HTML module slug, in course order. Slugs mirror curriculum/worlds.py.
+ *  Exposed so tests can assert the full 15-module ladder stays intact. */
+export const STUDIO_MODULE_SLUGS = Object.keys(BASE_MODULES);

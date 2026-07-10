@@ -24,7 +24,7 @@ export function AssignmentPanel({
   const nodes = useStudio((s) => s.nodes);
   const [submitting, setSubmitting] = useState(false);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"unauthenticated" | "error" | null>(null);
 
   // Remember a prior submission so returning shows the submitted state.
   useEffect(() => {
@@ -40,23 +40,28 @@ export function AssignmentPanel({
 
   async function handleSubmit() {
     setSubmitting(true);
-    setError(false);
+    setError(null);
     try {
       const files = nodes
         .filter((n) => n.kind === "file")
         .map((n) => ({ name: n.name, content: n.content }));
-      const { submittedAt: at } = await submitAssignment({
+      const res = await submitAssignment({
         missionSlug: slug,
         title: assignment.title,
         code: files,
         checklist: results,
       });
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(submittedKey(slug), at);
+      if (!res.ok) {
+        setError(res.reason);
+        return;
       }
-      setSubmittedAt(at);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(submittedKey(slug), res.submittedAt);
+      }
+      setSubmittedAt(res.submittedAt);
     } catch {
-      setError(true);
+      // Network/unexpected — the work is still in the browser; let them retry.
+      setError("error");
     } finally {
       setSubmitting(false);
     }
@@ -124,7 +129,9 @@ export function AssignmentPanel({
       )}
       {error && (
         <p className="mt-2 text-sm font-semibold text-red-500">
-          Couldn&apos;t send that — check you&apos;re signed in and try again.
+          {error === "unauthenticated"
+            ? "Please sign in to hand in your work — then tap Submit again. Your code is safe."
+            : "We couldn't save that just now. Your work is safe — please tap Submit to try again."}
         </p>
       )}
     </section>

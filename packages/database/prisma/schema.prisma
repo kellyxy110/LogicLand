@@ -6,6 +6,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  // `native` builds the engine for the local dev OS; `rhel-openssl-3.0.x` is the
+  // Vercel serverless runtime (Amazon Linux 2023). Both must be generated so the
+  // deployed functions can find their query engine. Paired with the monorepo
+  // workaround plugin in apps/web/next.config.mjs, which copies the engine binary
+  // next to the Next.js bundle (pnpm's nested node_modules breaks NFT tracing).
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
