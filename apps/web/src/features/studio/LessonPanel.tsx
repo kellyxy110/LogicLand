@@ -4,7 +4,7 @@
 // a pre-reader can still follow the class.
 import { RoboAvatar } from "@logicland/ui";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Lightbulb } from "lucide-react";
 import { SpeakerButton } from "@/features/voice/SpeakerButton";
 import type { HtmlLessonStep } from "@/types/studio";
 
@@ -18,7 +18,7 @@ export function LessonPanel({
   const complete = currentIndex >= steps.length;
   const step = complete ? null : steps[currentIndex];
   const speech = complete
-    ? "Class complete — amazing coding! Ready for the next one? 🎉"
+    ? "Class complete — amazing coding! Ready for the next one?"
     : (step?.instruction ?? "");
 
   return (
@@ -47,7 +47,10 @@ export function LessonPanel({
             </motion.p>
           </AnimatePresence>
           {step && (
-            <p className="mt-1 text-sm opacity-70">💡 {step.hint}</p>
+            <p className="mt-1 flex items-start gap-1.5 text-sm opacity-70">
+              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sunburst" aria-hidden />
+              {step.hint}
+            </p>
           )}
         </div>
       </div>

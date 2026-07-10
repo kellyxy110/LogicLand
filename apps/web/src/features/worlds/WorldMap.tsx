@@ -28,7 +28,7 @@ export function WorldMap({ worlds }: { worlds: LandWorld[] }) {
         <RoboAvatar mood="happy" size={64} />
         <div>
           <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
-            Welcome, {ready ? state.name : "Explorer"}! 🌟
+            Welcome, {ready ? state.name : "Explorer"}!
           </h1>
           <p className="opacity-70">Pick a world and begin your adventure.</p>
         </div>

@@ -40,9 +40,8 @@ export function WorldCard({ world, completed, playable, index }: WorldCardProps)
         <div
           className={`relative flex h-32 items-center justify-center bg-gradient-to-br ${skin.gradient}`}
         >
-          <span className="text-6xl drop-shadow-lg" aria-hidden>
-            {skin.emblem}
-          </span>
+          <skin.emblem className="h-16 w-16 text-white drop-shadow-lg" aria-hidden />
+          <span className="sr-only">{world.title}</span>
           {!world.locked && completed >= playable && playable > 0 && (
             <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-600 shadow">
               Complete ✓

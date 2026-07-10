@@ -3,6 +3,7 @@
 // current animation Frame, it draws the board and smoothly glides Robo to his
 // spot, rotating him to face his heading. Purely presentational.
 import { motion } from "framer-motion";
+import { Bot, ChevronUp, Flag, Star } from "lucide-react";
 import type { Frame, Puzzle } from "@/lib/puzzles";
 
 const keyOf = (x: number, y: number) => `${x},${y}`;
@@ -49,7 +50,7 @@ export function RoboStage({
                 }`}
               >
                 {isGoal && !puzzle.stars.some((s) => s.x === x && s.y === y) && (
-                  <span className="opacity-40">🏁</span>
+                  <Flag className="h-5 w-5 text-brand opacity-40" aria-hidden />
                 )}
               </div>
             );
@@ -71,13 +72,12 @@ export function RoboStage({
               height: `${rowPct}%`,
             }}
           >
-            <span
-              className={`text-2xl transition-all duration-300 ${
+            <Star
+              className={`h-6 w-6 fill-sunburst text-sunburst transition-all duration-300 ${
                 got ? "scale-50 opacity-20" : "animate-pulse"
               }`}
-            >
-              ⭐
-            </span>
+              aria-hidden
+            />
           </div>
         );
       })}
@@ -95,14 +95,14 @@ export function RoboStage({
         transition={{ type: "spring", stiffness: 260, damping: 22 }}
       >
         <div className="relative grid h-full w-full place-items-center rounded-xl bg-brand text-white shadow-md">
-          <span className="text-xl leading-none">🤖</span>
+          <Bot className="h-5 w-5" aria-hidden />
           <span
-            className="absolute text-xs"
+            className="absolute"
             style={{
               transform: `rotate(${DIR_DEG[frame.dir]}deg) translateY(-140%)`,
             }}
           >
-            ▲
+            <ChevronUp className="h-3 w-3" aria-hidden />
           </span>
         </div>
       </motion.div>

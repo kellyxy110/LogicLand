@@ -4,6 +4,7 @@
 // invented client-side) and shows exactly what was earned.
 import { BadgeChip, Button, RewardBurst, RoboAvatar } from "@logicland/ui";
 import { motion } from "framer-motion";
+import { Coins, Star } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { MissionReward } from "@/lib/engine";
@@ -60,13 +61,17 @@ export function RewardModal({
 
         <div className="my-6 flex justify-center gap-5 font-display text-xl font-bold">
           <span className="text-brand">+{reward.xp_awarded} XP</span>
-          <span className="text-sunburst">+{reward.stars_awarded} ⭐</span>
-          <span className="text-sunburst">+{reward.coins_awarded} 🪙</span>
+          <span className="flex items-center gap-1.5 text-sunburst">
+            +{reward.stars_awarded} <Star className="h-5 w-5 fill-sunburst" aria-hidden />
+          </span>
+          <span className="flex items-center gap-1.5 text-sunburst">
+            +{reward.coins_awarded} <Coins className="h-5 w-5" aria-hidden />
+          </span>
         </div>
 
         {starsCollected > 0 && (
           <p className="-mt-3 mb-4 text-sm font-semibold opacity-70">
-            You grabbed {starsCollected} bonus star{starsCollected > 1 ? "s" : ""} on the way! ✨
+            You grabbed {starsCollected} bonus star{starsCollected > 1 ? "s" : ""} on the way!
           </p>
         )}
 
@@ -81,7 +86,7 @@ export function RewardModal({
           </p>
         ) : (
           <p className="mb-3 text-sm font-semibold opacity-70">
-            You&apos;ve cleared every mission in {worldTitle}! 🌟
+            You&apos;ve cleared every mission in {worldTitle}!
           </p>
         )}
 

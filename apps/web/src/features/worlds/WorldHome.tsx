@@ -4,7 +4,7 @@
 // "soon" ones stay visible to show the road ahead.
 import { Card, RoboAvatar, Skeleton } from "@logicland/ui";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookOpen, Volume2 } from "lucide-react";
 import Link from "next/link";
 import type { LandWorld } from "@/types/world";
 import { useStudent } from "@/lib/student-store";
@@ -36,9 +36,8 @@ export function WorldHome({ world }: { world: LandWorld }) {
         className={`relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br ${skin.gradient} p-6 text-white shadow-lg`}
       >
         <div className="flex items-center gap-4">
-          <span className="text-6xl drop-shadow" aria-hidden>
-            {skin.emblem}
-          </span>
+          <skin.emblem className="h-16 w-16 shrink-0 text-white drop-shadow" aria-hidden />
+          <span className="sr-only">{world.title}</span>
           <div>
             <h1 className="font-display text-3xl font-extrabold">{world.title}</h1>
             <p className="opacity-90">{world.subtitle}</p>
@@ -83,8 +82,8 @@ export function WorldHome({ world }: { world: LandWorld }) {
       {/* Word Wall — learn the world's coding words */}
       <Link href={`/worlds/${world.slug}/vocabulary`} className="mt-6 block">
         <Card className="flex items-center gap-4 transition-transform hover:scale-[1.01]">
-          <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl ${skin.wash}`}>
-            📚
+          <div className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl ${skin.wash} ${skin.accent}`}>
+            <BookOpen className="h-7 w-7" />
           </div>
           <div className="flex-1">
             <h3 className="font-display text-lg font-bold">Word Wall</h3>
@@ -92,7 +91,7 @@ export function WorldHome({ world }: { world: LandWorld }) {
               Learn the coding words of {world.title} — with pictures and voice.
             </p>
           </div>
-          <span className="text-2xl">🔊</span>
+          <Volume2 className="h-6 w-6 shrink-0 opacity-60" aria-hidden />
         </Card>
       </Link>
 

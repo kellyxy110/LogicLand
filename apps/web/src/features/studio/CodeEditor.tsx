@@ -2,6 +2,7 @@
 // The editor pane. Shows the open file's name as a tab and a big, calm
 // monospace textarea bound to its contents. Folders and the empty state get a
 // friendly nudge instead of a blank box.
+import { FileCode } from "lucide-react";
 import { useStudio } from "./useStudio";
 
 export function CodeEditor() {
@@ -11,8 +12,8 @@ export function CodeEditor() {
   if (!file) {
     return (
       <div className="grid h-full min-h-[16rem] place-items-center rounded-2xl bg-black/[0.03] p-6 text-center dark:bg-white/5">
-        <p className="text-sm opacity-60">
-          📄 Pick a file (or make one) to start coding!
+        <p className="flex items-center gap-1.5 text-sm opacity-60">
+          <FileCode className="h-4 w-4" aria-hidden /> Pick a file (or make one) to start coding!
         </p>
       </div>
     );
@@ -21,7 +22,7 @@ export function CodeEditor() {
   return (
     <div className="flex h-full min-h-[16rem] flex-col overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-slate-900">
       <div className="flex items-center gap-2 border-b border-black/10 bg-black/[0.03] px-3 py-2 dark:border-white/10 dark:bg-white/5">
-        <span aria-hidden>📄</span>
+        <FileCode className="h-4 w-4 opacity-70" aria-hidden />
         <span className="text-sm font-bold">{file.name}</span>
       </div>
       <label htmlFor="studio-editor" className="sr-only">

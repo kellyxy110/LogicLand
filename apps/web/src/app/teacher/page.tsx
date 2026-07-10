@@ -34,11 +34,21 @@ export default async function TeacherDashboard() {
 
   return (
     <main className="mx-auto max-w-4xl px-5 py-8">
-      <header className="mb-8">
-        <h1 className="font-display text-3xl font-extrabold">
-          Welcome back, {name} 👋
-        </h1>
-        <p className="opacity-70">Your classroom, ready when you are.</p>
+      <header className="mb-8 flex items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/mr-kelly.png"
+          alt="Mr. Kelly"
+          width={1254}
+          height={1254}
+          className="h-14 w-14 rounded-full object-cover ring-2 ring-brand/30"
+        />
+        <div>
+          <h1 className="font-display text-3xl font-extrabold">
+            Welcome back, {name}
+          </h1>
+          <p className="opacity-70">Your classroom, ready when you are.</p>
+        </div>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2">

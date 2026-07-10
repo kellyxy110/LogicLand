@@ -4,7 +4,16 @@
 // level deep — plenty for the Beginner Journey), press Run to watch Robo act it
 // out on the grid, and solve the puzzle to unlock the rest of the mission.
 import { Button } from "@logicland/ui";
-import { Play, RotateCcw, Trash2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Footprints,
+  Play,
+  Repeat,
+  RotateCcw,
+  RotateCw,
+  Split,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import {
   type Block,
@@ -18,17 +27,17 @@ import { RoboStage } from "./RoboStage";
 
 const LABELS: Record<BlockType, string> = {
   move: "Move",
-  left: "Turn ↺",
-  right: "Turn ↻",
+  left: "Turn Left",
+  right: "Turn Right",
   repeat: "Repeat",
   if_path: "If Path",
 };
-const EMOJI: Record<BlockType, string> = {
-  move: "🦶",
-  left: "↺",
-  right: "↻",
-  repeat: "🔁",
-  if_path: "🚧",
+const BLOCK_ICON: Record<BlockType, LucideIcon> = {
+  move: Footprints,
+  left: RotateCcw,
+  right: RotateCw,
+  repeat: Repeat,
+  if_path: Split,
 };
 const CONTAINER: BlockType[] = ["repeat", "if_path"];
 
@@ -136,7 +145,7 @@ export function CodingLab({
           }`}
         >
           {result === "solved"
-            ? "🎉 You solved it! Robo collected everything."
+            ? "You solved it! Robo collected everything."
             : "Not quite — tweak your blocks and Run again. You've got this!"}
         </p>
       )}
@@ -151,7 +160,11 @@ export function CodingLab({
             disabled={running}
             className="flex items-center gap-1.5 rounded-xl bg-brand/10 px-3 py-2 text-sm font-semibold text-brand transition hover:bg-brand/20 disabled:opacity-50"
           >
-            <span aria-hidden>{EMOJI[t]}</span> {LABELS[t]}
+            {(() => {
+              const Icon = BLOCK_ICON[t];
+              return <Icon className="h-4 w-4" aria-hidden />;
+            })()}{" "}
+            {LABELS[t]}
           </button>
         ))}
       </div>
@@ -233,7 +246,10 @@ function BlockList({
                   : "bg-brand/10 text-brand"
               }`}
             >
-              <span aria-hidden>{EMOJI[b.type]}</span>
+              {(() => {
+                const Icon = BLOCK_ICON[b.type];
+                return <Icon className="h-4 w-4" aria-hidden />;
+              })()}
               <span>{LABELS[b.type]}</span>
               {b.type === "repeat" && (
                 <span className="flex items-center gap-1">

@@ -4,18 +4,32 @@
 // (visible on the map, not yet playable) — never a button that does nothing.
 import { Card } from "@logicland/ui";
 import { motion } from "framer-motion";
-import { Check, Clock, Lock, Play } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Award,
+  Bot,
+  Brain,
+  Check,
+  Clock,
+  Code2,
+  Keyboard,
+  Lock,
+  Palette,
+  Play,
+  Shapes,
+  Sparkles,
+} from "lucide-react";
 import Link from "next/link";
 import type { LandMission } from "@/types/world";
 import type { WorldSkin } from "./theme";
 
-const GAME_EMOJI: Record<string, string> = {
-  "robot-maze": "🤖",
-  "typing-quest": "⌨️",
-  "shape-match": "🔷",
-  memory: "🧠",
-  "pattern-builder": "🎨",
-  "html-studio": "💻",
+const GAME_ICON: Record<string, LucideIcon> = {
+  "robot-maze": Bot,
+  "typing-quest": Keyboard,
+  "shape-match": Shapes,
+  memory: Brain,
+  "pattern-builder": Palette,
+  "html-studio": Code2,
 };
 
 interface MissionCardProps {
@@ -34,7 +48,7 @@ export function MissionCard({
   index,
 }: MissionCardProps) {
   const live = mission.status === "live";
-  const emoji = GAME_EMOJI[mission.game] ?? "✨";
+  const GameIcon = GAME_ICON[mission.game] ?? Sparkles;
 
   const body = (
     <motion.div
@@ -49,10 +63,10 @@ export function MissionCard({
         }`}
       >
         <div
-          className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl text-3xl ${skin.wash}`}
+          className={`grid h-16 w-16 shrink-0 place-items-center rounded-2xl ${skin.wash} ${skin.accent}`}
           aria-hidden
         >
-          {emoji}
+          <GameIcon className="h-8 w-8" />
         </div>
 
         <div className="min-w-0 flex-1">
@@ -72,7 +86,9 @@ export function MissionCard({
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" /> {mission.estimatedMinutes} min
             </span>
-            <span>🏅 {mission.badge}</span>
+            <span className="flex items-center gap-1">
+              <Award className="h-3 w-3" /> {mission.badge}
+            </span>
           </div>
         </div>
 

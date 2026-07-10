@@ -187,6 +187,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Meet Mr. Kelly */}
+      <section className="border-t border-black/5 dark:border-white/10">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[0.95fr_1.05fr]">
+          <div>
+            <div className="flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/mr-kelly.png"
+                alt="Mr. Kelly"
+                width={1254}
+                height={1254}
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-brand/30"
+              />
+              <div>
+                <p className="font-display text-xl font-extrabold">Mr. Kelly</p>
+                <p className="text-sm font-semibold text-brand">
+                  Educator · Mentor · Innovator
+                </p>
+              </div>
+            </div>
+            <h2 className="mt-6 font-display text-3xl font-extrabold tracking-tight">
+              The teacher behind LogicLand
+            </h2>
+            <p className="mt-3 max-w-md text-lg leading-relaxed opacity-75">
+              Helping students master today&apos;s academics and tomorrow&apos;s
+              technology — with clarity, confidence, and purpose.
+            </p>
+            <blockquote className="mt-4 border-l-2 border-brand/40 pl-4 text-base font-semibold italic opacity-80">
+              “Excellence is not an act, it&apos;s a habit.”
+            </blockquote>
+            <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] opacity-50">
+              Teaches
+            </p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {[
+                "Mathematics",
+                "Further Mathematics",
+                "Physics",
+                "English Language",
+                "Coding",
+                "Artificial Intelligence",
+              ].map((s) => (
+                <li
+                  key={s}
+                  className="rounded-full border border-black/10 px-3 py-1 text-sm font-semibold opacity-80 dark:border-white/15"
+                >
+                  {s}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-sm opacity-60">
+              Preparing students for WAEC, NECO, JAMB, JUPEB &amp; University
+              Foundation.
+            </p>
+            <a
+              href="https://kelly.xy.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline"
+            >
+              View Mr. Kelly&apos;s portfolio →
+            </a>
+          </div>
+          <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/mr-kelly-poster.jpeg"
+              alt="Study with Mr. Kelly — Learn. Think. Build."
+              width={561}
+              height={840}
+              className="mx-auto w-full max-w-sm rounded-3xl border border-black/10 shadow-xl dark:border-white/10"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Closing CTA */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
         <div className="overflow-hidden rounded-[2rem] bg-brand px-8 py-14 text-center text-white">
@@ -227,7 +303,20 @@ export default function Home() {
               {APP_NAME} — {TAGLINE}
             </span>
           </div>
-          <p>Mr. Kelly&apos;s Digital Coding Classroom</p>
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <p>Mr. Kelly&apos;s Digital Coding Classroom</p>
+            <p>
+              Powered by{" "}
+              <a
+                href="https://sitenexis.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand hover:underline"
+              >
+                SiteNexis
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
     </div>

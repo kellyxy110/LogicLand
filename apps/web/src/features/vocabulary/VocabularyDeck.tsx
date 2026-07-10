@@ -35,7 +35,7 @@ export function VocabularyDeck({ worldSlug, worldTitle, words }: VocabularyDeckP
       >
         <RoboAvatar mood="happy" size={60} />
         <div className="flex-1">
-          <h1 className="font-display text-3xl font-extrabold">Word Wall 📚</h1>
+          <h1 className="font-display text-3xl font-extrabold">Word Wall</h1>
           <p className="opacity-70">The coding words of {worldTitle}.</p>
         </div>
         <SpeakerButton text={intro} label="Hear the introduction" />

@@ -3,7 +3,7 @@
 // a folder or a file; new items are named with a friendly inline input (no
 // browser prompts). Files open in the editor; folders become the home for the
 // next new item, so "make a folder, then a file inside it" just works.
-import { FilePlus2, FolderPlus } from "lucide-react";
+import { FileCode, FilePlus2, Folder, FolderPlus } from "lucide-react";
 import { useState } from "react";
 import type { FsNode } from "@/types/studio";
 import { useStudio } from "./useStudio";
@@ -66,7 +66,11 @@ export function FileExplorer() {
 
       {creating && (
         <div className="mb-2 flex items-center gap-1 rounded-lg bg-white p-1 dark:bg-white/10">
-          <span aria-hidden>{creating === "folder" ? "📁" : "📄"}</span>
+          {creating === "folder" ? (
+            <Folder className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+          ) : (
+            <FileCode className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+          )}
           {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
           <input
             autoFocus
@@ -126,7 +130,11 @@ function TreeNodes({
                 : "hover:bg-black/5 dark:hover:bg-white/10"
             }`}
           >
-            <span aria-hidden>{node.kind === "folder" ? "📁" : "📄"}</span>
+            {node.kind === "folder" ? (
+              <Folder className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+            ) : (
+              <FileCode className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+            )}
             <span className="truncate">{node.name}</span>
           </button>
           {node.kind === "folder" && (

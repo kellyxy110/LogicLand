@@ -11,6 +11,7 @@ import {
   Skeleton,
 } from "@logicland/ui";
 import { AnimatePresence, motion } from "framer-motion";
+import { Coins, Star } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -96,13 +97,17 @@ export default function MissionPlayer() {
         <div>
           <RoboAvatar mood="happy" size={120} className="mx-auto" />
           <h1 className="mt-4 font-display text-4xl font-extrabold">
-            Mission Complete! 🎉
+            Mission Complete!
           </h1>
           <p className="mt-2 text-lg opacity-80">You earned the {mission.badge} badge!</p>
           <div className="mt-6 flex justify-center gap-6 font-display text-xl font-bold">
             <span className="text-brand">+{reward.xp_awarded} XP</span>
-            <span className="text-sunburst">+{reward.stars_awarded} ⭐</span>
-            <span className="text-sunburst">+{reward.coins_awarded} 🪙</span>
+            <span className="flex items-center gap-1.5 text-sunburst">
+              +{reward.stars_awarded} <Star className="h-5 w-5 fill-sunburst" aria-hidden />
+            </span>
+            <span className="flex items-center gap-1.5 text-sunburst">
+              +{reward.coins_awarded} <Coins className="h-5 w-5" aria-hidden />
+            </span>
           </div>
           <div className="mt-8 flex justify-center gap-3">
             <Button onClick={() => router.push("/student")}>Back to Map</Button>
@@ -170,7 +175,7 @@ export default function MissionPlayer() {
         </Button>
         {isLast ? (
           <Button size="lg" onClick={finish} disabled={saving}>
-            {alreadyDone ? "Play Again" : saving ? "Saving…" : "Finish Mission 🎉"}
+            {alreadyDone ? "Play Again" : saving ? "Saving…" : "Finish Mission"}
           </Button>
         ) : (
           <Button
@@ -178,7 +183,7 @@ export default function MissionPlayer() {
             onClick={() => setStep((s) => s + 1)}
             disabled={labLocked}
           >
-            {labLocked ? "Solve to continue 🔒" : "Next →"}
+            {labLocked ? "Solve to continue" : "Next →"}
           </Button>
         )}
       </div>

@@ -116,10 +116,10 @@ export function AssignmentPanel({
         <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-2 text-sm font-semibold text-meadow"
+          className="mt-2 flex items-start gap-1.5 text-sm font-semibold text-meadow"
         >
-          ✅ Submitted! Your teacher will see it next class. You can keep editing
-          and submit again.
+          <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> Submitted! Your
+          teacher will see it next class. You can keep editing and submit again.
         </motion.p>
       )}
       {error && (

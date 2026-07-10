@@ -5,6 +5,7 @@
 // dealt after mount (the shuffle is random, so dealing during SSR would cause a
 // hydration mismatch); LeveledGame remounts this per level with a fresh key.
 import { motion } from "framer-motion";
+import { Leaf } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   boardCleared,
@@ -91,7 +92,7 @@ function MemoryBoard({
   }
 
   const speech = done
-    ? "You found every pair! 🎉"
+    ? "You found every pair!"
     : "Flip two cards. Can you find a matching pair?";
 
   return (
@@ -124,7 +125,7 @@ function MemoryBoard({
                   animate={{ scale: 1, opacity: 1 }}
                   aria-hidden
                 >
-                  {faceUp && c ? c.face : "🍃"}
+                  {faceUp && c ? c.face : <Leaf className="h-7 w-7 text-white/80" />}
                 </motion.span>
               </motion.button>
             );

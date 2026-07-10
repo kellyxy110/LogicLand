@@ -4,7 +4,7 @@
 // parser turns typos into gentle hints ("Did you mean RIGHT?") — never red errors.
 import { Button, RoboAvatar } from "@logicland/ui";
 import { AnimatePresence, motion } from "framer-motion";
-import { Play, RotateCcw } from "lucide-react";
+import { Lightbulb, Play, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { COMMAND_GRAMMAR } from "@/data/commands";
 import { friendlyHint, parseCommands } from "@/lib/engines/command-parser";
@@ -41,7 +41,7 @@ export function TypingQuest({ slug, data, onWin }: TypingQuestProps) {
   const speech =
     run.message ??
     (run.phase === "won"
-      ? "Amazing typing! 🎉"
+      ? "Amazing typing!"
       : run.phase === "failed"
         ? "Nice try! Check the path and type again."
         : data.maze.hint ?? `Try typing: ${example}…`);
@@ -111,8 +111,8 @@ export function TypingQuest({ slug, data, onWin }: TypingQuestProps) {
 
           {/* Friendly hint (typos, empty) */}
           {hint && (
-            <p className="rounded-xl bg-sunburst/10 px-3 py-2 text-sm font-semibold text-sunburst">
-              💡 {hint}
+            <p className="flex items-center gap-1.5 rounded-xl bg-sunburst/10 px-3 py-2 text-sm font-semibold text-sunburst">
+              <Lightbulb className="h-4 w-4 shrink-0" aria-hidden /> {hint}
             </p>
           )}
         </>

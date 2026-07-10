@@ -15,7 +15,7 @@ interface Turn {
 export function AiHelper({ missionSlug }: { missionSlug?: string }) {
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([
-    { role: "robo", text: "Hi! I'm Robo's Helper. Stuck? Ask me for a hint! 🌟" },
+    { role: "robo", text: "Hi! I'm Robo's Helper. Stuck? Ask me for a hint!" },
   ]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,7 +37,7 @@ export function AiHelper({ missionSlug }: { missionSlug?: string }) {
     } catch {
       setTurns((t) => [
         ...t,
-        { role: "robo", text: "Let's try that again together! 🌟" },
+        { role: "robo", text: "Let's try that again together!" },
       ]);
     } finally {
       setBusy(false);

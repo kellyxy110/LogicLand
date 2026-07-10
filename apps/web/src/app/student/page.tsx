@@ -12,7 +12,7 @@ import {
   XpMeter,
 } from "@logicland/ui";
 import { motion } from "framer-motion";
-import { Award, Coins, Compass, Star } from "lucide-react";
+import { Award, Coins, Compass, Leaf, Map, Sparkles, Star, TreePine } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -70,7 +70,7 @@ export default function StudentHome() {
         <RoboAvatar mood="happy" size={72} />
         <div className="flex-1">
           <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
-            Welcome, {state.name}! 👋
+            Welcome, {state.name}!
           </h1>
           <p className="opacity-70">Ready for today&apos;s adventure?</p>
         </div>
@@ -107,9 +107,7 @@ export default function StudentHome() {
             Today&apos;s Mission
           </span>
           <div className="mt-1 flex items-center gap-3">
-            <span className="text-4xl" aria-hidden>
-              {skin.emblem}
-            </span>
+            <skin.emblem className="h-10 w-10 shrink-0 text-white" aria-hidden />
             <div>
               <p className="font-display text-2xl font-extrabold">{nextMissionTitle}</p>
               <p className="opacity-90">
@@ -128,7 +126,7 @@ export default function StudentHome() {
       ) : (
         <Card className="relative mb-6 text-center">
           <RoboAvatar mood="happy" size={72} className="mx-auto" />
-          <h2 className="mt-2 font-display text-2xl font-bold">You did it! 🎉</h2>
+          <h2 className="mt-2 font-display text-2xl font-bold">You did it!</h2>
           <p className="mt-1 opacity-80">
             You&apos;ve cleared every open mission. New worlds are on the way!
           </p>
@@ -147,7 +145,7 @@ export default function StudentHome() {
               Six magical worlds are waiting to be discovered.
             </p>
           </div>
-          <span className="text-2xl">🗺️</span>
+          <Map className="h-6 w-6 shrink-0 text-brand" aria-hidden />
         </Card>
       </Link>
 
@@ -159,13 +157,13 @@ export default function StudentHome() {
 /** Gentle, decorative forest — a few drifting leaves/trees behind the content.
  *  Purely aesthetic (aria-hidden) and transform-only so it stays smooth. */
 function ForestBackdrop() {
-  const bits = ["🌲", "🍃", "⭐", "🌿", "✨", "🌲"];
+  const bits = [TreePine, Leaf, Star, Sparkles, Leaf, TreePine];
   return (
     <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden" aria-hidden>
-      {bits.map((b, i) => (
+      {bits.map((Bit, i) => (
         <motion.span
           key={i}
-          className="absolute text-3xl opacity-20"
+          className="absolute text-brand/20"
           style={{ left: `${(i * 17 + 5) % 90}%`, top: `${(i * 23 + 8) % 80}%` }}
           animate={{ y: [0, -14, 0], rotate: [0, 8, 0] }}
           transition={{
@@ -175,7 +173,7 @@ function ForestBackdrop() {
             delay: i * 0.4,
           }}
         >
-          {b}
+          <Bit className="h-8 w-8" />
         </motion.span>
       ))}
     </div>

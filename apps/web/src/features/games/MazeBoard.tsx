@@ -3,22 +3,38 @@
 // it draws whatever RobotState you give it and animates position changes with
 // Framer Motion. The engine decides *where* Robo is; the board only shows it.
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Bot,
+  Droplet,
+  Gift,
+  Mountain,
+  Sparkles,
+  Star,
+  TreePine,
+  Trophy,
+} from "lucide-react";
 import type { CellKind, MazeConfig, RobotState } from "@/types/game";
 
-const TERRAIN: Record<CellKind, string> = {
-  empty: "",
-  tree: "🌲",
-  rock: "🪨",
-  water: "💧",
-  star: "⭐",
-  treasure: "🎁",
+/** Icon + tint for each terrain cell. `empty` renders nothing. */
+const TERRAIN: Record<CellKind, { icon: LucideIcon; className: string } | null> = {
+  empty: null,
+  tree: { icon: TreePine, className: "text-emerald-600" },
+  rock: { icon: Mountain, className: "text-slate-500" },
+  water: { icon: Droplet, className: "text-sky-500" },
+  star: { icon: Star, className: "text-sunburst" },
+  treasure: { icon: Gift, className: "text-brand" },
 };
 
-const FACING_ARROW: Record<RobotState["facing"], string> = {
-  N: "⬆️",
-  E: "➡️",
-  S: "⬇️",
-  W: "⬅️",
+const FACING_ARROW: Record<RobotState["facing"], LucideIcon> = {
+  N: ArrowUp,
+  E: ArrowRight,
+  S: ArrowDown,
+  W: ArrowLeft,
 };
 
 interface MazeBoardProps {
@@ -53,25 +69,36 @@ export function MazeBoard({ maze, robot, visitedStars, won }: MazeBoardProps) {
           row.map((cell, x) => {
             const key = `${x},${y}`;
             const collected = cell === "star" && visitedStars.has(key);
+            const terrain = TERRAIN[cell];
             return (
               <div
                 key={key}
-                className="grid place-items-center rounded-xl bg-white/40 text-[clamp(1rem,6vw,2rem)] dark:bg-white/5"
+                className="grid place-items-center rounded-xl bg-white/40 dark:bg-white/5"
               >
                 {cell === "star" ? (
-                  <span className={collected ? "opacity-25 grayscale" : "animate-pulse"}>
-                    {collected ? "✨" : "⭐"}
-                  </span>
+                  collected ? (
+                    <Sparkles className="h-[clamp(1rem,6vw,2rem)] w-[clamp(1rem,6vw,2rem)] text-slate-400 opacity-40" aria-hidden />
+                  ) : (
+                    <Star className="h-[clamp(1rem,6vw,2rem)] w-[clamp(1rem,6vw,2rem)] animate-pulse fill-sunburst text-sunburst" aria-hidden />
+                  )
                 ) : cell === "treasure" ? (
                   <motion.span
                     animate={won ? { scale: [1, 1.3, 1], rotate: [0, -8, 8, 0] } : {}}
                     transition={{ repeat: won ? Infinity : 0, duration: 0.9 }}
+                    aria-hidden
                   >
-                    {won ? "🏆" : TERRAIN.treasure}
+                    {won ? (
+                      <Trophy className="h-[clamp(1rem,6vw,2rem)] w-[clamp(1rem,6vw,2rem)] fill-sunburst/30 text-sunburst" />
+                    ) : (
+                      <Gift className="h-[clamp(1rem,6vw,2rem)] w-[clamp(1rem,6vw,2rem)] text-brand" />
+                    )}
                   </motion.span>
-                ) : (
-                  <span aria-hidden>{TERRAIN[cell]}</span>
-                )}
+                ) : terrain ? (
+                  <terrain.icon
+                    className={`h-[clamp(1rem,6vw,2rem)] w-[clamp(1rem,6vw,2rem)] ${terrain.className}`}
+                    aria-hidden
+                  />
+                ) : null}
               </div>
             );
           }),
@@ -86,14 +113,20 @@ export function MazeBoard({ maze, robot, visitedStars, won }: MazeBoardProps) {
         animate={{ left: `${robot.x * cellPct}%`, top: `${robot.y * rowPct}%` }}
         transition={{ type: "spring", stiffness: 260, damping: 24 }}
       >
-        <div className="relative grid place-items-center text-[clamp(1.2rem,7vw,2.4rem)]">
-          <span aria-hidden>🤖</span>
-          <span
-            className="absolute -right-0.5 -top-1 text-[0.6em]"
-            aria-label={`facing ${robot.facing}`}
-          >
-            {FACING_ARROW[robot.facing]}
-          </span>
+        <div className="relative grid place-items-center">
+          <Bot
+            className="h-[clamp(1.2rem,7vw,2.4rem)] w-[clamp(1.2rem,7vw,2.4rem)] text-brand"
+            aria-hidden
+          />
+          {(() => {
+            const Arrow = FACING_ARROW[robot.facing];
+            return (
+              <Arrow
+                className="absolute -right-1 -top-1 h-3 w-3 text-brand"
+                aria-label={`facing ${robot.facing}`}
+              />
+            );
+          })()}
         </div>
       </motion.div>
     </div>

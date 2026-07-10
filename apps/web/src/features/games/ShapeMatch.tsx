@@ -96,7 +96,7 @@ function ShapeMatchLevel({
 
       {mistakes === 0 && (
         <p className="text-center text-xs font-semibold text-meadow">
-          Match them all with no misses for a bonus star! ⭐
+          Match them all with no misses for a bonus star!
         </p>
       )}
     </div>

@@ -67,7 +67,7 @@ export default async function ParentDashboard() {
         <RoboAvatar mood="happy" size={56} />
         <div>
           <h1 className="font-display text-3xl font-extrabold">
-            Hello, {firstName} 👋
+            Hello, {firstName}
           </h1>
           <p className="opacity-70">Here&apos;s how your young coder is doing.</p>
         </div>

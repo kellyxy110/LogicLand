@@ -36,7 +36,7 @@ export function RobotMaze({ slug, data, onWin }: RobotMazeProps) {
   const speech =
     run.message ??
     (run.phase === "won"
-      ? "You did it! 🎉"
+      ? "You did it!"
       : run.phase === "failed"
         ? "So close! Let's tweak the plan and try again."
         : data.maze.hint ?? "Tap commands, then press Run!");
