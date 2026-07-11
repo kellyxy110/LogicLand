@@ -1,6 +1,6 @@
 // Keyboard Kingdom (Typing Town) — the world that builds real keyboard fluency
 // before children type code in Coding City. One live mission today ("Meet the
-// Keyboard"), an 8-level ladder that grows Discovery → Mastery: single keys →
+// Keyboard"), a 12-level ladder that grows Discovery → Mastery: single keys →
 // words → sentences → the coding keywords that bridge into Coding City. Two more
 // missions are on the roadmap (honest "soon", never a fake button).
 //
@@ -57,9 +57,29 @@ export const KEYBOARD_QUEST: KeyQuestData = {
       targets: ["my name is sam.", "we can code today."],
       starThreshold: 4,
     }),
-    level("kb-8", "Mastery", "The coding words that open Coding City.", {
+    level("kb-8", "Coding Keys", "The coding words that open Coding City.", {
       prompt: "Type the coding keywords!",
       targets: ["move", "jump", "turn", "start", "stop", "repeat"],
+      starThreshold: 3,
+    }),
+    level("kb-9", "Speed Words", "Bigger words — type them smoothly.", {
+      prompt: "Type each longer word.",
+      targets: ["orange", "yellow", "purple", "rocket", "planet"],
+      starThreshold: 4,
+    }),
+    level("kb-10", "Storyteller", "Full sentences with capitals and dots.", {
+      prompt: "Type each whole sentence.",
+      targets: ["robo can jump.", "i type really fast."],
+      starThreshold: 3,
+    }),
+    level("kb-11", "Code Lines", "Type real two-word commands.", {
+      prompt: "Type each command line.",
+      targets: ["move forward", "turn left", "repeat three"],
+      starThreshold: 4,
+    }),
+    level("kb-12", "Mastery", "The words real coders type every day.", {
+      prompt: "Type like a real coder!",
+      targets: ["if", "else", "loop", "print", "function", "hello world"],
       starThreshold: 3,
     }),
   ],

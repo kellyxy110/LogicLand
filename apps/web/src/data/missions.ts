@@ -57,7 +57,7 @@ const TYPING_QUEST: MissionGameData = {
   },
 };
 
-/** Mission 2 — Shape Match: a 7-level ladder of visual discrimination, the root
+/** Mission 2 — Shape Match: a 12-level ladder of visual discrimination, the root
  *  of pattern recognition. Difficulty grows via more options, closer
  *  distractors, and more rounds — never just "more of the same". */
 const SHAPE_MATCH: ShapeMatchData = {
@@ -164,11 +164,88 @@ const SHAPE_MATCH: ShapeMatchData = {
         ],
       },
     },
+    {
+      id: "sm-8",
+      title: "Challenge",
+      objective: "Sneaky look-alikes — keep your eyes sharp.",
+      content: {
+        prompt: "Spot the exact match!",
+        rounds: [
+          { target: "🔷", options: ["🔶", "🔷", "🔵", "🟦", "🔹", "🟪"] },
+          { target: "🟤", options: ["🟠", "🔴", "🟤", "🟣", "🟫", "⚫"] },
+          { target: "🍎", options: ["🍎", "🍅", "❤️", "🔴", "🟥", "🍏"] },
+          { target: "🟨", options: ["🟨", "🟧", "🟡", "🟩", "🔶", "🌟"] },
+          { target: "🔵", options: ["🔵", "🔷", "🟦", "🟣", "💙", "🩵"] },
+        ],
+      },
+    },
+    {
+      id: "sm-9",
+      title: "Speed Round",
+      objective: "Seven quick rounds — stay calm and match.",
+      content: {
+        prompt: "Quick — find the match!",
+        rounds: [
+          { target: "💙", options: ["💜", "💙", "💚", "🩵", "🔵", "🟦"] },
+          { target: "🟩", options: ["🟩", "🟢", "🟫", "🟨", "🟦", "🟪"] },
+          { target: "🔻", options: ["🔺", "🔻", "🔶", "🔽", "🔷", "⏬"] },
+          { target: "🌟", options: ["⭐", "🌟", "✨", "💫", "🌠", "🔆"] },
+          { target: "🟧", options: ["🟨", "🟧", "🟥", "🟠", "🟫", "🔶"] },
+        ],
+      },
+    },
+    {
+      id: "sm-10",
+      title: "Focus",
+      objective: "Tiny differences — look really closely.",
+      content: {
+        prompt: "Only one is exactly right.",
+        rounds: [
+          { target: "🟣", options: ["🟪", "🟣", "🔵", "🟤", "🟫", "🩷"] },
+          { target: "🔸", options: ["🔹", "🔶", "🔸", "🔷", "🟠", "🟡"] },
+          { target: "🐱", options: ["🐶", "🐱", "🐭", "🦊", "🐯", "🐰"] },
+          { target: "🟥", options: ["🟧", "🟥", "🔴", "🟫", "🟪", "🟨"] },
+          { target: "💚", options: ["💛", "💚", "🟢", "🟩", "💙", "🩵"] },
+        ],
+      },
+    },
+    {
+      id: "sm-11",
+      title: "Champion",
+      objective: "Longer round — champions don't rush.",
+      content: {
+        prompt: "Match every one!",
+        rounds: [
+          { target: "🐼", options: ["🐨", "🐼", "🐻", "🐯", "🦊", "🐰"] },
+          { target: "🔶", options: ["🔷", "🔶", "🟨", "🔸", "🟧", "⭐"] },
+          { target: "🩵", options: ["💙", "🩵", "💚", "🔵", "🟦", "🩷"] },
+          { target: "🟫", options: ["🟤", "🟫", "🟪", "⚫", "🟥", "🟧"] },
+          { target: "🍇", options: ["🍇", "🫐", "🟣", "🟪", "🍆", "🔮"] },
+          { target: "☀️", options: ["🌙", "☀️", "⭐", "🌟", "🔆", "🌈"] },
+        ],
+      },
+    },
+    {
+      id: "sm-12",
+      title: "Grand Master",
+      objective: "Every kind of look-alike — the final test!",
+      content: {
+        prompt: "Grand match — find them all!",
+        rounds: [
+          { target: "💜", options: ["💙", "💜", "🟣", "🟪", "🩷", "💚"] },
+          { target: "🔹", options: ["🔸", "🔹", "🔷", "🔵", "🟦", "🟨"] },
+          { target: "🐯", options: ["🦁", "🐯", "🐱", "🐶", "🐻", "🐨"] },
+          { target: "🟦", options: ["🟩", "🟦", "🔵", "💙", "🟪", "🩵"] },
+          { target: "🍊", options: ["🍊", "🟠", "🍑", "🔴", "🟧", "🥭"] },
+          { target: "❄️", options: ["⭐", "❄️", "✨", "🌨️", "💠", "🌟"] },
+        ],
+      },
+    },
   ],
 };
 
-/** Mission 3 — Memory Game: a 7-level ladder growing from 3 pairs to 8, with
- *  tighter no-miss star thresholds along the way. Forest faces on a 4-wide board. */
+/** Mission 3 — Memory Game: a 12-level ladder growing from 3 pairs to 10, with
+ *  tighter no-miss star thresholds along the way. Themed faces on a 4-wide board. */
 const MEMORY_GAME: MemoryData = {
   kind: "memory",
   levels: [
@@ -217,11 +294,56 @@ const MEMORY_GAME: MemoryData = {
         starThreshold: 5,
       },
     },
+    {
+      id: "mem-8",
+      title: "Challenge",
+      objective: "Dive into the ocean — eight sea pairs.",
+      content: {
+        faces: ["🐠", "🐙", "🦀", "🐬", "🐳", "🦈", "🐟", "🦭"],
+        starThreshold: 4,
+      },
+    },
+    {
+      id: "mem-9",
+      title: "Speed Round",
+      objective: "Eight fruity pairs — remember fast!",
+      content: {
+        faces: ["🍎", "🍌", "🍇", "🍓", "🍊", "🍉", "🍒", "🥝"],
+        starThreshold: 4,
+      },
+    },
+    {
+      id: "mem-10",
+      title: "Focus",
+      objective: "Ten pairs now — stay focused.",
+      content: {
+        faces: ["🌲", "🍄", "🦊", "🐰", "⭐", "🍎", "🦉", "🐻", "🐝", "🦋"],
+        starThreshold: 3,
+      },
+    },
+    {
+      id: "mem-11",
+      title: "Champion",
+      objective: "Ten space pairs — champion memory!",
+      content: {
+        faces: ["🚀", "🛸", "🪐", "⭐", "🌙", "☄️", "👽", "🌟", "🌍", "🛰️"],
+        starThreshold: 3,
+      },
+    },
+    {
+      id: "mem-12",
+      title: "Grand Master",
+      objective: "Ten pairs, few misses — the memory master!",
+      content: {
+        faces: ["🐶", "🐱", "🦁", "🐯", "🐨", "🐼", "🦊", "🐰", "🐻", "🐸"],
+        starThreshold: 2,
+      },
+    },
   ],
 };
 
 /** Mission 4 — Pattern Builder: fill the missing piece to complete the pattern —
- *  the gentle on-ramp to loops. Seven levels grow the pattern length, symbol
+ *  the gentle on-ramp to loops. Twelve levels grow the pattern length, symbol
  *  count, and palette size. */
 const PATTERN_BUILDER: PatternBuilderData = {
   kind: "pattern-builder",
@@ -311,6 +433,67 @@ const PATTERN_BUILDER: PatternBuilderData = {
           { sequence: ["🟥", "🟧", "🟨", "🟩", "🟦", "🟥", "🟧", "?"], options: ["🟨", "🟩", "🟦", "🟥"], answer: "🟨" },
           { sequence: ["🌙", "⭐", "⭐", "🌙", "⭐", "⭐", "🌙", "?"], options: ["🌙", "⭐", "☀️", "🌈"], answer: "⭐" },
           { sequence: ["🚗", "🚕", "🚙", "🚗", "🚕", "🚙", "🚗", "?"], options: ["🚗", "🚕", "🚙", "🚌"], answer: "🚕" },
+        ],
+      },
+    },
+    {
+      id: "pat-8",
+      title: "Challenge",
+      objective: "Patterns inside patterns — read the whole strip.",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🔵", "🔴", "🔵", "🔵", "🔴", "?"], options: ["🔴", "🔵", "🟡", "🟢"], answer: "🔵" },
+          { sequence: ["🌙", "⭐", "☀️", "🌙", "⭐", "?"], options: ["🌙", "⭐", "☀️", "🌈"], answer: "☀️" },
+          { sequence: ["🐶", "🐶", "🐱", "🐭", "🐶", "🐶", "🐱", "?"], options: ["🐶", "🐱", "🐭", "🐰"], answer: "🐭" },
+        ],
+      },
+    },
+    {
+      id: "pat-9",
+      title: "Speed Round",
+      objective: "Four-piece cycles — spin them quickly.",
+      content: {
+        rounds: [
+          { sequence: ["🟥", "🟧", "🟨", "🟩", "🟥", "🟧", "🟨", "?"], options: ["🟩", "🟦", "🟥", "🟧"], answer: "🟩" },
+          { sequence: ["🔺", "🔺", "🔻", "🔺", "🔺", "🔻", "🔺", "?"], options: ["🔺", "🔻", "🔶", "🔷"], answer: "🔺" },
+          { sequence: ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "1️⃣", "2️⃣", "?"], options: ["1️⃣", "2️⃣", "3️⃣", "4️⃣"], answer: "3️⃣" },
+        ],
+      },
+    },
+    {
+      id: "pat-10",
+      title: "Focus",
+      objective: "Doubles and triples — count them out.",
+      content: {
+        rounds: [
+          { sequence: ["🍎", "🍎", "🍌", "🍌", "🍎", "🍎", "🍌", "?"], options: ["🍎", "🍌", "🍇", "🍓"], answer: "🍌" },
+          { sequence: ["🔵", "🟡", "🟡", "🔵", "🟡", "🟡", "🔵", "?"], options: ["🔵", "🟡", "🔴", "🟢"], answer: "🟡" },
+          { sequence: ["⬆️", "⬆️", "➡️", "⬇️", "⬆️", "⬆️", "➡️", "?"], options: ["⬆️", "➡️", "⬇️", "⬅️"], answer: "⬇️" },
+        ],
+      },
+    },
+    {
+      id: "pat-11",
+      title: "Champion",
+      objective: "Longer cycles — a champion sees the loop.",
+      content: {
+        rounds: [
+          { sequence: ["🟣", "🟢", "🔵", "🟡", "🟣", "🟢", "🔵", "?"], options: ["🟣", "🟢", "🔵", "🟡"], answer: "🟡" },
+          { sequence: ["🐝", "🦋", "🐝", "🐌", "🐝", "🦋", "🐝", "?"], options: ["🐝", "🦋", "🐌", "🐞"], answer: "🐌" },
+          { sequence: ["🌸", "🌼", "🌷", "🌸", "🌼", "🌷", "🌸", "?"], options: ["🌸", "🌼", "🌷", "🌹"], answer: "🌼" },
+        ],
+      },
+    },
+    {
+      id: "pat-12",
+      title: "Grand Master",
+      objective: "The longest loops — pattern grand master!",
+      content: {
+        rounds: [
+          { sequence: ["🔴", "🔵", "🟡", "🟢", "🟣", "🔴", "🔵", "🟡", "?"], options: ["🟢", "🟣", "🔴", "🟡"], answer: "🟢" },
+          { sequence: ["🚗", "🚕", "🚕", "🚙", "🚗", "🚕", "🚕", "?"], options: ["🚗", "🚕", "🚙", "🚌"], answer: "🚙" },
+          { sequence: ["🟥", "🟧", "🟨", "🟩", "🟦", "🟪", "🟥", "🟧", "?"], options: ["🟨", "🟩", "🟦", "🟪"], answer: "🟨" },
+          { sequence: ["⭐", "🌙", "🌙", "⭐", "🌙", "🌙", "⭐", "?"], options: ["⭐", "🌙", "☀️", "🌟"], answer: "🌙" },
         ],
       },
     },
