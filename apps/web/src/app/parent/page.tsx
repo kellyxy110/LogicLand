@@ -7,11 +7,13 @@ import {
   getLevelRecords,
   getParentChildren,
   getStudentSubmissions,
+  getTypingStat,
   type StudentProgress,
   type StudioSubmissionView,
+  type TypingStatView,
 } from "@logicland/database";
 import { getCurrentUser } from "@logicland/auth/server";
-import { Award, Code2, Coins, Send, Star, Trophy } from "lucide-react";
+import { Award, Code2, Coins, Keyboard, Send, Star, Trophy } from "lucide-react";
 import { engine } from "@/lib/engine";
 import { getMissionIndex, titleFor, type MissionIndex } from "@/lib/missions-server";
 
@@ -20,20 +22,23 @@ export const dynamic = "force-dynamic";
 interface CodingProgress {
   levelsCleared: number;
   submissions: StudioSubmissionView[];
+  typing: TypingStatView | null;
 }
 
 async function codingProgress(child: StudentProgress): Promise<CodingProgress> {
   try {
-    const [levels, submissions] = await Promise.all([
+    const [levels, submissions, typing] = await Promise.all([
       getLevelRecords(child.id),
       getStudentSubmissions(child.id),
+      getTypingStat(child.id),
     ]);
     return {
       levelsCleared: levels.filter((l) => l.completed).length,
       submissions,
+      typing,
     };
   } catch {
-    return { levelsCleared: 0, submissions: [] };
+    return { levelsCleared: 0, submissions: [], typing: null };
   }
 }
 
@@ -89,7 +94,7 @@ export default async function ParentDashboard() {
               child={child}
               missions={missions}
               summary={summaries[i] ?? null}
-              coding={coding[i] ?? { levelsCleared: 0, submissions: [] }}
+              coding={coding[i] ?? { levelsCleared: 0, submissions: [], typing: null }}
             />
           ))}
         </div>
@@ -150,7 +155,7 @@ function ChildCard({
         </div>
       )}
 
-      {(coding.levelsCleared > 0 || recentSubs.length > 0) && (
+      {(coding.levelsCleared > 0 || recentSubs.length > 0 || coding.typing) && (
         <div className="mb-4 rounded-2xl bg-sky/5 p-4">
           <div className="mb-2 flex items-center gap-2">
             <Code2 className="h-4 w-4 text-sky" />
@@ -164,6 +169,17 @@ function ChildCard({
               ? ` and handed in ${recentSubs.length} coding ${recentSubs.length === 1 ? "project" : "projects"}.`
               : "."}
           </p>
+
+          {coding.typing && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl bg-white/60 p-2.5 text-sm dark:bg-white/5">
+              <span className="flex items-center gap-1.5 font-semibold text-brand">
+                <Keyboard className="h-4 w-4" /> Typing
+              </span>
+              <TypingChip label="Accuracy" value={`${coding.typing.accuracy}%`} />
+              <TypingChip label="Best speed" value={`${coding.typing.bestWpm} wpm`} />
+              <TypingChip label="Levels" value={`${coding.typing.levelsCleared}`} />
+            </div>
+          )}
           {recentSubs.length > 0 && (
             <ul className="mt-2 space-y-1.5 text-sm">
               {recentSubs.map((s) => (
@@ -210,6 +226,14 @@ function ChildCard({
         </p>
       )}
     </Card>
+  );
+}
+
+function TypingChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
+      {label}: {value}
+    </span>
   );
 }
 

@@ -115,6 +115,7 @@ model Student {
   rewards       Reward[]
   levelProgress     LevelProgress[]
   studioSubmissions StudioSubmission[]
+  typingStat        TypingStat?
 }
 
 // ---------------------------------------------------------------------------
@@ -243,6 +244,22 @@ model StudioSubmission {
 
   @@index([studentId, missionSlug])
   @@index([status])
+}
+
+// Aggregate keyboard-fluency stats for the parent/teacher dashboards. One row per
+// student, accumulated as they clear Keyboard Kingdom levels: total keystrokes,
+// how many were correct (accuracy), best words-per-minute, and levels cleared.
+model TypingStat {
+  id            String   @id @default(cuid())
+  studentId     String   @unique
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  keysTyped     Int      @default(0)
+  correctKeys   Int      @default(0)
+  mistakes      Int      @default(0)
+  bestWpm       Int      @default(0)
+  levelsCleared Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Project {

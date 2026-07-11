@@ -36,3 +36,9 @@ export {
   type ChecklistResult,
   type StudioSubmissionView,
 } from "./submissions";
+export {
+  recordTypingResult,
+  getTypingStat,
+  type TypingResultInput,
+  type TypingStatView,
+} from "./typing";

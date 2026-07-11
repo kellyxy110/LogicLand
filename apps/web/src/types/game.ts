@@ -195,6 +195,22 @@ export interface KeyQuestData {
   levels: GameLevel<KeyQuestLevel>[];
 }
 
+// --- Balloon Pop (arcade typing mini-game) --------------------------------
+export interface BalloonPopLevel {
+  prompt: string;
+  /** Letters that float up, one balloon at a time; press each before it escapes. */
+  letters: string[];
+  /** Seconds each balloon takes to float off-screen (smaller = harder). */
+  secondsPerBalloon: number;
+  /** Max balloons that may escape and still earn the mastery star. */
+  starThreshold: number;
+}
+
+export interface BalloonPopData {
+  kind: "balloon-pop";
+  levels: GameLevel<BalloonPopLevel>[];
+}
+
 export type MissionGameData =
   | RobotMazeData
   | TypingQuestData
@@ -202,4 +218,5 @@ export type MissionGameData =
   | MemoryData
   | PatternBuilderData
   | KeyQuestData
+  | BalloonPopData
   | HtmlStudioData;

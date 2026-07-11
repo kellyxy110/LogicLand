@@ -16,6 +16,7 @@ import {
   KeyRound,
   Lock,
   Palette,
+  PartyPopper,
   Play,
   Shapes,
   Sparkles,
@@ -31,6 +32,7 @@ const GAME_ICON: Record<string, LucideIcon> = {
   memory: Brain,
   "pattern-builder": Palette,
   "key-quest": KeyRound,
+  "balloon-pop": PartyPopper,
   "html-studio": Code2,
 };
 

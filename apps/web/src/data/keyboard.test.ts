@@ -18,7 +18,7 @@ describe("Keyboard Kingdom catalog", () => {
     for (const m of live) {
       const data = gameDataFor(m.slug);
       expect(data, `game data for ${m.slug}`).not.toBeNull();
-      expect(data!.kind).toBe("key-quest");
+      expect(["key-quest", "balloon-pop"]).toContain(data!.kind);
     }
   });
 });

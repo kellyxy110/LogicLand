@@ -6,7 +6,13 @@
 //
 // The catalog here augments the engine's world list (see lib/worlds.ts) so the
 // world is playable immediately; when the engine ships the same slug it wins.
-import type { GameLevel, KeyQuestData, KeyQuestLevel } from "@/types/game";
+import type {
+  BalloonPopData,
+  BalloonPopLevel,
+  GameLevel,
+  KeyQuestData,
+  KeyQuestLevel,
+} from "@/types/game";
 import type { LandWorld } from "@/types/world";
 
 function level(
@@ -15,6 +21,15 @@ function level(
   objective: string,
   content: KeyQuestLevel,
 ): GameLevel<KeyQuestLevel> {
+  return { id, title, objective, content };
+}
+
+function bp(
+  id: string,
+  title: string,
+  objective: string,
+  content: BalloonPopLevel,
+): GameLevel<BalloonPopLevel> {
   return { id, title, objective, content };
 }
 
@@ -85,9 +100,61 @@ export const KEYBOARD_QUEST: KeyQuestData = {
   ],
 };
 
+/** Balloon Pop — an arcade typing mini-game. A balloon floats up with a letter;
+ *  press it before it escapes. Seven levels speed the balloons up and widen the
+ *  alphabet. Misses are gentle (a balloon just drifts away — never game over). */
+export const BALLOON_POP: BalloonPopData = {
+  kind: "balloon-pop",
+  levels: [
+    bp("bp-1", "Warm Up", "Pop the home-row balloons.", {
+      prompt: "Press the letter on each balloon!",
+      letters: ["a", "s", "d", "f", "j", "k", "l"],
+      secondsPerBalloon: 6,
+      starThreshold: 3,
+    }),
+    bp("bp-2", "Steady", "A few more letters, a little faster.", {
+      prompt: "Pop them before they float away!",
+      letters: ["a", "e", "i", "o", "u", "r", "t", "n"],
+      secondsPerBalloon: 5.5,
+      starThreshold: 3,
+    }),
+    bp("bp-3", "Faster", "Balloons are rising quicker now.", {
+      prompt: "Quick — pop each balloon!",
+      letters: ["b", "c", "g", "h", "m", "p", "s", "w"],
+      secondsPerBalloon: 5,
+      starThreshold: 3,
+    }),
+    bp("bp-4", "Quick Fingers", "More letters across the keyboard.", {
+      prompt: "Keep popping!",
+      letters: ["a", "e", "r", "t", "y", "u", "i", "o", "p", "l"],
+      secondsPerBalloon: 4.5,
+      starThreshold: 3,
+    }),
+    bp("bp-5", "Speedy", "Fewer misses allowed — stay sharp!", {
+      prompt: "Fast balloons — don't let them escape!",
+      letters: ["q", "w", "e", "d", "f", "g", "h", "j", "k", "z"],
+      secondsPerBalloon: 4,
+      starThreshold: 2,
+    }),
+    bp("bp-6", "Rapid", "Twelve balloons, rising fast.", {
+      prompt: "Pop, pop, pop!",
+      letters: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"],
+      secondsPerBalloon: 3.5,
+      starThreshold: 2,
+    }),
+    bp("bp-7", "Pop Master", "The whole keyboard, at top speed.", {
+      prompt: "Master popper — catch them all!",
+      letters: ["q", "w", "e", "r", "t", "y", "z", "x", "c", "v", "b", "n", "m"],
+      secondsPerBalloon: 3,
+      starThreshold: 2,
+    }),
+  ],
+};
+
 /** Slug → keyboard game data. Registered into gameDataFor via data/missions.ts. */
-export const KEYBOARD_GAME_DATA: Record<string, KeyQuestData> = {
+export const KEYBOARD_GAME_DATA: Record<string, KeyQuestData | BalloonPopData> = {
   "keyboard-basics": KEYBOARD_QUEST,
+  "keyboard-balloons": BALLOON_POP,
 };
 
 /** The Keyboard Kingdom world card + mission trail for the World Map. */
@@ -114,12 +181,25 @@ export const KEYBOARD_KINGDOM_WORLD: LandWorld = {
       estimatedMinutes: 6,
     },
     {
+      slug: "keyboard-balloons",
+      title: "Balloon Pop",
+      skill: "Key Speed",
+      badge: "Balloon Popper",
+      game: "balloon-pop",
+      order: 2,
+      story:
+        "Balloons are floating up over the Kingdom, each with a letter. Pop them by pressing the right key before they drift away!",
+      objective: "Press each balloon's letter before it floats off the top.",
+      status: "live",
+      estimatedMinutes: 5,
+    },
+    {
       slug: "keyboard-words",
       title: "Word Builder",
       skill: "Typing Speed",
       badge: "Word Wizard",
       game: "key-quest",
-      order: 2,
+      order: 3,
       story: "Build bigger words and race the gentle clock.",
       objective: "Type longer words with speed and accuracy.",
       status: "soon",
@@ -131,7 +211,7 @@ export const KEYBOARD_KINGDOM_WORLD: LandWorld = {
       skill: "Coding Vocabulary",
       badge: "Keyboard Coder",
       game: "key-quest",
-      order: 3,
+      order: 4,
       story: "Type the words real coders use — and open the gates to Coding City.",
       objective: "Type coding keywords to bridge into Coding City.",
       status: "soon",

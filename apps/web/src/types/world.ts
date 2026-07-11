@@ -12,6 +12,7 @@ export type GameKind =
   | "memory"
   | "pattern-builder"
   | "key-quest"
+  | "balloon-pop"
   | "html-studio";
 
 /** "live" is playable now; "soon" appears on the map to preserve the roadmap

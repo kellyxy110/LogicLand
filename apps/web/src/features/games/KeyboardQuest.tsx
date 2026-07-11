@@ -7,11 +7,19 @@
 import { motion } from "framer-motion";
 import { Delete } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { classifyKey, expectedChar } from "@/lib/engines/typing";
-import { starForTyping } from "@/lib/engines/typing";
+import { recordTyping } from "@/app/actions/typing";
+import { classifyKey, expectedChar, starForTyping } from "@/lib/engines/typing";
 import type { KeyQuestData, KeyQuestLevel } from "@/types/game";
 import { GameSpeech, ProgressDots } from "./GameSpeech";
 import { LeveledGame } from "./LeveledGame";
+
+/** What a single cleared level reports for the typing dashboards. */
+export interface TypingRun {
+  keysTyped: number;
+  correctKeys: number;
+  mistakes: number;
+  wpm: number;
+}
 
 interface KeyboardQuestProps {
   slug: string;
@@ -26,7 +34,14 @@ export function KeyboardQuest({ slug, data, onWin }: KeyboardQuestProps) {
       levels={data.levels}
       onWin={onWin}
       renderLevel={(content, onComplete) => (
-        <KeyboardQuestLevel content={content} onComplete={onComplete} />
+        <KeyboardQuestLevel
+          content={content}
+          onComplete={(stars, run) => {
+            // Fire-and-forget: never block progression on telemetry.
+            void recordTyping(run);
+            onComplete(stars);
+          }}
+        />
       )}
     />
   );
@@ -46,13 +61,15 @@ function KeyboardQuestLevel({
   onComplete,
 }: {
   content: KeyQuestLevel;
-  onComplete: (stars: number) => void;
+  onComplete: (stars: number, run: TypingRun) => void;
 }) {
   const [targetIdx, setTargetIdx] = useState(0);
   const [pos, setPos] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [wrong, setWrong] = useState(false);
   const mistakesRef = useRef(0);
+  const correctRef = useRef(0);
+  const startRef = useRef<number | null>(null);
   const finished = useRef(false);
 
   const target = content.targets[targetIdx] ?? "";
@@ -67,6 +84,8 @@ function KeyboardQuestLevel({
       }
       const outcome = classifyKey(target, pos, key);
       if (outcome === "ignore") return;
+      // Start the clock on the first real keystroke of the level.
+      if (startRef.current === null) startRef.current = Date.now();
       if (outcome === "miss") {
         mistakesRef.current += 1;
         setMistakes((m) => m + 1);
@@ -75,6 +94,7 @@ function KeyboardQuestLevel({
         return;
       }
       setWrong(false);
+      correctRef.current += 1;
       if (outcome === "advance") {
         setPos((p) => p + 1);
         return;
@@ -82,7 +102,17 @@ function KeyboardQuestLevel({
       // "complete": this token is done.
       if (targetIdx + 1 >= content.targets.length) {
         finished.current = true;
-        onComplete(starForTyping(mistakesRef.current, content.starThreshold));
+        const minutes = Math.max(
+          (Date.now() - (startRef.current ?? Date.now())) / 60000,
+          1 / 60000, // guard against divide-by-zero on an instant clear
+        );
+        const wpm = correctRef.current / 5 / minutes;
+        onComplete(starForTyping(mistakesRef.current, content.starThreshold), {
+          keysTyped: correctRef.current + mistakesRef.current,
+          correctKeys: correctRef.current,
+          mistakes: mistakesRef.current,
+          wpm,
+        });
       } else {
         setTargetIdx((t) => t + 1);
         setPos(0);

@@ -3,7 +3,7 @@
 // the engine curriculum. No mock data.
 import { Card, CardTitle } from "@logicland/ui";
 import { listClassroomStudents } from "@logicland/database";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame, Keyboard, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { getMissionIndex, titleFor } from "@/lib/missions-server";
 import { lastActiveLabel } from "@/lib/format";
@@ -50,6 +50,7 @@ export default async function TeacherRoster() {
                 <th className="p-4 font-semibold">Streak</th>
                 <th className="p-4 font-semibold">Missions</th>
                 <th className="p-4 font-semibold">Badges</th>
+                <th className="p-4 font-semibold">Typing</th>
                 <th className="p-4 font-semibold">Last active</th>
               </tr>
             </thead>
@@ -91,6 +92,16 @@ export default async function TeacherRoster() {
                         <Sparkles className="h-4 w-4 text-brand" />
                         {s.earnedBadges.length}
                       </span>
+                    </td>
+                    <td className="p-4">
+                      {s.typing ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Keyboard className="h-4 w-4 text-brand" />
+                          {s.typing.accuracy}% · {s.typing.bestWpm} wpm
+                        </span>
+                      ) : (
+                        <span className="opacity-40">—</span>
+                      )}
                     </td>
                     <td className="p-4 opacity-80">
                       {lastActiveLabel(s.lastActiveOn)}

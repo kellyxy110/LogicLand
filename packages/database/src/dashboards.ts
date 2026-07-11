@@ -18,6 +18,8 @@ export interface StudentProgress {
   completedMissions: string[];
   earnedBadges: string[];
   lastActiveOn: Date | null;
+  /** Keyboard-fluency summary, when the student has typed. */
+  typing: { accuracy: number; bestWpm: number } | null;
 }
 
 interface StudentRow {
@@ -33,9 +35,15 @@ interface StudentRow {
   earnedBadges: string[];
   lastActiveOn: Date | null;
   user: { email: string };
+  typingStat: {
+    keysTyped: number;
+    correctKeys: number;
+    bestWpm: number;
+  } | null;
 }
 
 function toProgress(s: StudentRow): StudentProgress {
+  const t = s.typingStat;
   return {
     id: s.id,
     displayName: s.displayName,
@@ -49,14 +57,24 @@ function toProgress(s: StudentRow): StudentProgress {
     completedMissions: s.completedMissions,
     earnedBadges: s.earnedBadges,
     lastActiveOn: s.lastActiveOn,
+    typing: t
+      ? {
+          accuracy: t.keysTyped > 0 ? Math.round((t.correctKeys / t.keysTyped) * 100) : 100,
+          bestWpm: t.bestWpm,
+        }
+      : null,
   };
 }
+
+const TYPING_SELECT = {
+  select: { keysTyped: true, correctKeys: true, bestWpm: true },
+} as const;
 
 /** Every student in the classroom. V1 is a single classroom (one teacher), so
  *  the roster is all students, most-recently-active first. */
 export async function listClassroomStudents(): Promise<StudentProgress[]> {
   const rows = await prisma.student.findMany({
-    include: { user: { select: { email: true } } },
+    include: { user: { select: { email: true } }, typingStat: TYPING_SELECT },
     orderBy: [{ lastActiveOn: { sort: "desc", nulls: "last" } }, { xp: "desc" }],
   });
   return rows.map(toProgress);
@@ -69,7 +87,7 @@ export async function getParentChildren(
 ): Promise<StudentProgress[]> {
   const rows = await prisma.student.findMany({
     where: { parent: { user: { clerkId } } },
-    include: { user: { select: { email: true } } },
+    include: { user: { select: { email: true } }, typingStat: TYPING_SELECT },
     orderBy: { displayName: "asc" },
   });
   return rows.map(toProgress);
