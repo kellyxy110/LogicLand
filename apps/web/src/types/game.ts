@@ -227,6 +227,20 @@ export interface FallingWordsData {
   levels: GameLevel<FallingWordsLevel>[];
 }
 
+// --- Code Racer (coding-keyword typing race) ------------------------------
+export interface CodeRacerLevel {
+  prompt: string;
+  /** Coding words/commands typed in order; each completed word advances Robo. */
+  words: string[];
+  /** Max total mistakes still allowed to earn the mastery star. */
+  starThreshold: number;
+}
+
+export interface CodeRacerData {
+  kind: "code-racer";
+  levels: GameLevel<CodeRacerLevel>[];
+}
+
 export type MissionGameData =
   | RobotMazeData
   | TypingQuestData
@@ -236,4 +250,5 @@ export type MissionGameData =
   | KeyQuestData
   | BalloonPopData
   | FallingWordsData
+  | CodeRacerData
   | HtmlStudioData;

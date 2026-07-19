@@ -13,6 +13,7 @@ import {
   Clock,
   Code2,
   CloudRain,
+  Flag,
   Keyboard,
   KeyRound,
   Lock,
@@ -35,6 +36,7 @@ const GAME_ICON: Record<string, LucideIcon> = {
   "key-quest": KeyRound,
   "balloon-pop": PartyPopper,
   "falling-words": CloudRain,
+  "code-racer": Flag,
   "html-studio": Code2,
 };
 

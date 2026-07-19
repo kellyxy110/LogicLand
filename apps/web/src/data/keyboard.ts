@@ -9,6 +9,8 @@
 import type {
   BalloonPopData,
   BalloonPopLevel,
+  CodeRacerData,
+  CodeRacerLevel,
   FallingWordsData,
   FallingWordsLevel,
   GameLevel,
@@ -41,6 +43,15 @@ function fw(
   objective: string,
   content: FallingWordsLevel,
 ): GameLevel<FallingWordsLevel> {
+  return { id, title, objective, content };
+}
+
+function cr(
+  id: string,
+  title: string,
+  objective: string,
+  content: CodeRacerLevel,
+): GameLevel<CodeRacerLevel> {
   return { id, title, objective, content };
 }
 
@@ -244,14 +255,86 @@ export const FALLING_WORDS: FallingWordsData = {
   ],
 };
 
+/** Code Racer — the culminating typing game that bridges into Coding City. Type
+ *  each coding keyword to send Robo dashing toward the finish flag. Twelve levels
+ *  climb from one-word commands → real code lines → the keywords professional
+ *  coders type daily. Stars reward accuracy (few misses), never raw speed, so no
+ *  child is ever punished for typing carefully. */
+export const CODE_RACER: CodeRacerData = {
+  kind: "code-racer",
+  levels: [
+    cr("cr-1", "Start Line", "Type your first coding commands.", {
+      prompt: "Type each word to move Robo forward!",
+      words: ["go", "move", "turn", "stop"],
+      starThreshold: 2,
+    }),
+    cr("cr-2", "Warm Lap", "A few more commands.", {
+      prompt: "Keep Robo racing — type each command!",
+      words: ["jump", "run", "left", "right", "up"],
+      starThreshold: 3,
+    }),
+    cr("cr-3", "Loops", "The words that make code repeat.", {
+      prompt: "Type the repeating words!",
+      words: ["loop", "repeat", "again", "times"],
+      starThreshold: 2,
+    }),
+    cr("cr-4", "Choices", "Words that let code decide.", {
+      prompt: "Type each decision word!",
+      words: ["if", "else", "then", "true", "false"],
+      starThreshold: 3,
+    }),
+    cr("cr-5", "Output", "Make the computer talk.", {
+      prompt: "Type the words that show things!",
+      words: ["print", "show", "say", "draw"],
+      starThreshold: 2,
+    }),
+    cr("cr-6", "Values", "Words for the things code remembers.", {
+      prompt: "Type each value word!",
+      words: ["value", "number", "word", "list", "count"],
+      starThreshold: 3,
+    }),
+    cr("cr-7", "Command Lines", "Two-word commands — mind the space.", {
+      prompt: "Type each whole command line!",
+      words: ["move forward", "turn left", "jump high"],
+      starThreshold: 3,
+    }),
+    cr("cr-8", "Functions", "Name the little machines in code.", {
+      prompt: "Type each function word!",
+      words: ["function", "return", "call", "start", "end"],
+      starThreshold: 3,
+    }),
+    cr("cr-9", "Speed Lap", "Short keywords, typed quickly.", {
+      prompt: "Fast fingers — race Robo home!",
+      words: ["let", "var", "int", "for", "add"],
+      starThreshold: 2,
+    }),
+    cr("cr-10", "Code Line", "A real line of code.", {
+      prompt: "Type the code line!",
+      words: ["let x be 5", "add one more"],
+      starThreshold: 3,
+    }),
+    cr("cr-11", "Pro Words", "The words real coders type.", {
+      prompt: "Type like a real coder!",
+      words: ["import", "export", "class", "object", "array"],
+      starThreshold: 3,
+    }),
+    cr("cr-12", "Grand Prix", "The finish line into Coding City!", {
+      prompt: "Final race — type it all!",
+      words: ["hello world", "print value", "loop ten times"],
+      starThreshold: 3,
+    }),
+  ],
+};
+
 /** Slug → keyboard game data. Registered into gameDataFor via data/missions.ts. */
 export const KEYBOARD_GAME_DATA: Record<
   string,
-  KeyQuestData | BalloonPopData | FallingWordsData
+  KeyQuestData | BalloonPopData | FallingWordsData | CodeRacerData
 > = {
   "keyboard-basics": KEYBOARD_QUEST,
   "keyboard-balloons": BALLOON_POP,
   "keyboard-words": FALLING_WORDS,
+  "keyboard-coder": CODE_RACER,
 };
 
 /** The Keyboard Kingdom world card + mission trail for the World Map. */
@@ -305,14 +388,15 @@ export const KEYBOARD_KINGDOM_WORLD: LandWorld = {
     },
     {
       slug: "keyboard-coder",
-      title: "Coding Keys",
+      title: "Code Racer",
       skill: "Coding Vocabulary",
       badge: "Keyboard Coder",
-      game: "key-quest",
+      game: "code-racer",
       order: 4,
-      story: "Type the words real coders use — and open the gates to Coding City.",
-      objective: "Type coding keywords to bridge into Coding City.",
-      status: "soon",
+      story:
+        "The gates to Coding City are ahead! Type each coding keyword to send Robo racing across the finish line.",
+      objective: "Type coding keywords to race Robo into Coding City.",
+      status: "live",
       estimatedMinutes: 8,
     },
   ],

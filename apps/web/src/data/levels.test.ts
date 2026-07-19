@@ -10,6 +10,7 @@ const LEVELED = [
   "pattern-builder",
   "keyboard-basics",
   "keyboard-words",
+  "keyboard-coder",
 ];
 
 describe("all leveled games reach level 12", () => {

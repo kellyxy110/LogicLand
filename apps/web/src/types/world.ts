@@ -14,6 +14,7 @@ export type GameKind =
   | "key-quest"
   | "balloon-pop"
   | "falling-words"
+  | "code-racer"
   | "html-studio";
 
 /** "live" is playable now; "soon" appears on the map to preserve the roadmap

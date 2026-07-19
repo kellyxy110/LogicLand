@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { gameDataFor } from "./missions";
-import { FALLING_WORDS, KEYBOARD_KINGDOM_WORLD, KEYBOARD_QUEST } from "./keyboard";
+import {
+  CODE_RACER,
+  FALLING_WORDS,
+  KEYBOARD_KINGDOM_WORLD,
+  KEYBOARD_QUEST,
+} from "./keyboard";
 
 // Guards the Keyboard Kingdom world ↔ game wiring so a live mission can never
 // ship without a playable game behind it, and the ladder keeps its 7+ levels.
@@ -18,7 +23,18 @@ describe("Keyboard Kingdom catalog", () => {
     for (const m of live) {
       const data = gameDataFor(m.slug);
       expect(data, `game data for ${m.slug}`).not.toBeNull();
-      expect(["key-quest", "balloon-pop", "falling-words"]).toContain(data!.kind);
+      expect(["key-quest", "balloon-pop", "falling-words", "code-racer"]).toContain(
+        data!.kind,
+      );
+    }
+  });
+
+  it("has no unplayable 'soon' missions left — Typing Town is complete", () => {
+    const soon = KEYBOARD_KINGDOM_WORLD.missions.filter((m) => m.status === "soon");
+    expect(soon).toHaveLength(0);
+    // Every mission resolves to real game data.
+    for (const m of KEYBOARD_KINGDOM_WORLD.missions) {
+      expect(gameDataFor(m.slug), `game data for ${m.slug}`).not.toBeNull();
     }
   });
 });
@@ -66,5 +82,23 @@ describe("FALLING_WORDS ladder", () => {
     const last = FALLING_WORDS.levels.at(-1)!.content.words;
     expect(first.every((w) => w.length === 1)).toBe(true);
     expect(last.some((w) => w.length > 1)).toBe(true);
+  });
+});
+
+describe("CODE_RACER ladder", () => {
+  it("has 12 levels with unique ids and non-empty coding words", () => {
+    expect(CODE_RACER.levels.length).toBe(12);
+    const ids = CODE_RACER.levels.map((l) => l.id);
+    expect(new Set(ids).size).toBe(12);
+    for (const l of CODE_RACER.levels) {
+      expect(l.content.words.length).toBeGreaterThan(0);
+      expect(l.content.words.every((w) => w.length > 0)).toBe(true);
+      expect(l.content.starThreshold).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("builds up to multi-word code lines by the final levels", () => {
+    const last = CODE_RACER.levels.at(-1)!.content.words;
+    expect(last.some((w) => w.includes(" "))).toBe(true);
   });
 });
