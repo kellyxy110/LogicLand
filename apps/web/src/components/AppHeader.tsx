@@ -5,7 +5,7 @@
 // public landing page (which has its own marketing header) and never shown to
 // signed-out visitors.
 import { SignedIn, UserButton } from "@clerk/nextjs";
-import { Compass, LayoutDashboard, UserCog } from "lucide-react";
+import { Compass, GraduationCap, LayoutDashboard, UserCog } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/marketing/BrandArt";
@@ -13,6 +13,7 @@ import { APP_NAME } from "@logicland/shared";
 
 const LINKS = [
   { href: "/student", label: "Play", icon: Compass },
+  { href: "/academies", label: "Academies", icon: GraduationCap },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/onboarding", label: "Switch role", icon: UserCog },
 ];
