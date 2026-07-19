@@ -13,7 +13,8 @@ import {
   type TypingStatView,
 } from "@logicland/database";
 import { getCurrentUser } from "@logicland/auth/server";
-import { Award, Code2, Coins, Keyboard, Send, Star, Trophy } from "lucide-react";
+import { Award, Code2, Coins, Keyboard, Send, Sigma, Star, Trophy } from "lucide-react";
+import { misconceptionLabel } from "@/lib/engines/math-fix";
 import { engine } from "@/lib/engine";
 import { getMissionIndex, titleFor, type MissionIndex } from "@/lib/missions-server";
 
@@ -200,6 +201,28 @@ function ChildCard({
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {child.math && (
+        <div className="mb-4 rounded-2xl bg-rose-500/5 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <Sigma className="h-4 w-4 text-rose-500" />
+            <p className="text-sm font-semibold text-rose-600 dark:text-rose-300">
+              Math Fix
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <TypingChip label="Accuracy" value={`${child.math.accuracy}%`} />
+            <TypingChip label="Topics" value={`${child.math.topicsStarted}`} />
+            <TypingChip label="Mastered" value={`${child.math.topicsMastered}`} />
+          </div>
+          {misconceptionLabel(child.math.lastMisconception) && (
+            <p className="mt-2 text-sm opacity-80">
+              <span className="font-semibold">To revisit together:</span>{" "}
+              {misconceptionLabel(child.math.lastMisconception)}
+            </p>
           )}
         </div>
       )}

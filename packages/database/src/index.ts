@@ -42,3 +42,9 @@ export {
   type TypingResultInput,
   type TypingStatView,
 } from "./typing";
+export {
+  recordMathAttempt,
+  getMathMastery,
+  type MathAttemptInput,
+  type MathMasteryView,
+} from "./math-mastery";

@@ -6,3 +6,4 @@ export * from "./problems";
 export * from "./diagnose";
 export * from "./mastery";
 export * from "./registry";
+export * from "./labels";

@@ -116,6 +116,7 @@ model Student {
   levelProgress     LevelProgress[]
   studioSubmissions StudioSubmission[]
   typingStat        TypingStat?
+  mathMastery       MathMastery[]
 }
 
 // ---------------------------------------------------------------------------
@@ -260,6 +261,29 @@ model TypingStat {
   levelsCleared Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// Per-topic Math Fix™ mastery for the parent/teacher dashboards. One row per
+// (student, topic): attempts, correct answers, best streak, current difficulty
+// tier, whether the topic is mastered, and the most recent misconception seen —
+// so a teacher can see *what idea* to reteach, not just a score. Topic-id keyed
+// and FK-free like the rest of progress (the catalog lives in the app, not the DB).
+model MathMastery {
+  id                String   @id @default(cuid())
+  studentId         String
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  topicId           String
+  attempts          Int      @default(0)
+  correct           Int      @default(0)
+  bestStreak        Int      @default(0)
+  difficulty        Int      @default(1)
+  mastered          Boolean  @default(false)
+  lastMisconception String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([studentId, topicId])
+  @@index([studentId])
 }
 
 model Project {

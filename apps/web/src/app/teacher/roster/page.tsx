@@ -3,8 +3,9 @@
 // the engine curriculum. No mock data.
 import { Card, CardTitle } from "@logicland/ui";
 import { listClassroomStudents } from "@logicland/database";
-import { Flame, Keyboard, Sparkles } from "lucide-react";
+import { Flame, Keyboard, Sigma, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { misconceptionLabel } from "@/lib/engines/math-fix";
 import { getMissionIndex, titleFor } from "@/lib/missions-server";
 import { lastActiveLabel } from "@/lib/format";
 
@@ -51,6 +52,7 @@ export default async function TeacherRoster() {
                 <th className="p-4 font-semibold">Missions</th>
                 <th className="p-4 font-semibold">Badges</th>
                 <th className="p-4 font-semibold">Typing</th>
+                <th className="p-4 font-semibold">Math Fix</th>
                 <th className="p-4 font-semibold">Last active</th>
               </tr>
             </thead>
@@ -99,6 +101,23 @@ export default async function TeacherRoster() {
                           <Keyboard className="h-4 w-4 text-brand" />
                           {s.typing.accuracy}% · {s.typing.bestWpm} wpm
                         </span>
+                      ) : (
+                        <span className="opacity-40">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      {s.math ? (
+                        <div>
+                          <span className="inline-flex items-center gap-1">
+                            <Sigma className="h-4 w-4 text-rose-500" />
+                            {s.math.accuracy}% · {s.math.topicsMastered} mastered
+                          </span>
+                          {misconceptionLabel(s.math.lastMisconception) && (
+                            <div className="text-xs opacity-60">
+                              Reteach: {misconceptionLabel(s.math.lastMisconception)}
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <span className="opacity-40">—</span>
                       )}

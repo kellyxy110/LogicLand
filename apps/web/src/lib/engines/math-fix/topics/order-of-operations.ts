@@ -199,5 +199,8 @@ export const ORDER_OF_OPERATIONS: MathTopic = {
   },
 };
 
+/** The Order of Operations misconception library (for labels / a glossary). */
+export const ORDER_MISCONCEPTIONS: Misconception[] = Object.values(MISCONCEPTIONS);
+
 // Exposed for tests.
 export const _internals = { generateExpr, solveExpr, renderExpr, diagnoseExpr, leftToRight };

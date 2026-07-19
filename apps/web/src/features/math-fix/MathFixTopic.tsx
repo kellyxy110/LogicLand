@@ -15,6 +15,7 @@ import {
   Target,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { recordMathAttemptAction } from "@/app/actions/math-fix";
 import {
   type Diagnosis,
   type MasteryState,
@@ -77,7 +78,19 @@ export function MathFixTopic({ topicId }: { topicId: string }) {
     setShowSteps(false);
     setMastery((prev) => {
       const next = afterAttempt(prev, d.correct);
-      if (topic) saveMastery(topic.id, next);
+      if (topic) {
+        saveMastery(topic.id, next);
+        // Fire-and-forget: persist for the parent/teacher dashboards. Never
+        // blocks practice, and no-ops for non-student accounts.
+        void recordMathAttemptAction({
+          topicId: topic.id,
+          correct: d.correct,
+          difficulty: next.difficulty,
+          streak: next.streak,
+          mastered: next.mastered,
+          misconceptionId: d.misconception?.id ?? null,
+        });
+      }
       return next;
     });
   }, [problem, result, input, topic]);

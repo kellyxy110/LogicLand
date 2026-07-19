@@ -20,6 +20,21 @@ export interface StudentProgress {
   lastActiveOn: Date | null;
   /** Keyboard-fluency summary, when the student has typed. */
   typing: { accuracy: number; bestWpm: number } | null;
+  /** Math Fix™ summary across topics, when the student has practised. The
+   *  `lastMisconception` is a misconception id — the web tier maps it to a label. */
+  math: {
+    topicsStarted: number;
+    topicsMastered: number;
+    accuracy: number;
+    lastMisconception: string | null;
+  } | null;
+}
+
+interface MathRow {
+  attempts: number;
+  correct: number;
+  mastered: boolean;
+  lastMisconception: string | null;
 }
 
 interface StudentRow {
@@ -40,6 +55,19 @@ interface StudentRow {
     correctKeys: number;
     bestWpm: number;
   } | null;
+  mathMastery: MathRow[];
+}
+
+function toMath(rows: MathRow[]): StudentProgress["math"] {
+  if (rows.length === 0) return null;
+  const attempts = rows.reduce((a, r) => a + r.attempts, 0);
+  const correct = rows.reduce((a, r) => a + r.correct, 0);
+  return {
+    topicsStarted: rows.length,
+    topicsMastered: rows.filter((r) => r.mastered).length,
+    accuracy: attempts > 0 ? Math.round((correct / attempts) * 100) : 0,
+    lastMisconception: rows.find((r) => r.lastMisconception)?.lastMisconception ?? null,
+  };
 }
 
 function toProgress(s: StudentRow): StudentProgress {
@@ -63,6 +91,7 @@ function toProgress(s: StudentRow): StudentProgress {
           bestWpm: t.bestWpm,
         }
       : null,
+    math: toMath(s.mathMastery),
   };
 }
 
@@ -70,11 +99,20 @@ const TYPING_SELECT = {
   select: { keysTyped: true, correctKeys: true, bestWpm: true },
 } as const;
 
+const MATH_SELECT = {
+  select: { attempts: true, correct: true, mastered: true, lastMisconception: true },
+  orderBy: { updatedAt: "desc" },
+} as const;
+
 /** Every student in the classroom. V1 is a single classroom (one teacher), so
  *  the roster is all students, most-recently-active first. */
 export async function listClassroomStudents(): Promise<StudentProgress[]> {
   const rows = await prisma.student.findMany({
-    include: { user: { select: { email: true } }, typingStat: TYPING_SELECT },
+    include: {
+      user: { select: { email: true } },
+      typingStat: TYPING_SELECT,
+      mathMastery: MATH_SELECT,
+    },
     orderBy: [{ lastActiveOn: { sort: "desc", nulls: "last" } }, { xp: "desc" }],
   });
   return rows.map(toProgress);
@@ -87,7 +125,11 @@ export async function getParentChildren(
 ): Promise<StudentProgress[]> {
   const rows = await prisma.student.findMany({
     where: { parent: { user: { clerkId } } },
-    include: { user: { select: { email: true } }, typingStat: TYPING_SELECT },
+    include: {
+      user: { select: { email: true } },
+      typingStat: TYPING_SELECT,
+      mathMastery: MATH_SELECT,
+    },
     orderBy: { displayName: "asc" },
   });
   return rows.map(toProgress);
