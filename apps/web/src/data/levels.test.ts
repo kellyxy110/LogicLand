@@ -4,7 +4,13 @@ import { gameDataFor } from "./missions";
 // Every leveled game must offer a full 12-level ladder (acceptance requirement),
 // with stable unique ids and internally consistent content.
 
-const LEVELED = ["shape-match", "memory-game", "pattern-builder", "keyboard-basics"];
+const LEVELED = [
+  "shape-match",
+  "memory-game",
+  "pattern-builder",
+  "keyboard-basics",
+  "keyboard-words",
+];
 
 describe("all leveled games reach level 12", () => {
   it.each(LEVELED)("%s has 12 levels with unique ids", (slug) => {

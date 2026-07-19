@@ -17,6 +17,7 @@ import type { MissionGameData } from "@/types/game";
 import { RewardModal } from "@/features/rewards/RewardModal";
 import { HtmlStudio } from "@/features/studio/HtmlStudio";
 import { BalloonPop } from "./BalloonPop";
+import { FallingWords } from "./FallingWords";
 import { KeyboardQuest } from "./KeyboardQuest";
 import { MemoryGame } from "./MemoryGame";
 import { PatternBuilder } from "./PatternBuilder";
@@ -132,6 +133,8 @@ function renderGame(
       return <KeyboardQuest slug={slug} data={gameData} onWin={onWin} />;
     case "balloon-pop":
       return <BalloonPop slug={slug} data={gameData} onWin={onWin} />;
+    case "falling-words":
+      return <FallingWords slug={slug} data={gameData} onWin={onWin} />;
     case "html-studio":
       return <HtmlStudio slug={slug} data={gameData} onWin={onWin} />;
     default:

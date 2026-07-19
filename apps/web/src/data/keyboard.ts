@@ -9,6 +9,8 @@
 import type {
   BalloonPopData,
   BalloonPopLevel,
+  FallingWordsData,
+  FallingWordsLevel,
   GameLevel,
   KeyQuestData,
   KeyQuestLevel,
@@ -30,6 +32,15 @@ function bp(
   objective: string,
   content: BalloonPopLevel,
 ): GameLevel<BalloonPopLevel> {
+  return { id, title, objective, content };
+}
+
+function fw(
+  id: string,
+  title: string,
+  objective: string,
+  content: FallingWordsLevel,
+): GameLevel<FallingWordsLevel> {
   return { id, title, objective, content };
 }
 
@@ -151,10 +162,96 @@ export const BALLOON_POP: BalloonPopData = {
   ],
 };
 
+/** Falling Words (Word Rain) — words drift down one at a time; type each one
+ *  fully before it lands. Twelve levels climb from single letters → short words
+ *  → longer words → the coding keywords that lead into Coding City, with the fall
+ *  speeding up. Landing a word is gentle (no game over) — it just costs a star. */
+export const FALLING_WORDS: FallingWordsData = {
+  kind: "falling-words",
+  levels: [
+    fw("fw-1", "First Drops", "Catch single letters as they fall.", {
+      prompt: "Type each letter before it lands!",
+      words: ["a", "s", "d", "f", "j", "k"],
+      secondsToFall: 7,
+      starThreshold: 3,
+    }),
+    fw("fw-2", "More Letters", "Letters from all over the keyboard.", {
+      prompt: "Quick — type the falling letter!",
+      words: ["e", "r", "t", "n", "o", "i", "u"],
+      secondsToFall: 6.5,
+      starThreshold: 3,
+    }),
+    fw("fw-3", "Tiny Words", "Your first little falling words.", {
+      prompt: "Type the whole word as it drops!",
+      words: ["cat", "sun", "dog", "top", "hat"],
+      secondsToFall: 6.5,
+      starThreshold: 2,
+    }),
+    fw("fw-4", "Four Letters", "A little longer now.", {
+      prompt: "Type each word before it lands!",
+      words: ["fish", "book", "tree", "jump", "star"],
+      secondsToFall: 6,
+      starThreshold: 2,
+    }),
+    fw("fw-5", "Growing", "Five-letter words falling down.", {
+      prompt: "Catch the bigger words!",
+      words: ["apple", "happy", "smile", "water", "robot"],
+      secondsToFall: 6,
+      starThreshold: 2,
+    }),
+    fw("fw-6", "Colors", "Colorful words, a touch faster.", {
+      prompt: "Type each color word!",
+      words: ["yellow", "orange", "purple", "green", "silver"],
+      secondsToFall: 5.5,
+      starThreshold: 2,
+    }),
+    fw("fw-7", "Code Words", "The words that lead to Coding City.", {
+      prompt: "Type each coding word!",
+      words: ["move", "turn", "stop", "jump", "start"],
+      secondsToFall: 5.5,
+      starThreshold: 2,
+    }),
+    fw("fw-8", "More Code", "Bigger coding words.", {
+      prompt: "Catch the coding words!",
+      words: ["repeat", "print", "loop", "robot", "level"],
+      secondsToFall: 5,
+      starThreshold: 2,
+    }),
+    fw("fw-9", "Quick Catch", "Short words, falling faster.", {
+      prompt: "Fast fingers — type quickly!",
+      words: ["run", "hop", "map", "key", "win", "fun"],
+      secondsToFall: 4.5,
+      starThreshold: 1,
+    }),
+    fw("fw-10", "Speed Words", "Medium words at speed.", {
+      prompt: "Keep up with the rain!",
+      words: ["rocket", "planet", "coder", "player", "puzzle"],
+      secondsToFall: 4.5,
+      starThreshold: 1,
+    }),
+    fw("fw-11", "Keywords", "Real coding keywords.", {
+      prompt: "Type the keywords real coders use!",
+      words: ["if", "else", "loop", "print", "true"],
+      secondsToFall: 4,
+      starThreshold: 1,
+    }),
+    fw("fw-12", "Word Rain Master", "The fastest rain of all.", {
+      prompt: "Master the rain — catch them all!",
+      words: ["function", "return", "value", "hello", "world"],
+      secondsToFall: 4,
+      starThreshold: 1,
+    }),
+  ],
+};
+
 /** Slug → keyboard game data. Registered into gameDataFor via data/missions.ts. */
-export const KEYBOARD_GAME_DATA: Record<string, KeyQuestData | BalloonPopData> = {
+export const KEYBOARD_GAME_DATA: Record<
+  string,
+  KeyQuestData | BalloonPopData | FallingWordsData
+> = {
   "keyboard-basics": KEYBOARD_QUEST,
   "keyboard-balloons": BALLOON_POP,
+  "keyboard-words": FALLING_WORDS,
 };
 
 /** The Keyboard Kingdom world card + mission trail for the World Map. */
@@ -198,11 +295,12 @@ export const KEYBOARD_KINGDOM_WORLD: LandWorld = {
       title: "Word Builder",
       skill: "Typing Speed",
       badge: "Word Wizard",
-      game: "key-quest",
+      game: "falling-words",
       order: 3,
-      story: "Build bigger words and race the gentle clock.",
-      objective: "Type longer words with speed and accuracy.",
-      status: "soon",
+      story:
+        "Words are raining over the Kingdom! Type each one before it lands to keep the sky clear.",
+      objective: "Type each falling word before it reaches the ground.",
+      status: "live",
       estimatedMinutes: 7,
     },
     {

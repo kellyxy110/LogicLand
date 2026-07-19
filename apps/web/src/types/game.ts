@@ -211,6 +211,22 @@ export interface BalloonPopData {
   levels: GameLevel<BalloonPopLevel>[];
 }
 
+// --- Falling Words (word-rain typing mini-game) ---------------------------
+export interface FallingWordsLevel {
+  prompt: string;
+  /** Words that drop one at a time; type each fully before it lands. */
+  words: string[];
+  /** Seconds a word takes to fall from the top to the ground (smaller = harder). */
+  secondsToFall: number;
+  /** Max words that may land uncaught and still earn the mastery star. */
+  starThreshold: number;
+}
+
+export interface FallingWordsData {
+  kind: "falling-words";
+  levels: GameLevel<FallingWordsLevel>[];
+}
+
 export type MissionGameData =
   | RobotMazeData
   | TypingQuestData
@@ -219,4 +235,5 @@ export type MissionGameData =
   | PatternBuilderData
   | KeyQuestData
   | BalloonPopData
+  | FallingWordsData
   | HtmlStudioData;

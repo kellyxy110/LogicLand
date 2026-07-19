@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { gameDataFor } from "./missions";
-import { KEYBOARD_KINGDOM_WORLD, KEYBOARD_QUEST } from "./keyboard";
+import { FALLING_WORDS, KEYBOARD_KINGDOM_WORLD, KEYBOARD_QUEST } from "./keyboard";
 
 // Guards the Keyboard Kingdom world ↔ game wiring so a live mission can never
 // ship without a playable game behind it, and the ladder keeps its 7+ levels.
@@ -18,7 +18,7 @@ describe("Keyboard Kingdom catalog", () => {
     for (const m of live) {
       const data = gameDataFor(m.slug);
       expect(data, `game data for ${m.slug}`).not.toBeNull();
-      expect(["key-quest", "balloon-pop"]).toContain(data!.kind);
+      expect(["key-quest", "balloon-pop", "falling-words"]).toContain(data!.kind);
     }
   });
 });
@@ -40,5 +40,31 @@ describe("KEYBOARD_QUEST ladder", () => {
     // Level 1 tokens are single keys; the final level types whole words.
     expect(first.every((t) => t.length === 1)).toBe(true);
     expect(last.some((t) => t.length > 1)).toBe(true);
+  });
+});
+
+describe("FALLING_WORDS ladder", () => {
+  it("has 12 levels with unique ids and non-empty words", () => {
+    expect(FALLING_WORDS.levels.length).toBe(12);
+    const ids = FALLING_WORDS.levels.map((l) => l.id);
+    expect(new Set(ids).size).toBe(12);
+    for (const l of FALLING_WORDS.levels) {
+      expect(l.content.words.length).toBeGreaterThan(0);
+      expect(l.content.words.every((w) => w.length > 0)).toBe(true);
+      expect(l.content.secondsToFall).toBeGreaterThan(0);
+    }
+  });
+
+  it("speeds up over the ladder: last level falls faster than the first", () => {
+    const first = FALLING_WORDS.levels[0].content.secondsToFall;
+    const last = FALLING_WORDS.levels.at(-1)!.content.secondsToFall;
+    expect(last).toBeLessThan(first);
+  });
+
+  it("grows from single letters to whole words", () => {
+    const first = FALLING_WORDS.levels[0].content.words;
+    const last = FALLING_WORDS.levels.at(-1)!.content.words;
+    expect(first.every((w) => w.length === 1)).toBe(true);
+    expect(last.some((w) => w.length > 1)).toBe(true);
   });
 });
