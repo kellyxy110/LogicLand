@@ -6,26 +6,7 @@
 // wording; the diagnosis itself stays rule-based and trustworthy.)
 import type { Problem } from "./problems";
 import { solutionSteps } from "./problems";
-
-export interface Misconception {
-  id: string;
-  /** Short label for dashboards / the misconception library. */
-  name: string;
-  /** Kid-friendly "here's what happened" — names the slip without shaming. */
-  explain: string;
-  /** The idea to repair — the thing to hold onto next time. */
-  repair: string;
-}
-
-export interface Diagnosis {
-  correct: boolean;
-  correctAnswer: number;
-  /** The identified misconception, when a known error pattern produced exactly
-   *  the child's answer. Null for a correct answer or an unrecognised slip. */
-  misconception: Misconception | null;
-  /** Worked solution, always provided so the whole method is visible. */
-  steps: string[];
-}
+import type { Diagnosis, Misconception } from "./types";
 
 // The misconception library for linear equations. Each entry also carries a
 // `predict(problem)` that returns the wrong answer this misconception yields, or

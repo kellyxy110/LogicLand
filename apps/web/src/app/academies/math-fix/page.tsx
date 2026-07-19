@@ -1,17 +1,17 @@
-// Math Fix™ — the Mathematics Academy's first live topic. A thin Server Component
-// shell around the client practice experience. One topic is live today (Solving
-// Linear Equations); the surrounding copy is honest that more are on the way.
-import { ArrowLeft, Sigma } from "lucide-react";
+// Math Fix™ — the Mathematics Academy hub. Lists the live topics; each opens its
+// own adaptive practice session. Deterministic misconception diagnosis is the
+// through-line: every topic names *why* an answer is wrong, then repairs it.
+import { ArrowLeft, ArrowRight, Sigma } from "lucide-react";
 import Link from "next/link";
-import { MathFixTopic } from "@/features/math-fix/MathFixTopic";
+import { MATH_TOPICS } from "@/lib/engines/math-fix";
 
 export const metadata = {
-  title: "Math Fix™ · Solving Linear Equations · LogicLand",
+  title: "Math Fix™ · LogicLand",
   description:
-    "Math Fix diagnoses the exact misconception behind a wrong answer, repairs the idea, and adapts practice to mastery — starting with solving linear equations.",
+    "Math Fix diagnoses the exact misconception behind a wrong answer, repairs the idea, and adapts practice to mastery. Pick a topic to begin.",
 };
 
-export default function MathFixPage() {
+export default function MathFixHome() {
   return (
     <main className="mx-auto max-w-2xl px-5 py-8">
       <header className="mb-5">
@@ -29,18 +29,36 @@ export default function MathFixPage() {
         </div>
         <div>
           <h1 className="font-display text-2xl font-extrabold sm:text-3xl">Math Fix™</h1>
-          <p className="text-sm font-semibold text-brand">Solving Linear Equations</p>
+          <p className="text-sm font-semibold text-brand">
+            Repairs misconceptions, not just marks answers.
+          </p>
         </div>
       </div>
 
       <p className="mb-6 rounded-2xl bg-brand/5 p-4 text-sm opacity-80">
-        This isn&apos;t just marking. When an answer is wrong, Math Fix works out the
-        exact idea that slipped, explains it kindly, and adjusts the next question
-        to help you master it. <span className="font-semibold">Solving Linear
-        Equations</span> is live now — more topics are on the way.
+        Pick a topic. When an answer is wrong, Math Fix works out the exact idea
+        that slipped, explains it kindly, and adapts the next question so you truly
+        master it. More topics are on the way.
       </p>
 
-      <MathFixTopic />
+      <div className="space-y-3">
+        {MATH_TOPICS.map((t) => (
+          <Link
+            key={t.id}
+            href={`/academies/math-fix/${t.id}`}
+            className="group flex items-center gap-4 rounded-3xl border-2 border-brand/10 p-4 transition-colors hover:border-brand/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30"
+          >
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-rose-500/10 font-mono text-lg font-extrabold text-rose-600 dark:text-rose-300">
+              {t.id === "order-of-operations" ? "×+" : "x"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-lg font-bold">{t.name}</h2>
+              <p className="text-sm opacity-70">{t.blurb}</p>
+            </div>
+            <ArrowRight className="h-5 w-5 shrink-0 text-brand transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        ))}
+      </div>
     </main>
   );
 }

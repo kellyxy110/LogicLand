@@ -18,22 +18,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type Diagnosis,
   type MasteryState,
-  type Problem,
+  type PosedProblem,
   START_MASTERY,
   accuracyPercent,
   afterAttempt,
-  diagnose,
-  generateProblem,
   masteryPercent,
-  renderProblem,
+  mathTopicById,
 } from "@/lib/engines/math-fix";
 
-const STORAGE_KEY = "mathfix:linear-equations:v1";
+function storageKey(topicId: string): string {
+  return `mathfix:${topicId}:v1`;
+}
 
-function loadMastery(): MasteryState {
+function loadMastery(topicId: string): MasteryState {
   if (typeof window === "undefined") return START_MASTERY;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey(topicId));
     if (!raw) return START_MASTERY;
     return { ...START_MASTERY, ...JSON.parse(raw) };
   } catch {
@@ -41,28 +41,30 @@ function loadMastery(): MasteryState {
   }
 }
 
-function saveMastery(state: MasteryState) {
+function saveMastery(topicId: string, state: MasteryState) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(storageKey(topicId), JSON.stringify(state));
   } catch {
     /* ignore quota / privacy-mode errors — practice still works in-session */
   }
 }
 
-export function MathFixTopic() {
+export function MathFixTopic({ topicId }: { topicId: string }) {
+  const topic = useMemo(() => mathTopicById(topicId), [topicId]);
   const [mastery, setMastery] = useState<MasteryState>(START_MASTERY);
-  const [problem, setProblem] = useState<Problem | null>(null);
+  const [problem, setProblem] = useState<PosedProblem | null>(null);
   const [input, setInput] = useState("");
   const [result, setResult] = useState<Diagnosis | null>(null);
   const [showSteps, setShowSteps] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Hydrate saved mastery, then pose the first problem at that difficulty.
+  // Hydrate saved mastery for this topic, then pose the first problem.
   useEffect(() => {
-    const saved = loadMastery();
+    if (!topic) return;
+    const saved = loadMastery(topic.id);
     setMastery(saved);
-    setProblem(generateProblem(saved.difficulty));
-  }, []);
+    setProblem(topic.generate(saved.difficulty));
+  }, [topic]);
 
   const submit = useCallback(() => {
     if (!problem || result) return;
@@ -70,26 +72,35 @@ export function MathFixTopic() {
     if (trimmed === "" || trimmed === "-") return;
     const value = Number(trimmed);
     if (!Number.isFinite(value)) return;
-    const d = diagnose(problem, value);
+    const d = problem.diagnose(value);
     setResult(d);
     setShowSteps(false);
     setMastery((prev) => {
       const next = afterAttempt(prev, d.correct);
-      saveMastery(next);
+      if (topic) saveMastery(topic.id, next);
       return next;
     });
-  }, [problem, result, input]);
+  }, [problem, result, input, topic]);
 
   const nextProblem = useCallback(() => {
+    if (!topic) return;
     setResult(null);
     setInput("");
     setShowSteps(false);
-    setProblem(generateProblem(mastery.difficulty));
+    setProblem(topic.generate(mastery.difficulty));
     inputRef.current?.focus();
-  }, [mastery.difficulty]);
+  }, [topic, mastery.difficulty]);
 
-  const equation = useMemo(() => (problem ? renderProblem(problem) : ""), [problem]);
+  const equation = problem?.prompt ?? "";
   const percent = masteryPercent(mastery);
+
+  if (!topic) {
+    return (
+      <div className="grid h-40 place-items-center text-sm opacity-50">
+        That topic isn&apos;t available yet.
+      </div>
+    );
+  }
 
   if (!problem) {
     return <div className="grid h-40 place-items-center text-sm opacity-50">Loading Math Fix…</div>;
@@ -124,13 +135,15 @@ export function MathFixTopic() {
       {/* The equation */}
       <Card className="text-center">
         <p className="text-xs font-bold uppercase tracking-wide text-brand">
-          Solve for x
+          {problem.instruction}
         </p>
         <p className="mt-2 font-mono text-4xl font-extrabold sm:text-5xl">{equation}</p>
 
         <div className="mx-auto mt-5 flex max-w-xs items-center gap-2">
           <div className="flex flex-1 items-center gap-2 rounded-2xl border-2 border-brand/20 px-3 py-2 focus-within:border-brand">
-            <span className="font-mono text-2xl font-bold opacity-60">x =</span>
+            <span className="font-mono text-2xl font-bold opacity-60">
+              {problem.instruction === "Solve for x" ? "x =" : "="}
+            </span>
             <input
               ref={inputRef}
               value={input}
@@ -189,7 +202,9 @@ export function MathFixTopic() {
             {result.correct ? (
               <Card className="border-2 border-meadow/40 bg-meadow/5">
                 <p className="flex items-center gap-2 font-display text-lg font-extrabold text-meadow">
-                  <CheckCircle2 className="h-6 w-6" /> Correct! x = {result.correctAnswer}
+                  <CheckCircle2 className="h-6 w-6" /> Correct!{" "}
+                  {problem.instruction === "Solve for x" ? "x = " : ""}
+                  {result.correctAnswer}
                 </p>
                 <p className="mt-1 text-sm opacity-75">
                   {mastery.streak === 0 && mastery.difficulty > 1
@@ -219,8 +234,10 @@ export function MathFixTopic() {
                           Not quite — let&apos;s look at it together.
                         </p>
                         <p className="mt-1 text-sm opacity-85">
-                          The answer is x = {result.correctAnswer}. Walk through the steps
-                          below and see where it went a different way.
+                          The answer is{" "}
+                          {problem.instruction === "Solve for x" ? "x = " : ""}
+                          {result.correctAnswer}. Walk through the steps below and see where
+                          it went a different way.
                         </p>
                       </>
                     )}
