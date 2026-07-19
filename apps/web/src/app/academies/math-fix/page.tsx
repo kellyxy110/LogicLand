@@ -49,7 +49,11 @@ export default function MathFixHome() {
             className="group flex items-center gap-4 rounded-3xl border-2 border-brand/10 p-4 transition-colors hover:border-brand/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30"
           >
             <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-rose-500/10 font-mono text-lg font-extrabold text-rose-600 dark:text-rose-300">
-              {t.id === "order-of-operations" ? "×+" : "x"}
+              {t.id === "order-of-operations"
+                ? "×+"
+                : t.id === "fractions-of-amount"
+                  ? "¾"
+                  : "x"}
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-lg font-bold">{t.name}</h2>
