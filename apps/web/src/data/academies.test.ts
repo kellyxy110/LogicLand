@@ -34,13 +34,14 @@ describe("Academy catalog", () => {
     expect(ACADEMIES.filter((a) => a.flagship).length).toBe(1);
   });
 
-  it("sorts live academies first, then the flagship among the rest", () => {
+  it("sorts live academies first, with the flagship leading", () => {
     const sorted = sortedAcademies();
     const firstSoon = sorted.findIndex((a) => a.status === "soon");
     // Everything before the first "soon" is live.
     expect(sorted.slice(0, firstSoon).every((a) => a.status === "live")).toBe(true);
-    // The flagship leads the roadmap group.
-    expect(sorted[firstSoon].flagship).toBe(true);
+    // The flagship leads overall (it is live and flagged).
+    expect(sorted[0].flagship).toBe(true);
+    expect(sorted[0].status).toBe("live");
   });
 
   it("academyBySlug resolves known slugs and rejects unknown", () => {

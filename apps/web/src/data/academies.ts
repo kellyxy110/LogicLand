@@ -30,17 +30,18 @@ export const ACADEMIES: Academy[] = [
     name: "Mathematics Academy · Math Fix™",
     tagline: "The AI that repairs misconceptions, not just marks answers.",
     description:
-      "LogicLand's flagship. Math Fix diagnoses the exact idea a learner is missing, explains it, and generates targeted practice until mastery — from primary arithmetic through WAEC, JAMB, IGCSE, A-Level, SAT and Olympiad.",
+      "LogicLand's flagship. Math Fix diagnoses the exact idea a learner is missing, explains it, and generates targeted practice until mastery. Solving Linear Equations is live now; more topics — through WAEC, JAMB, IGCSE, A-Level, SAT and Olympiad — are on the way.",
     icon: "sigma",
     gradient: "from-rose-500 to-orange-500",
-    status: "soon",
+    status: "live",
+    href: "/academies/math-fix",
     flagship: true,
     ageBands: ["All Ages"],
     plannedTracks: 40,
     highlights: [
-      "Misconception library + step-by-step repair",
+      "Solving Linear Equations — live now",
+      "Names the exact misconception, then repairs it",
       "Adaptive practice that tracks true mastery",
-      "Exam & Olympiad modes for real syllabuses",
     ],
   },
   {
