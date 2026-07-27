@@ -35,10 +35,11 @@ MSGS = [Message(role="user", content="Explain 20% of 60 another way.")]
 
 
 def test_routing_respects_task_and_age():
-    assert select_model("math_explain").id == "gpt-4o-mini"
-    assert select_model("code_review", "pro").id == "gpt-4o"
-    # A young learner can't use the pro-only model; routing falls back.
-    assert select_model("code_review", "sprout").id == "gpt-4o-mini"
+    assert select_model("math_explain").id == "llama-3.3-70b-versatile"
+    assert select_model("code_review", "pro").id == "openai/gpt-oss-120b"
+    # A young learner can't use the pro-only model; routing falls back down the
+    # fallback chain to the first age-appropriate model.
+    assert select_model("code_review", "sprout").id == "llama-3.3-70b-versatile"
 
 
 def test_cost_estimate_positive():
@@ -94,4 +95,4 @@ def test_usage_limiter_blocks_then_falls_back():
 def test_health_snapshot():
     h = gateway_health(_settings(configured=False))
     assert h["provider_configured"] is False
-    assert "gpt-4o-mini" in h["models"]  # type: ignore[operator]
+    assert "llama-3.1-8b-instant" in h["models"]  # type: ignore[operator]

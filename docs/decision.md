@@ -359,6 +359,16 @@ observed, cost-tracked and — crucially — **degrade to a deterministic fallba
 by config; cost and safety are enforced centrally. **Blocker to go live: LLM
 provider credentials + choosing production models** (the registry + routing are
 ready; only real keys/deploy remain).
+**Update (2026-07-27): active provider wired to Groq (OpenAI-compatible).**
+Registry now lists real Groq models — `llama-3.1-8b-instant` (default),
+`llama-3.3-70b-versatile` (tutor/math), `openai/gpt-oss-120b` (code/agent, pro
+only). Verified with a live end-to-end call (route → Groq → child-safety → cost).
+Key lives only in the engine's git-ignored `.env` (and, for prod, the engine
+host's secret store — the engine is not on Vercel). **ADR-009 caveat:** Groq is
+`privacy_class="standard"`, not zero-retention — good for dev/staging + content
+generation; a production **child-facing** tutor should route to a ZDR provider,
+which is a config/registry swap, not a code change. **Remaining to serve live AI
+to users: deploy the engine + set `LLM_*` there + point the web app at it.**
 
 ## ADR-024 Engine production-readiness — private, hardened, observable
 **Context:** the engine owns curriculum, tutoring, generation and the AI Gateway,
