@@ -5,6 +5,7 @@
 // the server passes [] and we show a warm retry, never a blank crash.
 import { Button, RoboAvatar, Skeleton } from "@logicland/ui";
 import { motion } from "framer-motion";
+import { ArrowRight, Code2 } from "lucide-react";
 import Link from "next/link";
 import type { LandWorld } from "@/types/world";
 import { useStudent } from "@/lib/student-store";
@@ -49,7 +50,44 @@ export function WorldMap({ worlds }: { worlds: LandWorld[] }) {
           );
         })}
       </div>
+
+      <StudioInvite />
     </main>
+  );
+}
+
+/** Bridge from the Coding Academy's guided worlds to free building in Studio —
+ *  the "now make your own" step (ADR-011: Academy teaches, Studio builds). */
+function StudioInvite() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="mt-8"
+    >
+      <Link
+        href="/studio"
+        className="group flex items-center gap-4 rounded-3xl border-2 border-indigo-500/20 bg-gradient-to-r from-indigo-500/5 to-violet-600/5 p-5 transition-colors hover:border-indigo-500/40 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30"
+      >
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+          <Code2 className="h-7 w-7" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-lg font-extrabold">
+            Ready to build your own?
+          </h2>
+          <p className="text-sm opacity-70">
+            Open <b>LogicLand Studio</b> — a real code editor where you can make
+            anything and run it.
+          </p>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-sm font-bold text-white">
+          Open Studio
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </Link>
+    </motion.div>
   );
 }
 
