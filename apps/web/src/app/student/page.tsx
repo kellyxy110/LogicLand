@@ -150,6 +150,20 @@ export default function StudentHome() {
         </Card>
       </Link>
 
+      <Link href="/student/portfolio" className="relative mt-4 block">
+        <Card className="flex items-center gap-4 transition-transform hover:scale-[1.01]">
+          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand/10 text-brand">
+            <Award className="h-7 w-7" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-display text-lg font-bold">My Work</h3>
+            <p className="text-sm opacity-70">
+              Everything you&apos;ve built and mastered, in one place.
+            </p>
+          </div>
+        </Card>
+      </Link>
+
       <MyMathProgress />
 
       <AiHelper missionSlug={nextMissionSlug} />
