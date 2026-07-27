@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiHelper } from "@/components/AiHelper";
+import { MyMathProgress } from "@/features/math-fix/MyMathProgress";
 import { worldSkin } from "@/features/worlds/theme";
 import { getWorlds } from "@/lib/worlds";
 import { useStudent } from "@/lib/student-store";
@@ -148,6 +149,8 @@ export default function StudentHome() {
           <Map className="h-6 w-6 shrink-0 text-brand" aria-hidden />
         </Card>
       </Link>
+
+      <MyMathProgress />
 
       <AiHelper missionSlug={nextMissionSlug} />
     </main>
