@@ -5,8 +5,9 @@
 // loads here, never in the young-learner bundles.
 import dynamic from "next/dynamic";
 import { FolderCode, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { languageForFile } from "@/lib/engines/studio-project";
+import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
 import { useStudioProject } from "./useStudioProject";
 import { FileTree } from "./FileTree";
 import { EditorTabs } from "./EditorTabs";
@@ -20,11 +21,42 @@ const MonacoPane = dynamic(() => import("./MonacoPane").then((m) => m.MonacoPane
 });
 
 export function StudioIDE() {
-  const { files, activeId, hydrated, hydrate, updateContent, reset } = useStudioProject();
+  const { files, activeId, hydrated, hydrate, hydrateFromServer, updateContent, reset } =
+    useStudioProject();
+  // True once we know the viewer is a student, so edits should persist to the DB.
+  const serverBacked = useRef(false);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  // Load the student's saved workspace (the server is source of truth across
+  // devices). A signed-in non-student, or any error, leaves the local project.
+  useEffect(() => {
+    let alive = true;
+    loadMyStudioProject()
+      .then((res) => {
+        if (!alive || !res.isStudent) return;
+        serverBacked.current = true;
+        if (res.project && res.project.files.length > 0) {
+          hydrateFromServer(res.project.files);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [hydrateFromServer]);
+
+  // Debounced save on any change — only once we know it's a student. Never
+  // blocks editing; localStorage remains the offline cache.
+  useEffect(() => {
+    if (!serverBacked.current) return;
+    const t = setTimeout(() => {
+      void saveMyStudioProject(files.map((f) => ({ name: f.name, content: f.content })));
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [files]);
 
   const active = files.find((f) => f.id === activeId) ?? null;
 

@@ -48,3 +48,9 @@ export {
   type MathAttemptInput,
   type MathMasteryView,
 } from "./math-mastery";
+export {
+  getStudioProject,
+  saveStudioProject,
+  type StudioFile,
+  type StudioProjectView,
+} from "./studio-projects";

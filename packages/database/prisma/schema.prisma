@@ -115,6 +115,7 @@ model Student {
   rewards       Reward[]
   levelProgress     LevelProgress[]
   studioSubmissions StudioSubmission[]
+  studioProject     StudioProject?
   typingStat        TypingStat?
   mathMastery       MathMastery[]
 }
@@ -294,6 +295,21 @@ model Project {
   studentId   String
   student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
+}
+
+// The learner's LogicLand Studio (IDE) workspace — a single free-build project
+// per student for now (one row, keyed by studentId). Files are stored as JSON
+// ([{ name, content }]) like StudioSubmission.code, so the shape stays flexible
+// without a separate file table. Distinct from `Project` (portfolio showcase)
+// and `StudioSubmission` (a mission's graded classwork).
+model StudioProject {
+  id        String   @id @default(cuid())
+  studentId String   @unique
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  name      String   @default("My Project")
+  files     Json // [{ name, content }]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Certificate {

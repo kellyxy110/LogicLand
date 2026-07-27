@@ -52,6 +52,8 @@ interface StudioProjectState extends Persisted {
   hydrated: boolean;
   /** Load from storage (or seed the starter). Call once on mount. */
   hydrate: () => void;
+  /** Replace the workspace with files loaded from the server (cross-device). */
+  hydrateFromServer: (files: Array<{ name: string; content: string }>) => void;
   open: (id: string) => void;
   closeTab: (id: string) => void;
   updateContent: (id: string, content: string) => void;
@@ -74,6 +76,26 @@ export const useStudioProject = create<StudioProjectState>((set, get) => ({
     if (get().hydrated) return;
     set({ ...load(), hydrated: true });
   },
+
+  hydrateFromServer: (incoming) =>
+    set(() => {
+      const files: FsNode[] = incoming.map((f) => ({
+        id: nextId(),
+        parentId: null,
+        name: f.name,
+        kind: "file",
+        content: f.content,
+      }));
+      const first = files[0]?.id ?? null;
+      const next = {
+        files,
+        openTabs: first ? [first] : [],
+        activeId: first,
+        hydrated: true,
+      };
+      save(next);
+      return next;
+    }),
 
   open: (id) =>
     set((s) => {
