@@ -17,6 +17,7 @@
     "@logicland/database": "workspace:*",
     "@logicland/shared": "workspace:*",
     "@logicland/ui": "workspace:*",
+    "@monaco-editor/react": "^4.7.0",
     "@prisma/nextjs-monorepo-workaround-plugin": "^7.8.0",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.417.0",
