@@ -33,6 +33,7 @@ from models.schemas import (
     WeeklyReportResponse,
     WorksheetResponse,
 )
+from llm.gateway import gateway_health
 from progress import service as progress_service
 from quizzes.service import QuizService
 from tutor.service import MathExplainService, TutorService
@@ -250,6 +251,20 @@ async def gen_flashcards(req: GenerateRequest) -> FlashcardResponse:
     return await FlashcardService().generate(req)
 
 
+# --- AI Gateway (observability / readiness) ---
+gateway_router = APIRouter(prefix="/gateway", tags=["gateway"])
+
+
+@gateway_router.get("/health")
+async def gateway_health_route() -> dict[str, object]:
+    """No-network readiness snapshot of the AI Gateway (ADR-023).
+
+    Reports whether a provider is configured, the routable model catalogue and
+    child-safety state — without ever calling a model. Safe to expose to probes.
+    """
+    return gateway_health()
+
+
 ALL_ROUTERS = [
     curriculum_router,
     tutor_router,
@@ -259,4 +274,5 @@ ALL_ROUTERS = [
     progress_router,
     gamification_router,
     generate_router,
+    gateway_router,
 ]

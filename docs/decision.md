@@ -331,3 +331,31 @@ owner provides three env values** — `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
 and `GITHUB_TOKEN_ENC_KEY`. See `docs/github-integration.md` for setup. No
 other internal work remains. **Blocker to enable: those three secrets + a
 registered GitHub OAuth app.**
+
+## ADR-023 NexisHub AI Gateway — the single choke point for model calls
+**Context:** ADR-018 named a provider-neutral gateway; this is its engine
+implementation. Every model call must be routed, retried, safety-filtered,
+observed, cost-tracked and — crucially — **degrade to a deterministic fallback**
+(ADR-015) so the product never depends on an LLM being up or configured.
+**Decision (in `logicland-engine/llm`):**
+- **Model registry** (`registry.py`): each model carries provider key, cost
+  metadata ($/1k in+out), max tokens, allowed ages, allowed tasks, privacy
+  class, eval score and a `fallback` model id. Routing selects the best model
+  for a `(task, age)`.
+- **Gateway** (`gateway.py`): one `AIGateway.complete(task, messages, age,
+  deterministic_fallback)` entry point that (1) routes via the registry,
+  (2) enforces a **timeout** and **bounded retries with backoff**, (3) applies
+  **usage controls** (a per-key request limiter), (4) runs output through the
+  child-safety filter for child-facing tasks, (5) emits **structured
+  observability** (model, attempts, latency, estimated cost, outcome), and
+  (6) on any failure returns the caller's **deterministic fallback** — so the
+  result is always usable. Returns a typed `GatewayResult` (text, model,
+  source=model|fallback, latency, attempts, estimated_cost, safe).
+- **Health/readiness:** `/gateway/health` reports config + registry state with
+  no external calls. Provider stays resolved via ADR-003 `provider.py`.
+- **Credentials are NOT required for the architecture:** with no provider
+  configured, every call cleanly takes the deterministic fallback path.
+**Consequences:** one auditable, testable seam for all AI; providers/models swap
+by config; cost and safety are enforced centrally. **Blocker to go live: LLM
+provider credentials + choosing production models** (the registry + routing are
+ready; only real keys/deploy remain).
