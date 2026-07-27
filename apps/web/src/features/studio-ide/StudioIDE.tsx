@@ -4,11 +4,12 @@
 // environment. Monaco is dynamically imported (ssr:false) so its chunk only
 // loads here, never in the young-learner bundles.
 import dynamic from "next/dynamic";
-import { FolderCode, RotateCcw } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { FolderCode, RotateCcw, TerminalSquare } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { languageForFile } from "@/lib/engines/studio-project";
 import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
 import { useStudioProject } from "./useStudioProject";
+import { LogicTerminal } from "./LogicTerminal";
 import { FileTree } from "./FileTree";
 import { EditorTabs } from "./EditorTabs";
 import { RunPreview } from "./RunPreview";
@@ -25,6 +26,7 @@ export function StudioIDE() {
     useStudioProject();
   // True once we know the viewer is a student, so edits should persist to the DB.
   const serverBacked = useRef(false);
+  const [showTerminal, setShowTerminal] = useState(false);
 
   useEffect(() => {
     hydrate();
@@ -70,12 +72,22 @@ export function StudioIDE() {
         </span>
         <button
           type="button"
+          onClick={() => setShowTerminal((v) => !v)}
+          aria-pressed={showTerminal}
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10 ${
+            showTerminal ? "text-brand" : "opacity-70 hover:opacity-100"
+          }`}
+        >
+          <TerminalSquare className="h-3.5 w-3.5" /> Terminal
+        </button>
+        <button
+          type="button"
           onClick={() => {
             if (confirm("Reset the project to the starter files? Your changes will be lost.")) {
               reset();
             }
           }}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
         >
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </button>
@@ -115,6 +127,12 @@ export function StudioIDE() {
           <RunPreview />
         </section>
       </div>
+
+      {showTerminal && (
+        <div className="mt-2 h-56 shrink-0">
+          <LogicTerminal />
+        </div>
+      )}
     </div>
   );
 }
