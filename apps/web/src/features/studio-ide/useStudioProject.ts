@@ -16,6 +16,8 @@ interface Persisted {
   files: FsNode[];
   openTabs: string[];
   activeId: string | null;
+  /** The template this workspace was started from (drives the active brief). */
+  templateId: string | null;
 }
 
 function seedFiles(): FsNode[] {
@@ -28,7 +30,9 @@ function load(): Persisted {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const p = JSON.parse(raw) as Persisted;
-        if (Array.isArray(p.files) && p.files.length > 0) return p;
+        if (Array.isArray(p.files) && p.files.length > 0) {
+          return { ...p, templateId: p.templateId ?? null };
+        }
       }
     } catch {
       /* fall through to a fresh project */
@@ -36,7 +40,7 @@ function load(): Persisted {
   }
   const files = seedFiles();
   const first = files[0]?.id ?? null;
-  return { files, openTabs: first ? [first] : [], activeId: first };
+  return { files, openTabs: first ? [first] : [], activeId: first, templateId: null };
 }
 
 function persist(p: Persisted) {
@@ -60,16 +64,24 @@ interface StudioProjectState extends Persisted {
   addFile: (name: string) => string | null;
   deleteFile: (id: string) => void;
   reset: () => void;
+  /** Replace the workspace with a project template's starter files. */
+  loadTemplate: (files: Array<{ name: string; content: string }>, templateId: string) => void;
 }
 
 function save(state: Persisted) {
-  persist({ files: state.files, openTabs: state.openTabs, activeId: state.activeId });
+  persist({
+    files: state.files,
+    openTabs: state.openTabs,
+    activeId: state.activeId,
+    templateId: state.templateId,
+  });
 }
 
 export const useStudioProject = create<StudioProjectState>((set, get) => ({
   files: [],
   openTabs: [],
   activeId: null,
+  templateId: null,
   hydrated: false,
 
   hydrate: () => {
@@ -91,6 +103,7 @@ export const useStudioProject = create<StudioProjectState>((set, get) => ({
         files,
         openTabs: first ? [first] : [],
         activeId: first,
+        templateId: null,
         hydrated: true,
       };
       save(next);
@@ -165,6 +178,28 @@ export const useStudioProject = create<StudioProjectState>((set, get) => ({
         files,
         openTabs: first ? [first] : [],
         activeId: first,
+        templateId: null,
+        hydrated: true,
+      };
+      save(next);
+      return next;
+    }),
+
+  loadTemplate: (incoming, templateId) =>
+    set(() => {
+      const files: FsNode[] = incoming.map((f) => ({
+        id: nextId(),
+        parentId: null,
+        name: f.name,
+        kind: "file",
+        content: f.content,
+      }));
+      const first = files[0]?.id ?? null;
+      const next = {
+        files,
+        openTabs: first ? [first] : [],
+        activeId: first,
+        templateId,
         hydrated: true,
       };
       save(next);

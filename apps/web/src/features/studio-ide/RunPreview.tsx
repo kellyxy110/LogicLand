@@ -9,7 +9,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { buildRunnableDoc, isPythonFile } from "@/lib/engines/studio-project";
 import { runPython } from "@/lib/engines/pyodide-runner";
 import { explainError } from "@/lib/engines/error-anatomy";
-import { DEFAULT_BRIEF, briefProgress, evaluateBrief } from "@/lib/engines/project-brief";
+import { DEFAULT_BRIEF, briefProgress, evaluateBrief, type ProjectBrief } from "@/lib/engines/project-brief";
+import { templateById } from "@/lib/engines/project-templates";
 import { useStudioProject } from "./useStudioProject";
 
 interface LogLine {
@@ -20,6 +21,7 @@ interface LogLine {
 export function RunPreview() {
   const files = useStudioProject((s) => s.files);
   const activeId = useStudioProject((s) => s.activeId);
+  const templateId = useStudioProject((s) => s.templateId);
   const active = files.find((f) => f.id === activeId) ?? null;
   const python = !!active && isPythonFile(active.name);
 
@@ -80,7 +82,8 @@ export function RunPreview() {
   }, []);
 
   const errorCount = logs.filter((l) => l.level === "error").length;
-  const taskResults = evaluateBrief(DEFAULT_BRIEF, files);
+  const brief = (templateId && templateById(templateId)?.brief) || DEFAULT_BRIEF;
+  const taskResults = evaluateBrief(brief, files);
   const donePct = briefProgress(taskResults);
 
   return (
@@ -144,7 +147,7 @@ export function RunPreview() {
             )}
           </div>
         ) : (
-          <TasksPanel results={taskResults} pct={donePct} />
+          <TasksPanel brief={brief} results={taskResults} pct={donePct} />
         )}
       </div>
     </div>
@@ -154,16 +157,18 @@ export function RunPreview() {
 // The build brief + acceptance criteria, ticked off deterministically as the
 // learner's code meets them (no AI decides done-ness).
 function TasksPanel({
+  brief,
   results,
   pct,
 }: {
+  brief: ProjectBrief;
   results: { id: string; label: string; passed: boolean }[];
   pct: number;
 }) {
   return (
     <div className="h-full overflow-y-auto p-4 text-sm">
-      <h3 className="font-display text-base font-extrabold">{DEFAULT_BRIEF.title}</h3>
-      <p className="mt-0.5 opacity-70">{DEFAULT_BRIEF.story}</p>
+      <h3 className="font-display text-base font-extrabold">{brief.title}</h3>
+      <p className="mt-0.5 opacity-70">{brief.story}</p>
       <div className="my-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
           className="h-full rounded-full bg-gradient-to-r from-meadow to-brand transition-all"

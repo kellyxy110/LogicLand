@@ -4,7 +4,8 @@
 // environment. Monaco is dynamically imported (ssr:false) so its chunk only
 // loads here, never in the young-learner bundles.
 import dynamic from "next/dynamic";
-import { FolderCode, RotateCcw, TerminalSquare } from "lucide-react";
+import Link from "next/link";
+import { FolderCode, FilePlus2, RotateCcw, TerminalSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { languageForFile } from "@/lib/engines/studio-project";
 import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
@@ -73,12 +74,18 @@ export function StudioIDE() {
         <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-brand">
           Build
         </span>
+        <Link
+          href="/studio/new"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+        >
+          <FilePlus2 className="h-3.5 w-3.5" /> New
+        </Link>
         {can("terminal") && (
           <button
             type="button"
             onClick={() => setShowTerminal((v) => !v)}
             aria-pressed={showTerminal}
-            className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10 ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10 ${
               showTerminal ? "text-brand" : "opacity-70 hover:opacity-100"
             }`}
           >
@@ -92,9 +99,7 @@ export function StudioIDE() {
               reset();
             }
           }}
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10 ${
-            can("terminal") ? "" : "ml-auto"
-          }`}
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
         >
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </button>
