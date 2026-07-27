@@ -359,3 +359,37 @@ observed, cost-tracked and — crucially — **degrade to a deterministic fallba
 by config; cost and safety are enforced centrally. **Blocker to go live: LLM
 provider credentials + choosing production models** (the registry + routing are
 ready; only real keys/deploy remain).
+
+## ADR-024 Engine production-readiness — private, hardened, observable
+**Context:** the engine owns curriculum, tutoring, generation and the AI Gateway,
+but is a **private** service (only the web app's server should reach it) and is
+**not** on Vercel. Before it can be exposed it needs auth, abuse controls,
+structured observability, readiness signals, fail-fast config and a documented
+deploy path — without hardcoding a host.
+**Decision (in `logicland-engine`):**
+- **Service auth** (`middleware/service_auth.py`): every `/api` request must
+  carry a shared secret in `X-Service-Token` (constant-time compared). Probes and
+  docs are exempt. Skipped when no token is set (local dev); a missing token in
+  production is a **startup error**.
+- **Rate limiting** (`middleware/rate_limit.py`): per-client fixed-window limiter
+  (honours `X-Forwarded-For`), `429 + Retry-After` on exceed. In-process — a
+  multi-instance deploy fronts it with a shared store (documented).
+- **Observability** (`middleware/observability.py` + `config/logging.py`):
+  per-request correlation id (echoed as `X-Request-ID`), one structured access
+  log line (method/path/status/latency); `JSON_LOGS=true` emits JSON for log
+  platforms. The gateway's cost/attempt logs ride the same pipeline.
+- **Health vs readiness:** `/health` = liveness (cheap); `/ready` = readiness,
+  `503` when config is unsound, reporting provider/db/safety checks with no
+  external calls.
+- **Fail-fast config** (`Settings.production_problems()`): in `production` the
+  engine refuses to boot if `DEBUG` is on, `CORS_ORIGINS` is `*`/empty, a non-
+  local origin is http, `SERVICE_TOKEN` is missing, or child-safety is off.
+  `/docs` is hidden in production.
+- **Container + manifests:** non-root Dockerfile with a `HEALTHCHECK`;
+  `.dockerignore`; provider-neutral `render.yaml` and `fly.toml` with all secrets
+  `sync:false`/`fly secrets`. Runbook: `docs/engine-deployment.md`.
+**Consequences:** the engine is safe to expose behind a single shared secret,
+resists floods, is debuggable via correlated JSON logs, and self-rejects unsound
+production config. **Blocker to go live: choose a deploy host + set the secrets
+(`SERVICE_TOKEN`, `CORS_ORIGINS`, `DATABASE_URL`, optional `LLM_*`) and set the
+same `SERVICE_TOKEN` in the web app so it sends the header.**

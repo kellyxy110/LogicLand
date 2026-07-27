@@ -33,6 +33,24 @@ class Settings(BaseSettings):
     # Comma-separated list of allowed origins for the Next.js frontend.
     cors_origins: str = "http://localhost:3000"
 
+    # --- Service auth (Next.js server <-> engine shared secret, ADR-024) ---
+    # The frontend's server calls the engine with this token in X-Service-Token.
+    # Enforcement is skipped when the token is empty (local dev); in production a
+    # missing token is a startup error (see production_problems()).
+    service_auth_enabled: bool = True
+    service_token: str = Field(
+        default="", description="Shared secret required in the X-Service-Token header for /api routes."
+    )
+
+    # --- Rate limiting (per-client fixed window, ADR-024) ---
+    rate_limit_enabled: bool = True
+    rate_limit_requests: int = 120
+    rate_limit_window_s: int = 60
+
+    # --- Observability ---
+    # Emit one structured JSON log line per request (recommended in production).
+    json_logs: bool = False
+
     # --- Database (engine-owned analytics / derived data) ---
     database_url: str = Field(
         default="postgresql+asyncpg://logicland:logicland@localhost:5432/logicland",
@@ -54,6 +72,28 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    def production_problems(self) -> list[str]:
+        """Return a list of misconfigurations that must block a production boot.
+
+        Empty in non-production. The engine calls this at startup and refuses to
+        serve if anything is returned — fail fast, never half-configured.
+        """
+        problems: list[str] = []
+        if self.environment != "production":
+            return problems
+        if self.debug:
+            problems.append("DEBUG must be false in production.")
+        origins = self.cors_origin_list
+        if not origins or "*" in origins:
+            problems.append("CORS_ORIGINS must be an explicit allow-list (never '*') in production.")
+        if any(o.startswith("http://") and "localhost" not in o and "127.0.0.1" not in o for o in origins):
+            problems.append("CORS_ORIGINS must use https for non-local origins in production.")
+        if self.service_auth_enabled and not self.service_token:
+            problems.append("SERVICE_TOKEN must be set when service auth is enabled in production.")
+        if not self.llm_child_safety_enabled:
+            problems.append("LLM_CHILD_SAFETY_ENABLED must stay true in production.")
+        return problems
 
 
 @lru_cache

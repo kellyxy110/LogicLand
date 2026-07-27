@@ -1,0 +1,48 @@
+# Render blueprint for the LogicLand Intelligence Engine (ADR-024).
+# Deploy target is intentionally provider-neutral — this is one supported host.
+# Secrets are declared `sync: false` so they are set in the Render dashboard,
+# never committed. See docs/engine-deployment.md.
+services:
+  - type: web
+    name: logicland-engine
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: JSON_LOGS
+        value: "true"
+      # Explicit https allow-list of the web app origin(s).
+      - key: CORS_ORIGINS
+        sync: false
+      # Shared secret the Next.js server sends in X-Service-Token.
+      - key: SERVICE_TOKEN
+        sync: false
+      - key: SERVICE_AUTH_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS
+        value: "120"
+      - key: RATE_LIMIT_WINDOW_S
+        value: "60"
+      - key: DATABASE_URL
+        sync: false
+      # AI provider (OpenAI-compatible). Gateway degrades to deterministic
+      # fallback when unset (ADR-023), so these are optional to boot.
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: LLM_CHILD_SAFETY_ENABLED
+        value: "true"
