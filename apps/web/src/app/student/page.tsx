@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AiHelper } from "@/components/AiHelper";
 import { MyMathProgress } from "@/features/math-fix/MyMathProgress";
+import { AgeModeSwitcher } from "@/features/age-mode/AgeModeSwitcher";
 import { worldSkin } from "@/features/worlds/theme";
 import { getWorlds } from "@/lib/worlds";
 import { useStudent } from "@/lib/student-store";
@@ -77,6 +78,10 @@ export default function StudentHome() {
         </div>
         <StreakFlame days={state.dailyStreak} />
       </motion.header>
+
+      <div className="relative mb-4 flex justify-end">
+        <AgeModeSwitcher compact />
+      </div>
 
       {/* Treasure chest: XP / coins / stars / badges */}
       <Card className="relative mb-6">

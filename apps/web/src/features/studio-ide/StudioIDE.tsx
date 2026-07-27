@@ -11,6 +11,7 @@ import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
 import { useStudioProject } from "./useStudioProject";
 import { LogicTerminal } from "./LogicTerminal";
 import { DependencyList } from "./DependencyList";
+import { useAgeMode } from "@/features/age-mode/AgeModeProvider";
 import { FileTree } from "./FileTree";
 import { EditorTabs } from "./EditorTabs";
 import { RunPreview } from "./RunPreview";
@@ -28,6 +29,7 @@ export function StudioIDE() {
   // True once we know the viewer is a student, so edits should persist to the DB.
   const serverBacked = useRef(false);
   const [showTerminal, setShowTerminal] = useState(false);
+  const { can, term } = useAgeMode();
 
   useEffect(() => {
     hydrate();
@@ -71,16 +73,18 @@ export function StudioIDE() {
         <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-brand">
           Build
         </span>
-        <button
-          type="button"
-          onClick={() => setShowTerminal((v) => !v)}
-          aria-pressed={showTerminal}
-          className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10 ${
-            showTerminal ? "text-brand" : "opacity-70 hover:opacity-100"
-          }`}
-        >
-          <TerminalSquare className="h-3.5 w-3.5" /> Terminal
-        </button>
+        {can("terminal") && (
+          <button
+            type="button"
+            onClick={() => setShowTerminal((v) => !v)}
+            aria-pressed={showTerminal}
+            className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/10 ${
+              showTerminal ? "text-brand" : "opacity-70 hover:opacity-100"
+            }`}
+          >
+            <TerminalSquare className="h-3.5 w-3.5" /> {term("terminal")}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => {
@@ -88,7 +92,9 @@ export function StudioIDE() {
               reset();
             }
           }}
-          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10 ${
+            can("terminal") ? "" : "ml-auto"
+          }`}
         >
           <RotateCcw className="h-3.5 w-3.5" /> Reset
         </button>
@@ -102,7 +108,7 @@ export function StudioIDE() {
               <div className="min-h-0 flex-1 overflow-hidden">
                 <FileTree />
               </div>
-              <DependencyList />
+              {can("dependencies") && <DependencyList />}
             </>
           ) : (
             <div className="p-3 text-xs opacity-50">Loading files…</div>

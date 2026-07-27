@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { APP_NAME, TAGLINE } from "@logicland/shared";
 import { AppHeader } from "@/components/AppHeader";
 import { MotionProvider } from "@/components/MotionProvider";
+import { AgeModeProvider } from "@/features/age-mode/AgeModeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,8 +17,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en" suppressHydrationWarning>
         <body className="min-h-screen font-sans antialiased">
           <MotionProvider>
-            <AppHeader />
-            {children}
+            <AgeModeProvider>
+              <AppHeader />
+              {children}
+            </AgeModeProvider>
           </MotionProvider>
         </body>
       </html>
