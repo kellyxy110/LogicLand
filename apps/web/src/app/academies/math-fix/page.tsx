@@ -53,7 +53,9 @@ export default function MathFixHome() {
                 ? "×+"
                 : t.id === "fractions-of-amount"
                   ? "¾"
-                  : "x"}
+                  : t.id === "percentages-of-amount"
+                    ? "%"
+                    : "x"}
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-lg font-bold">{t.name}</h2>

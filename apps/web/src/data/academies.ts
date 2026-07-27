@@ -38,7 +38,7 @@ export const ACADEMIES: Academy[] = [
     name: "Mathematics Academy · Math Fix™",
     tagline: "The AI that repairs misconceptions, not just marks answers.",
     description:
-      "LogicLand's flagship. Math Fix diagnoses the exact idea a learner is missing, explains it, and generates targeted practice until mastery. Three topics are live now — Linear Equations, Order of Operations and Fractions of an Amount — with more, through WAEC, JAMB, IGCSE, A-Level, SAT and Olympiad, on the way.",
+      "LogicLand's flagship. Math Fix diagnoses the exact idea a learner is missing, explains it, and generates targeted practice until mastery. Four topics are live now — Linear Equations, Order of Operations, Fractions of an Amount and Percentages of an Amount — with more, through WAEC, JAMB, IGCSE, A-Level, SAT and Olympiad, on the way.",
     icon: "sigma",
     gradient: "from-rose-500 to-orange-500",
     status: "live",
@@ -47,7 +47,7 @@ export const ACADEMIES: Academy[] = [
     ageBands: ["All Ages"],
     plannedTracks: 40,
     highlights: [
-      "Three topics live, with mastery on the dashboards",
+      "Four topics live, with mastery on the dashboards",
       "Names the exact misconception, then repairs it",
       "Adaptive practice that tracks true mastery",
     ],

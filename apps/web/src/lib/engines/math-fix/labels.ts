@@ -4,12 +4,14 @@
 import { misconceptionLibrary } from "./diagnose";
 import { ORDER_MISCONCEPTIONS } from "./topics/order-of-operations";
 import { FRACTION_MISCONCEPTIONS } from "./topics/fractions-of-amount";
+import { PERCENT_MISCONCEPTIONS } from "./topics/percentages-of-amount";
 
 const LABELS: Record<string, string> = Object.fromEntries(
   [
     ...misconceptionLibrary(),
     ...ORDER_MISCONCEPTIONS,
     ...FRACTION_MISCONCEPTIONS,
+    ...PERCENT_MISCONCEPTIONS,
   ].map((m) => [m.id, m.name]),
 );
 
