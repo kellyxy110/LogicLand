@@ -24,6 +24,31 @@ class TutorAskResponse(BaseModel):
     safe: bool = True
 
 
+# --- Math Fix: re-explain a wrong answer another way ---
+class MathExplainRequest(BaseModel):
+    """Context for re-explaining a Math Fix problem in fresh words.
+
+    The deterministic engine has already decided the correct answer and the
+    misconception; this asks only for a *different explanation of the same
+    method*. The correct answer is passed in so the model can never change it.
+    """
+
+    topic: str = Field(min_length=1, max_length=80)
+    prompt: str = Field(min_length=1, max_length=200)  # e.g. "20% of 60"
+    instruction: str = Field(min_length=1, max_length=80)  # e.g. "Work it out"
+    correct_answer: str = Field(min_length=1, max_length=80)
+    student_answer: str | None = Field(default=None, max_length=80)
+    misconception_name: str | None = Field(default=None, max_length=120)
+    steps: list[str] = Field(default_factory=list)
+
+
+class MathExplainResponse(BaseModel):
+    explanation: str
+    # "ai" when a model produced it; "fallback" when the deterministic restatement did.
+    source: str = "ai"
+    safe: bool = True
+
+
 # --- Worksheet / Quiz / Flashcard generation ---
 class GenerateRequest(BaseModel):
     mission_slug: str

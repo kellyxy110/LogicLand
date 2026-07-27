@@ -15,6 +15,7 @@ import {
   Delete,
   Lightbulb,
   PenLine,
+  Sparkles,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -23,6 +24,7 @@ import {
   MATH_TOPICS,
   mathTopicById,
 } from "@/lib/engines/math-fix";
+import { explainMathAction } from "@/app/actions/math-fix";
 
 const SketchCanvas = dynamic(() => import("./SketchCanvas").then((m) => m.SketchCanvas), {
   ssr: false,
@@ -45,6 +47,8 @@ export function MathSketchpad({ initialTopicId }: { initialTopicId?: string }) {
   const [input, setInput] = useState("");
   const [result, setResult] = useState<Diagnosis | null>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState(false);
   // Bump to clear the canvas when a new problem is posed.
   const [canvasKey, setCanvasKey] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -54,9 +58,29 @@ export function MathSketchpad({ initialTopicId }: { initialTopicId?: string }) {
     setResult(null);
     setInput("");
     setShowSteps(false);
+    setExplanation(null);
     setProblem(topic.generate(START_DIFFICULTY));
     setCanvasKey((k) => k + 1);
   }, [topic]);
+
+  const explainAnotherWay = useCallback(async () => {
+    if (!problem || !result || explaining) return;
+    setExplaining(true);
+    try {
+      const res = await explainMathAction({
+        topicId,
+        prompt: problem.prompt,
+        instruction: problem.instruction,
+        correctAnswer: String(result.correctAnswer),
+        studentAnswer: input,
+        misconceptionName: result.misconception?.name ?? null,
+        steps: result.steps,
+      });
+      setExplanation(res.text);
+    } finally {
+      setExplaining(false);
+    }
+  }, [problem, result, explaining, topicId, input]);
 
   useEffect(() => {
     pose();
@@ -70,6 +94,7 @@ export function MathSketchpad({ initialTopicId }: { initialTopicId?: string }) {
     if (!Number.isFinite(value)) return;
     setResult(problem.diagnose(value));
     setShowSteps(false);
+    setExplanation(null);
   }, [problem, result, input]);
 
   const isEquation = problem?.instruction === "Solve for x";
@@ -240,6 +265,29 @@ export function MathSketchpad({ initialTopicId }: { initialTopicId?: string }) {
                             </motion.ol>
                           )}
                         </AnimatePresence>
+
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            onClick={explainAnotherWay}
+                            disabled={explaining}
+                            className="inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline disabled:opacity-50"
+                          >
+                            <Sparkles className="h-4 w-4" />
+                            {explaining
+                              ? "Thinking of another way…"
+                              : "Explain it another way"}
+                          </button>
+                          {explanation && (
+                            <motion.p
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mt-2 rounded-xl bg-brand/5 p-3 text-sm opacity-90"
+                            >
+                              {explanation}
+                            </motion.p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </Card>

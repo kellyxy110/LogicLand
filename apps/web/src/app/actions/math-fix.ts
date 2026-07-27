@@ -10,6 +10,7 @@ import {
   type MathMasteryView,
 } from "@logicland/database";
 import { currentStudent } from "@/lib/current-student";
+import { workedExampleText } from "@/lib/engines/math-fix";
 
 export async function recordMathAttemptAction(input: MathAttemptInput): Promise<void> {
   try {
@@ -30,4 +31,60 @@ export async function getMyMathMastery(): Promise<MathMasteryView[]> {
   } catch {
     return [];
   }
+}
+
+export interface MathExplainInput {
+  topicId: string;
+  prompt: string;
+  instruction: string;
+  correctAnswer: string;
+  studentAnswer?: string | null;
+  misconceptionName?: string | null;
+  steps: string[];
+}
+
+export interface MathExplanation {
+  text: string;
+  /** "ai" from the engine's LLM; "example" from the deterministic fallback. */
+  source: "ai" | "example";
+}
+
+/**
+ * Re-explain a Math Fix problem another way. The deterministic diagnosis stays
+ * the source of truth; this only re-words the method. It asks the engine (never
+ * an LLM directly — rule 8; the engine runs it through provider.py + safety.py)
+ * when LOGICLAND_ENGINE_URL is configured, and ALWAYS falls back to a
+ * deterministic worked example so the feature works even before the engine is
+ * deployed. Never throws.
+ */
+export async function explainMathAction(
+  input: MathExplainInput,
+): Promise<MathExplanation> {
+  const base = process.env.LOGICLAND_ENGINE_URL;
+  if (base) {
+    try {
+      const res = await fetch(`${base.replace(/\/$/, "")}/api/math-fix/explain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: input.topicId,
+          prompt: input.prompt,
+          instruction: input.instruction,
+          correct_answer: input.correctAnswer,
+          student_answer: input.studentAnswer ?? null,
+          misconception_name: input.misconceptionName ?? null,
+          steps: input.steps,
+        }),
+        signal: AbortSignal.timeout(6000),
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { explanation?: string };
+        if (data.explanation) return { text: data.explanation, source: "ai" };
+      }
+    } catch {
+      // Engine unavailable / slow — fall through to the deterministic example.
+    }
+  }
+  return { text: workedExampleText(input.topicId), source: "example" };
 }

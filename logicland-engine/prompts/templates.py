@@ -51,3 +51,36 @@ def tutor_user_prompt(question: str, mission_slug: str | None, hint_level: int) 
         f'The child asks: "{question}".{context} '
         f"Give {strength} that helps them think, without solving it for them."
     )
+
+
+MATH_EXPLAIN_SYSTEM = (
+    "You are Robo's Helper in LogicLand, helping a child aged 5 to 10 who just got "
+    "a maths problem wrong. Re-explain the SAME correct method in fresh, simple "
+    "words — a friendly, different angle from the steps you are given. Use short "
+    "sentences and at most one emoji. NEVER change the correct answer and NEVER "
+    "state a different answer. Do not mention that you are an AI."
+)
+
+
+def math_explain_user_prompt(
+    prompt: str,
+    instruction: str,
+    correct_answer: str,
+    misconception_name: str | None,
+    steps: list[str],
+) -> str:
+    mix_up = (
+        f" The child's mix-up was: {misconception_name}." if misconception_name else ""
+    )
+    step_text = (
+        " ".join(f"({i + 1}) {s}" for i, s in enumerate(steps))
+        if steps
+        else "(no steps provided)"
+    )
+    return (
+        f'The problem is "{prompt}" ({instruction}). '
+        f"The correct answer is {correct_answer}.{mix_up} "
+        f"The correct steps are: {step_text}. "
+        "Explain this another way in two or three short sentences so the idea "
+        "clicks, and keep exactly the same answer."
+    )

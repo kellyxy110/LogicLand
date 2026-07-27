@@ -7,3 +7,4 @@ export * from "./diagnose";
 export * from "./mastery";
 export * from "./registry";
 export * from "./labels";
+export * from "./explain";

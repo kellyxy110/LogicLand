@@ -20,6 +20,8 @@ from models.schemas import (
     CertificateResponse,
     FlashcardResponse,
     GenerateRequest,
+    MathExplainRequest,
+    MathExplainResponse,
     MissionCompleteRequest,
     MissionCompleteResponse,
     ProgressRequest,
@@ -33,7 +35,7 @@ from models.schemas import (
 )
 from progress import service as progress_service
 from quizzes.service import QuizService
-from tutor.service import TutorService
+from tutor.service import MathExplainService, TutorService
 from worksheets.service import WorksheetService
 
 # --- Curriculum ---
@@ -133,6 +135,16 @@ tutor_router = APIRouter(prefix="/tutor", tags=["tutor"])
 @tutor_router.post("/ask", response_model=TutorAskResponse)
 async def ask_tutor(req: TutorAskRequest) -> TutorAskResponse:
     return await TutorService().ask(req)
+
+
+# --- Math Fix (deterministic diagnosis lives in the web engine; this only
+# re-explains a wrong answer another way, and degrades to a safe restatement) ---
+mathfix_router = APIRouter(prefix="/math-fix", tags=["math-fix"])
+
+
+@mathfix_router.post("/explain", response_model=MathExplainResponse)
+async def explain_math(req: MathExplainRequest) -> MathExplainResponse:
+    return await MathExplainService().explain(req)
 
 
 # --- Reports (stub wiring; service to be implemented in reports/) ---
@@ -241,6 +253,7 @@ async def gen_flashcards(req: GenerateRequest) -> FlashcardResponse:
 ALL_ROUTERS = [
     curriculum_router,
     tutor_router,
+    mathfix_router,
     reports_router,
     certificates_router,
     progress_router,
