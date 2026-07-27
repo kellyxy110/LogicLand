@@ -8,6 +8,7 @@ import { Eye, Play, Terminal, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { buildRunnableDoc, isPythonFile } from "@/lib/engines/studio-project";
 import { runPython } from "@/lib/engines/pyodide-runner";
+import { explainError } from "@/lib/engines/error-anatomy";
 import { useStudioProject } from "./useStudioProject";
 
 interface LogLine {
@@ -130,27 +131,60 @@ export function RunPreview() {
             {logs.length === 0 ? (
               <p className="opacity-50">Output appears here when your code runs.</p>
             ) : (
-              logs.map((l, i) => (
-                <div
-                  key={i}
-                  className={`flex gap-2 border-b border-black/5 py-1 dark:border-white/5 ${
-                    l.level === "error"
-                      ? "text-rose-500"
-                      : l.level === "warn"
-                        ? "text-amber-500"
-                        : l.level === "info"
-                          ? "opacity-60"
-                          : ""
-                  }`}
-                >
-                  {l.level === "error" && <TriangleAlert className="mt-0.5 h-3 w-3 shrink-0" />}
-                  <span className="whitespace-pre-wrap break-words">{l.text}</span>
-                </div>
-              ))
+              logs.map((l, i) => <ConsoleLine key={i} line={l} />)
             )}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// One console line. Errors get an "explain" toggle that reveals the 3-layer
+// anatomy (original message stays; what-it-means + plain-words appear).
+function ConsoleLine({ line }: { line: LogLine }) {
+  const [open, setOpen] = useState(false);
+  const isError = line.level === "error";
+  const tone =
+    line.level === "error"
+      ? "text-rose-500"
+      : line.level === "warn"
+        ? "text-amber-500"
+        : line.level === "info"
+          ? "opacity-60"
+          : "";
+  return (
+    <div className="border-b border-black/5 py-1 dark:border-white/5">
+      <div className={`flex items-start gap-2 ${tone}`}>
+        {isError && <TriangleAlert className="mt-0.5 h-3 w-3 shrink-0" />}
+        <span className="min-w-0 flex-1 whitespace-pre-wrap break-words">{line.text}</span>
+        {isError && (
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="shrink-0 text-[0.65rem] font-bold uppercase tracking-wide underline decoration-dotted opacity-80 hover:opacity-100"
+          >
+            {open ? "hide" : "explain"}
+          </button>
+        )}
+      </div>
+      {isError && open && <ErrorAnatomyBox raw={line.text} />}
+    </div>
+  );
+}
+
+function ErrorAnatomyBox({ raw }: { raw: string }) {
+  const a = explainError(raw);
+  return (
+    <div className="mt-1 space-y-1 rounded-md bg-black/[0.04] p-2 text-[0.7rem] leading-relaxed dark:bg-white/5">
+      <p>
+        <span className="font-bold text-brand">What it means: </span>
+        <span className="opacity-80">{a.technical}</span>
+      </p>
+      <p>
+        <span className="font-bold text-meadow">In plain words: </span>
+        <span className="opacity-80">{a.learning}</span>
+      </p>
     </div>
   );
 }
