@@ -10,6 +10,7 @@ import { languageForFile } from "@/lib/engines/studio-project";
 import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
 import { useStudioProject } from "./useStudioProject";
 import { LogicTerminal } from "./LogicTerminal";
+import { DependencyList } from "./DependencyList";
 import { FileTree } from "./FileTree";
 import { EditorTabs } from "./EditorTabs";
 import { RunPreview } from "./RunPreview";
@@ -95,9 +96,14 @@ export function StudioIDE() {
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[190px_1fr_minmax(320px,42%)]">
         {/* Explorer */}
-        <aside className="min-h-0 overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-black/10 dark:border-white/10">
           {hydrated ? (
-            <FileTree />
+            <>
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <FileTree />
+              </div>
+              <DependencyList />
+            </>
           ) : (
             <div className="p-3 text-xs opacity-50">Loading files…</div>
           )}
