@@ -213,3 +213,65 @@ experience. Sibling products integrate later without entangling LogicLand's core
 **Consequences:** clean seams for shared services; LogicLand stays focused. No
 immediate re-platforming — this names the boundary we build toward, not a
 rewrite.
+
+## ADR-020 Consent-gated public sharing (DRAFT — awaiting policy sign-off)
+**Status:** *Draft. Data model + flow designed; NOT implemented. Public
+visibility stays OFF until the owner signs off on the consent policy.*
+**Context:** learners (aged 5–10 and up) will want to share projects and
+portfolios. Exposing a minor's work publicly is a safeguarding/PII decision, not
+an engineering default. Everything must be **private by default**, and any step
+toward wider visibility must be **explicitly approved by a responsible adult**.
+**Decision (target design):**
+- **Visibility ladder**, most-private first — a project/portfolio has exactly one
+  level: `private` (owner only) → `portfolio` (owner + linked parent/teacher) →
+  `school` (within the learner's classroom/school) → `anonymous_showcase` (public
+  but no name/PII, no profile link) → `public_showcase` (named, public) →
+  `competition` (visible to a specific event's judges/audience).
+- **Approvals required to *raise* visibility**, by role and level:
+  - to `school`: teacher **or** parent approval;
+  - to `anonymous_showcase` / `competition`: parent approval;
+  - to `public_showcase`: parent **and** (for school-managed accounts) school-admin
+    approval. Lowering visibility never needs approval and takes effect at once.
+- **PII scrubbing** at `anonymous_showcase`: strip display name, avatar, age,
+  free-text that may contain names; show work + skills only. A deterministic
+  scrubber runs before anything leaves the private boundary.
+- **Revocable + audited:** any approver (or the platform) can revoke; every
+  visibility change and approval is logged with who/when.
+- **Share links** are unguessable tokens, scoped to the granted level, and
+  expire; they never elevate visibility on their own.
+**Data model (draft — to migrate only after sign-off):**
+```
+enum Visibility { PRIVATE PORTFOLIO SCHOOL ANONYMOUS_SHOWCASE PUBLIC_SHOWCASE COMPETITION }
+enum ShareState { PENDING APPROVED REJECTED REVOKED }
+model ShareGrant {
+  id           String   @id @default(cuid())
+  studentId    String                       // owner (Student)
+  subjectType  String                       // "studio_project" | "portfolio"
+  subjectId    String                       // the thing being shared
+  visibility   Visibility @default(PRIVATE)
+  state        ShareState @default(PENDING)
+  token        String   @unique             // unguessable; for link scope
+  requestedBy  String                       // userId who asked
+  approvedBy   String?                       // userId who approved (parent/teacher/admin)
+  approverRole String?                       // "PARENT" | "TEACHER" | "SCHOOL_ADMIN"
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@index([studentId]) @@index([subjectType, subjectId])
+}
+model ShareAudit {
+  id         String   @id @default(cuid())
+  grantId    String
+  actorId    String
+  action     String   // "requested" | "approved" | "rejected" | "revoked" | "visibility_changed"
+  detail     String?
+  createdAt  DateTime @default(now())
+  @@index([grantId])
+}
+```
+**Consequences:** a real consent/audit spine LogicLand can build behind, with
+public visibility disabled until the owner sets the policy (who may approve what,
+default expiry, whether `public_showcase` is allowed for minors at all). No
+public route, migration, or PII exposure ships from this ADR — it is the plan the
+implementation will follow once approved. **Blocker to enable: the owner's
+policy decision.**
