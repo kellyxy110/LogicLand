@@ -1,7 +1,7 @@
 // Math Fix™ — the Mathematics Academy hub. Lists the live topics; each opens its
 // own adaptive practice session. Deterministic misconception diagnosis is the
 // through-line: every topic names *why* an answer is wrong, then repairs it.
-import { ArrowLeft, ArrowRight, Sigma } from "lucide-react";
+import { ArrowLeft, ArrowRight, PenLine, Sigma } from "lucide-react";
 import Link from "next/link";
 import { MATH_TOPICS } from "@/lib/engines/math-fix";
 
@@ -35,11 +35,27 @@ export default function MathFixHome() {
         </div>
       </div>
 
-      <p className="mb-6 rounded-2xl bg-brand/5 p-4 text-sm opacity-80">
+      <p className="mb-4 rounded-2xl bg-brand/5 p-4 text-sm opacity-80">
         Pick a topic. When an answer is wrong, Math Fix works out the exact idea
         that slipped, explains it kindly, and adapts the next question so you truly
         master it. More topics are on the way.
       </p>
+
+      <Link
+        href="/academies/math-fix/sketchpad"
+        className="mb-6 flex items-center gap-3 rounded-2xl border-2 border-rose-500/20 bg-gradient-to-r from-rose-500/5 to-orange-500/5 p-4 transition-colors hover:border-rose-500/40"
+      >
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white">
+          <PenLine className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-base font-bold">Open the Math Sketchpad</h2>
+          <p className="text-sm opacity-70">
+            Work a problem out by hand on a canvas — get the same feedback in place.
+          </p>
+        </div>
+        <ArrowRight className="h-5 w-5 shrink-0 text-brand" aria-hidden />
+      </Link>
 
       <div className="space-y-3">
         {MATH_TOPICS.map((t) => (
