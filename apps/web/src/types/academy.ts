@@ -9,6 +9,25 @@
  *  never a button that leads nowhere. */
 export type AcademyStatus = "live" | "soon";
 
+/** The three permanent foundations of LogicLand (ADR-010). Every academy belongs
+ *  to one; programming is the core, and everything else *branches from* these
+ *  three rather than sitting beside them as an equal. */
+export type FoundationId = "programming" | "mathematics" | "ai";
+
+/** Presentation metadata for a foundation section on the Academies hub. */
+export interface Foundation {
+  id: FoundationId;
+  name: string;
+  /** One-line hook for the section header. */
+  tagline: string;
+  /** A sentence framing what the foundation is about. */
+  description: string;
+  /** Lucide icon key, resolved in the UI (keeps data React-free). */
+  icon: string;
+  /** Tailwind gradient classes for the section emblem. */
+  gradient: string;
+}
+
 /** The learner tiers from the v2.0 vision. "All Ages" spans several bands. */
 export type AgeBand =
   | "Little Explorers" // 4–6
@@ -29,6 +48,11 @@ export interface Academy {
   /** Tailwind gradient classes for the card's emblem + accent. */
   gradient: string;
   status: AcademyStatus;
+  /** Which of the three permanent foundations this academy belongs to (ADR-010). */
+  foundation: FoundationId;
+  /** The core academy of its foundation — the one the others branch from. Exactly
+   *  one academy per foundation is the core. */
+  core?: boolean;
   /** Learner tiers this academy serves. */
   ageBands: AgeBand[];
   /** Planned number of courses/tracks — the roadmap ambition, not a live count. */

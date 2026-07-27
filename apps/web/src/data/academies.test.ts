@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { ACADEMIES, academyBySlug, sortedAcademies } from "./academies";
+import {
+  ACADEMIES,
+  academyBySlug,
+  academiesByFoundation,
+  FOUNDATIONS,
+  sortedAcademies,
+} from "./academies";
+import type { FoundationId } from "@/types/academy";
 
 // Guards the Academy catalog: honest live/soon wiring (a live academy must lead
 // somewhere real), unique slugs, and the flagship/live ordering the hub relies on.
@@ -47,5 +54,48 @@ describe("Academy catalog", () => {
   it("academyBySlug resolves known slugs and rejects unknown", () => {
     expect(academyBySlug("coding")?.name).toContain("Coding");
     expect(academyBySlug("nope")).toBeUndefined();
+  });
+});
+
+describe("Foundations (ADR-010)", () => {
+  const foundationIds = new Set<FoundationId>(FOUNDATIONS.map((f) => f.id));
+
+  it("every academy names a known foundation", () => {
+    for (const a of ACADEMIES) {
+      expect(foundationIds.has(a.foundation), `${a.slug} → ${a.foundation}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("each foundation has exactly one core academy", () => {
+    for (const f of FOUNDATIONS) {
+      const cores = ACADEMIES.filter((a) => a.foundation === f.id && a.core);
+      expect(cores.length, `${f.id} cores`).toBe(1);
+    }
+  });
+
+  it("coding is the programming core; math-fix the mathematics core", () => {
+    expect(academyBySlug("coding")?.foundation).toBe("programming");
+    expect(academyBySlug("coding")?.core).toBe(true);
+    expect(academyBySlug("math-fix")?.foundation).toBe("mathematics");
+    expect(academyBySlug("math-fix")?.core).toBe(true);
+  });
+
+  it("groups the whole catalog, in foundation order, core-first within each", () => {
+    const groups = academiesByFoundation();
+    expect(groups.map((g) => g.foundation.id)).toEqual([
+      "programming",
+      "mathematics",
+      "ai",
+    ]);
+    // No academy lost or duplicated in the grouping.
+    const grouped = groups.flatMap((g) => g.academies);
+    expect(grouped.length).toBe(ACADEMIES.length);
+    expect(new Set(grouped.map((a) => a.slug)).size).toBe(ACADEMIES.length);
+    // The core academy leads each non-empty group.
+    for (const g of groups) {
+      if (g.academies.length > 0) expect(g.academies[0].core).toBe(true);
+    }
   });
 });

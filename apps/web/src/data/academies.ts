@@ -4,11 +4,17 @@
 // without ever pretending to ship what isn't built yet. As each academy comes
 // online it flips to `status: "live"` with an `href`, and its Courses/Worlds are
 // wired beneath — no structural change needed here.
-import type { Academy } from "@/types/academy";
+// Every academy also names its `foundation` (ADR-010): LogicLand has three
+// permanent foundations — Programming, Mathematics, AI — and everything else
+// *branches from* them. The hub groups the catalog under these three so the
+// product reads as a programming platform first, not a flat list of subjects.
+import type { Academy, Foundation, FoundationId } from "@/types/academy";
 
 export const ACADEMIES: Academy[] = [
   {
     slug: "coding",
+    foundation: "programming",
+    core: true,
     name: "Coding Academy",
     tagline: "From first blocks to real software.",
     description:
@@ -27,6 +33,8 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "math-fix",
+    foundation: "mathematics",
+    core: true,
     name: "Mathematics Academy · Math Fix™",
     tagline: "The AI that repairs misconceptions, not just marks answers.",
     description:
@@ -46,6 +54,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "olympiad",
+    foundation: "mathematics",
     name: "Olympiad Academy",
     tagline: "Train for the world's toughest problems.",
     description:
@@ -63,6 +72,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "science",
+    foundation: "mathematics",
     name: "Science Academy",
     tagline: "Physics, chemistry and biology you can play with.",
     description:
@@ -80,6 +90,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "robotics",
+    foundation: "programming",
     name: "Robotics Academy",
     tagline: "Program robots — virtual, then real.",
     description:
@@ -97,6 +108,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "electronics",
+    foundation: "programming",
     name: "Electronics Academy",
     tagline: "Circuits, sensors and smart things.",
     description:
@@ -114,6 +126,8 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "ai",
+    foundation: "ai",
+    core: true,
     name: "Artificial Intelligence Academy",
     tagline: "Understand and build with AI.",
     description:
@@ -131,6 +145,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "design",
+    foundation: "programming",
     name: "Design Academy",
     tagline: "Make things beautiful and usable.",
     description:
@@ -148,6 +163,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "creator",
+    foundation: "programming",
     name: "Creator Academy",
     tagline: "Tell stories the world wants to watch.",
     description:
@@ -165,6 +181,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "entrepreneurship",
+    foundation: "programming",
     name: "Entrepreneurship Academy",
     tagline: "Turn ideas into ventures.",
     description:
@@ -182,6 +199,7 @@ export const ACADEMIES: Academy[] = [
   },
   {
     slug: "digital-skills",
+    foundation: "programming",
     name: "Digital Skills Academy",
     tagline: "The essentials for a digital life.",
     description:
@@ -211,4 +229,61 @@ export function sortedAcademies(): Academy[] {
 
 export function academyBySlug(slug: string): Academy | undefined {
   return ACADEMIES.find((a) => a.slug === slug);
+}
+
+/** The three permanent foundations (ADR-010), in the order the hub presents them:
+ *  Programming first (LogicLand's core), then Mathematics, then AI. */
+export const FOUNDATIONS: Foundation[] = [
+  {
+    id: "programming",
+    name: "Programming & Software Engineering",
+    tagline: "From first blocks to shipping real software.",
+    description:
+      "LogicLand's core. Learn to think, build and ship — code, tools, terminals, Git and real projects. Every other maker skill branches from here.",
+    icon: "code",
+    gradient: "from-indigo-500 to-violet-600",
+  },
+  {
+    id: "mathematics",
+    name: "Mathematics & Computational Reasoning",
+    tagline: "Understand it, visualise it, then compute it.",
+    description:
+      "The reasoning that powers real programming — from repairing misconceptions with Math Fix™ to Olympiad problem-solving and computational science.",
+    icon: "sigma",
+    gradient: "from-rose-500 to-orange-500",
+  },
+  {
+    id: "ai",
+    name: "Artificial Intelligence",
+    tagline: "Understand, use, and build intelligent systems.",
+    description:
+      "AI as engineering, not magic — how models work, how to use them responsibly, and how to build with them, on a gentle on-ramp to machine learning.",
+    icon: "brain",
+    gradient: "from-fuchsia-500 to-purple-600",
+  },
+];
+
+/** Order academies within a foundation: the core academy first, then live before
+ *  soon, and the flagship ahead of its peers. */
+function orderWithinFoundation(list: Academy[]): Academy[] {
+  return [...list].sort((a, b) => {
+    if (!!b.core !== !!a.core) return a.core ? -1 : 1;
+    if (a.status !== b.status) return a.status === "live" ? -1 : 1;
+    if (!!b.flagship !== !!a.flagship) return a.flagship ? -1 : 1;
+    return 0;
+  });
+}
+
+/** The catalog grouped under the three foundations, in hub order. Each group is
+ *  guaranteed to have its academies ordered core-first. */
+export function academiesByFoundation(): Array<{
+  foundation: Foundation;
+  academies: Academy[];
+}> {
+  return FOUNDATIONS.map((foundation) => ({
+    foundation,
+    academies: orderWithinFoundation(
+      ACADEMIES.filter((a) => a.foundation === foundation.id),
+    ),
+  }));
 }
