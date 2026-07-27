@@ -302,3 +302,32 @@ later.
 semantic layer is the moat (structured, machine-readable work), and it stays
 deterministic and offline-capable. Cost: two layers to keep in sync (blocks +
 scene) — handled in one `CanvasDoc` with a single autosave.
+
+## ADR-022 GitHub integration — OAuth, encrypted tokens, dormant until configured
+**Context:** learners should reach *real* Git/GitHub (ADR-016). We need repo
+connect, selection, branch/commit and revocation — without ever storing a token
+in plaintext, and without breaking the app when no GitHub app is configured.
+**Decision:**
+- **OAuth (web application flow):** `/api/github/connect` redirects to GitHub
+  with a signed, single-use `state`; `/api/github/callback` verifies `state`,
+  exchanges the code for a token, encrypts it, stores it, and returns the user
+  to Studio. Both routes **no-op with a clear "not configured" response** when
+  `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` are absent.
+- **Encrypted token at rest:** `GitHubConnection` stores the access token as
+  **AES-256-GCM** ciphertext (iv‖tag‖ct, base64). The key is derived (scrypt)
+  from `GITHUB_TOKEN_ENC_KEY`; tokens are never logged or returned to the client.
+- **Abstraction:** a `GitHubClient` wraps the REST API (user, repos, branches,
+  create-repo, put-file = commit) behind typed results, so call sites never
+  touch fetch details. `putFile` implements the commit workflow via the Contents
+  API (reads existing sha, then creates/updates on a branch).
+- **Sync states:** `disconnected → connecting → connected → syncing → synced →
+  error`, surfaced in the UI; every network path returns a typed ok/err result
+  (no throws to the UI). **Revocation** deletes the stored connection and best-
+  effort revokes the token at GitHub.
+- **Least privilege:** request the narrowest scopes (`repo`, `read:user`); the
+  token stays server-side only.
+**Consequences:** a complete, testable integration that is **inert until the
+owner provides three env values** — `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+and `GITHUB_TOKEN_ENC_KEY`. See `docs/github-integration.md` for setup. No
+other internal work remains. **Blocker to enable: those three secrets + a
+registered GitHub OAuth app.**

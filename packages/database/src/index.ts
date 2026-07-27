@@ -54,3 +54,10 @@ export {
   type StudioFile,
   type StudioProjectView,
 } from "./studio-projects";
+export {
+  getGitHubConnection,
+  saveGitHubConnection,
+  deleteGitHubConnection,
+  type GitHubConnectionInput,
+  type GitHubConnectionView,
+} from "./github";

@@ -5,7 +5,7 @@
 // loads here, never in the young-learner bundles.
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { FolderCode, FilePlus2, PenLine, RotateCcw, TerminalSquare } from "lucide-react";
+import { FolderCode, FilePlus2, Github, PenLine, RotateCcw, TerminalSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { languageForFile } from "@/lib/engines/studio-project";
 import { loadMyStudioProject, saveMyStudioProject } from "@/app/actions/studio";
@@ -85,6 +85,12 @@ export function StudioIDE() {
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
         >
           <PenLine className="h-3.5 w-3.5" /> Canvas
+        </Link>
+        <Link
+          href="/studio/github"
+          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+        >
+          <Github className="h-3.5 w-3.5" /> GitHub
         </Link>
         {can("terminal") && (
           <button
