@@ -47,7 +47,8 @@ export const MATHLABS: MathLab[] = [
       "Assemble assumptions and reasoning into a proof the system checks structurally — the differentiator that teaches genuine mathematical reasoning.",
     icon: "scroll",
     gradient: "from-indigo-500 to-violet-600",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/proof",
   },
   {
     id: "algebra-studio",
