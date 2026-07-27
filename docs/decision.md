@@ -275,3 +275,30 @@ default expiry, whether `public_showcase` is allowed for minors at all). No
 public route, migration, or PII exposure ships from this ADR — it is the plan the
 implementation will follow once approved. **Blocker to enable: the owner's
 policy decision.**
+
+## ADR-021 LogicLand Canvas — a semantic-block layer over Excalidraw
+**Context:** the Sketchpad embeds raw Excalidraw (freehand only). A
+LogicLand-native canvas needs *semantic* objects (code, equations, flowchart
+steps, notes) that other systems — Proof Workshop, AI tools, the Project Graph —
+can read and reason about, plus autosave, versions and safe export. Rewriting
+Excalidraw's element system is out of scope and unnecessary.
+**Decision:** keep Excalidraw as the **freehand drawing layer**, and add a
+**document model on top**: a `CanvasDoc` = `{ title, blocks: CanvasBlock[],
+scene (Excalidraw elements), linkedTo }`. `CanvasBlock` is a typed union
+(`note | label | flowchart | code | equation`) with text + position. The engine
+(`lib/engines/canvas-doc.ts`) is pure and testable — block CRUD, version
+snapshots (bounded history + restore), and a **safe export** (self-contained
+JSON / plain text; no external calls). The UI composes the draw surface + a
+semantic-blocks panel + an **age-adaptive toolbar** (which block kinds are
+offered follows ADR-012 capabilities: notes/labels for everyone, flowchart from
+Explorer, code/equation from Builder). Autosave + crash recovery via
+localStorage; server persistence reuses the Studio pattern later.
+**Integration seams (typed, not yet wired):** `linkedTo: {type,id}` links a
+canvas to a lesson/project; `blocks` are the units the **Project Graph** will
+ingest; `equation`/`flowchart` blocks are what the **Proof Workshop** and
+**AI explain** tools will consume. These are contracts now, implementations
+later.
+**Consequences:** a real, extensible canvas without forking Excalidraw; the
+semantic layer is the moat (structured, machine-readable work), and it stays
+deterministic and offline-capable. Cost: two layers to keep in sync (blocks +
+scene) — handled in one `CanvasDoc` with a single autosave.
