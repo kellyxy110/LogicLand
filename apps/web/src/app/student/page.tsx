@@ -20,6 +20,7 @@ import { AiHelper } from "@/components/AiHelper";
 import { MyMathProgress } from "@/features/math-fix/MyMathProgress";
 import { AgeModeSwitcher } from "@/features/age-mode/AgeModeSwitcher";
 import { worldSkin } from "@/features/worlds/theme";
+import { journeySummary, nextStep } from "@/lib/engines/journey";
 import { getWorlds } from "@/lib/worlds";
 import { useStudent } from "@/lib/student-store";
 import type { LandWorld } from "@/types/world";
@@ -35,28 +36,17 @@ export default function StudentHome() {
 
   if (!ready || worlds === null) return <StudentHomeSkeleton />;
 
-  // The next adventure: the first live, not-yet-completed mission across the
-  // unlocked worlds (ordered). Falls back to "all done" celebration.
+  // The next adventure + progress come from the pure journey engine (prerequisite
+  // enforcement: only ever live missions in unlocked worlds). Degrades safely if
+  // the world catalog is empty (backend unavailable).
   const done = new Set(state.completedMissions);
-  const open = [...worlds]
-    .filter((w) => !w.locked)
-    .sort((a, b) => a.order - b.order);
-  let nextWorld: LandWorld | undefined;
-  let nextMissionSlug: string | undefined;
-  let nextMissionTitle: string | undefined;
-  let nextSkill: string | undefined;
-  for (const w of open) {
-    const m = [...w.missions]
-      .sort((a, b) => a.order - b.order)
-      .find((mm) => mm.status === "live" && !done.has(mm.slug));
-    if (m) {
-      nextWorld = w;
-      nextMissionSlug = m.slug;
-      nextMissionTitle = m.title;
-      nextSkill = m.skill;
-      break;
-    }
-  }
+  const step = nextStep(worlds, done);
+  const summary = journeySummary(worlds, done);
+  const nextWorld = step?.world;
+  const nextMissionSlug = step?.mission.slug;
+  const nextMissionTitle = step?.mission.title;
+  const nextSkill = step?.mission.skill;
+  const worldsUnavailable = worlds.length === 0;
   const skin = worldSkin(nextWorld?.theme ?? "forest");
   const levelProgress = (state.xp % 250) / 250;
 
@@ -102,6 +92,27 @@ export default function StudentHome() {
         </div>
       </Card>
 
+      {/* Journey progress */}
+      {!worldsUnavailable && summary.missionsLive > 0 && (
+        <Card className="relative mb-6">
+          <div className="flex items-center justify-between text-sm font-semibold">
+            <span className="flex items-center gap-1.5 text-brand">
+              <Map className="h-4 w-4" /> Your journey
+            </span>
+            <span className="opacity-70">
+              {summary.missionsDone}/{summary.missionsLive} missions ·{" "}
+              {summary.worldsUnlocked}/{summary.worldsTotal} worlds
+            </span>
+          </div>
+          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-meadow to-brand transition-all"
+              style={{ width: `${summary.percent}%` }}
+            />
+          </div>
+        </Card>
+      )}
+
       {/* Today's adventure */}
       {nextMissionSlug && nextWorld ? (
         <motion.div
@@ -129,6 +140,17 @@ export default function StudentHome() {
             Continue Adventure →
           </Button>
         </motion.div>
+      ) : worldsUnavailable ? (
+        <Card className="relative mb-6 text-center">
+          <RoboAvatar mood="thinking" size={72} className="mx-auto" />
+          <h2 className="mt-2 font-display text-2xl font-bold">Adventures are loading…</h2>
+          <p className="mt-1 opacity-80">
+            Robo can&apos;t reach the worlds right now — please try again in a moment.
+          </p>
+          <Button className="mt-4" onClick={() => getWorlds().then(setWorlds)}>
+            Try again
+          </Button>
+        </Card>
       ) : (
         <Card className="relative mb-6 text-center">
           <RoboAvatar mood="happy" size={72} className="mx-auto" />
