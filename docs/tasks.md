@@ -36,20 +36,26 @@ Studio / Lab / Arena** — are the surfaces we build them into.
 Goal: a real IDE, a mastery spine, age-adaptive presentation, and MathLab roots.
 
 ### 1A. LogicLand Studio v1 (browser IDE) — ADR-013
-- 🔬 Spike: Monaco integration in Next.js App Router (lazy-loaded, code-split,
-  confined to a `/studio` route; confirm it never enters young-learner bundles).
-- ⬜ Multi-file project model: types + Prisma `Project`/`ProjectFile` (or blob),
-  file explorer, tabbed editor, dirty/save state.
-- ⬜ Editor essentials: syntax highlight, completion, bracket match, format,
-  lint diagnostics, find/replace, command palette, theme + font controls,
-  screen-reader/distraction-free modes (accessibility-first per CLAUDE.md).
-- ⬜ Panels: output console, problems panel, README/instructions pane.
-- ⬜ Project templates (`web-app`, `python-project`) with real folder structure.
+- ✅ Spike: Monaco integrated in Next.js App Router — lazy-loaded + code-split
+  (dynamic import, ssr:false), confined to `/studio`; First Load 95.6 kB, so the
+  editor chunk never enters young-learner bundles. (`@monaco-editor/react`)
+- 🟡 Multi-file project model: in-memory files + tabs, localStorage-persisted
+  (`useStudioProject`). ⬜ Still to do: Prisma `Project`/`ProjectFile` so a
+  project survives across devices; folders in the explorer (flat for now).
+- 🟡 Editor essentials: Monaco gives highlight/completion/bracket-match/find &
+  replace/command palette/theme out of the box. ⬜ Still: font controls,
+  explicit distraction-free + screen-reader passes.
+- 🟡 Panels: output console ✅ (bridged from the sandbox). ⬜ problems panel,
+  README/instructions pane.
+- ⬜ Project templates (`web-app`, `python-project`) with real folder structure
+  (today: one `web-app` starter — index.html + style.css + script.js).
 
 ### 1B. Execution runtime v1 (browser-first) — ADR-014
-- 🔬 Spike: WebContainers (Node/HTML/CSS/JS/TS) + Pyodide (Python) in-browser.
-- ⬜ Runtime-selection layer (`chooseRuntime(project)`), browser lane only.
-- ⬜ Run button → console output; error surfacing.
+- ✅ Browser web lane: HTML/CSS/JS assembled into one document
+  (`buildRunnableDoc`) and run in a sandboxed `allow-scripts` iframe; console.*
+  and errors bridged back via postMessage. Deterministic + unit-tested.
+- ⬜ Pyodide (Python) in-browser; WebContainers (Node) — next runtimes.
+- ⬜ Runtime-selection layer (`chooseRuntime(project)`) once >1 runtime exists.
 - ⬜ Defer cloud sandbox to Phase 2 (Vercel Sandbox); leave the seam.
 
 ### 1C. Deterministic evaluation engine — ADR-015
