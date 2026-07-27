@@ -42,7 +42,7 @@ export const ACADEMIES: Academy[] = [
     icon: "sigma",
     gradient: "from-rose-500 to-orange-500",
     status: "live",
-    href: "/academies/math-fix",
+    href: "/mathlab",
     flagship: true,
     ageBands: ["All Ages"],
     plannedTracks: 40,
