@@ -1,12 +1,13 @@
 "use client";
-// The run surface: a live browser preview + a console. This is ADR-014's browser
-// execution lane — the project's HTML/CSS/JS is assembled into one document and
-// run in a sandboxed iframe (allow-scripts so JS actually runs, but no
-// same-origin, so it can't touch the app). console.* and errors are streamed
-// back through postMessage and shown in the console panel.
+// The run surface: a live web preview OR Python output, plus a console. This is
+// ADR-014's browser execution lane. Which runtime runs depends on the file in
+// focus: a .py file runs through Pyodide (CPython in WebAssembly); anything else
+// assembles the project's HTML/CSS/JS into one document and runs it in a
+// sandboxed iframe. console.* / print() / errors stream into the console panel.
 import { Eye, Play, Terminal, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildRunnableDoc } from "@/lib/engines/studio-project";
+import { buildRunnableDoc, isPythonFile } from "@/lib/engines/studio-project";
+import { runPython } from "@/lib/engines/pyodide-runner";
 import { useStudioProject } from "./useStudioProject";
 
 interface LogLine {
@@ -16,26 +17,55 @@ interface LogLine {
 
 export function RunPreview() {
   const files = useStudioProject((s) => s.files);
+  const activeId = useStudioProject((s) => s.activeId);
+  const active = files.find((f) => f.id === activeId) ?? null;
+  const python = !!active && isPythonFile(active.name);
+
   const [srcDoc, setSrcDoc] = useState<string | null>(null);
   const [runId, setRunId] = useState(0);
   const [logs, setLogs] = useState<LogLine[]>([]);
   const [tab, setTab] = useState<"preview" | "console">("preview");
+  const [busy, setBusy] = useState(false);
   const noEntry = useRef(false);
 
-  const run = useCallback(() => {
+  const runWeb = useCallback(() => {
     const doc = buildRunnableDoc(files);
     noEntry.current = doc === null;
     setLogs([]);
     setSrcDoc(doc ?? "");
     setRunId((n) => n + 1);
+    setTab("preview");
   }, [files]);
 
-  // Auto-run once on first mount so the starter project is alive immediately.
+  const runPy = useCallback(async () => {
+    if (!active || busy) return;
+    setBusy(true);
+    setTab("console");
+    setLogs([{ level: "info", text: "Running Python… (the first run loads Python — a few seconds)" }]);
+    const res = await runPython(active.content);
+    const lines: LogLine[] = [];
+    for (const t of res.stdout.split("\n")) if (t !== "") lines.push({ level: "log", text: t });
+    if (res.stderr) {
+      for (const t of res.stderr.split("\n")) if (t !== "") lines.push({ level: "error", text: t });
+    }
+    if (lines.length === 0) lines.push({ level: "info", text: "(no output)" });
+    setLogs(lines);
+    setBusy(false);
+  }, [active, busy]);
+
+  const run = useCallback(() => {
+    if (python) void runPy();
+    else runWeb();
+  }, [python, runPy, runWeb]);
+
+  // Auto-run the web preview once on mount so the starter project is alive.
+  // Python never auto-runs (loading Pyodide is heavy — explicit Run only).
   useEffect(() => {
-    run();
+    if (!python) runWeb();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Web console: capture postMessage output from the sandboxed iframe.
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       const d = e.data;
@@ -66,15 +96,23 @@ export function RunPreview() {
         <button
           type="button"
           onClick={run}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-white hover:opacity-90"
+          disabled={busy}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50"
         >
-          <Play className="h-3.5 w-3.5" /> Run
+          <Play className="h-3.5 w-3.5" /> {busy ? "Running…" : python ? "Run Python" : "Run"}
         </button>
       </div>
 
       <div className="relative flex-1 bg-white dark:bg-slate-950">
         {tab === "preview" ? (
-          noEntry.current ? (
+          python ? (
+            <div className="grid h-full place-items-center p-6 text-center text-sm opacity-60">
+              <span>
+                <b className="font-mono">{active?.name}</b> runs Python — press{" "}
+                <b>Run Python</b> and see the output in the <b>Console</b> tab. 🐍
+              </span>
+            </div>
+          ) : noEntry.current ? (
             <div className="grid h-full place-items-center p-6 text-center text-sm opacity-60">
               Add an <b className="mx-1 font-mono">index.html</b> file, then press Run.
             </div>
@@ -90,7 +128,7 @@ export function RunPreview() {
         ) : (
           <div className="h-full overflow-y-auto p-3 font-mono text-xs">
             {logs.length === 0 ? (
-              <p className="opacity-50">Console output appears here when your code runs.</p>
+              <p className="opacity-50">Output appears here when your code runs.</p>
             ) : (
               logs.map((l, i) => (
                 <div
@@ -100,7 +138,9 @@ export function RunPreview() {
                       ? "text-rose-500"
                       : l.level === "warn"
                         ? "text-amber-500"
-                        : ""
+                        : l.level === "info"
+                          ? "opacity-60"
+                          : ""
                   }`}
                 >
                   {l.level === "error" && <TriangleAlert className="mt-0.5 h-3 w-3 shrink-0" />}

@@ -53,6 +53,21 @@ export function entryHtml(nodes: FsNode[]): FsNode | null {
   );
 }
 
+/** The project's Python entry: main.py if present, else the first .py file. */
+export function pythonEntry(nodes: FsNode[]): FsNode | null {
+  const files = nodes.filter(isFile);
+  return (
+    files.find((n) => n.name.toLowerCase() === "main.py") ??
+    files.find((n) => hasExt(n.name, "py")) ??
+    null
+  );
+}
+
+/** True when a file runs as Python (drives the Studio run mode). */
+export function isPythonFile(name: string): boolean {
+  return hasExt(name, "py");
+}
+
 /** A tiny script injected first, so the sandboxed preview can stream console
  *  output and uncaught errors back to the Studio's console panel. Marked with a
  *  sentinel the parent checks before trusting a message. */
@@ -184,6 +199,18 @@ button.addEventListener("click", () => {
 });
 
 console.log("App started 🚀");
+`,
+    },
+    {
+      name: "main.py",
+      kind: "file",
+      content: `# Python runs right here in your browser!
+# Open this file and press Run to see it work.
+
+for i in range(1, 6):
+    print("Counting:", i)
+
+print("Nice work!")
 `,
     },
   ];

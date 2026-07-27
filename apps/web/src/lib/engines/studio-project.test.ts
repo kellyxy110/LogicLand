@@ -4,7 +4,9 @@ import {
   CONSOLE_BRIDGE,
   defaultStudioProject,
   entryHtml,
+  isPythonFile,
   languageForFile,
+  pythonEntry,
 } from "./studio-project";
 import type { FsNode } from "@/types/studio";
 
@@ -81,11 +83,24 @@ describe("buildRunnableDoc", () => {
   });
 });
 
+describe("python entry", () => {
+  it("prefers main.py, else the first .py, else null", () => {
+    expect(pythonEntry([file("a.py", ""), file("main.py", "x")])?.name).toBe("main.py");
+    expect(pythonEntry([file("solve.py", "x")])?.name).toBe("solve.py");
+    expect(pythonEntry([file("index.html", "x")])).toBeNull();
+  });
+
+  it("isPythonFile detects .py", () => {
+    expect(isPythonFile("main.py")).toBe(true);
+    expect(isPythonFile("index.html")).toBe(false);
+  });
+});
+
 describe("defaultStudioProject", () => {
-  it("is a real runnable multi-file web project", () => {
+  it("is a real runnable multi-file project with web files and Python", () => {
     const proj = defaultStudioProject();
     const names = proj.map((f) => f.name);
-    expect(names).toEqual(["index.html", "style.css", "script.js"]);
+    expect(names).toEqual(["index.html", "style.css", "script.js", "main.py"]);
     const nodes: FsNode[] = proj.map((f, i) => ({
       id: String(i),
       parentId: null,
