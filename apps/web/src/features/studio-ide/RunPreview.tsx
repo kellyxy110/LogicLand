@@ -4,11 +4,12 @@
 // focus: a .py file runs through Pyodide (CPython in WebAssembly); anything else
 // assembles the project's HTML/CSS/JS into one document and runs it in a
 // sandboxed iframe. console.* / print() / errors stream into the console panel.
-import { Eye, Play, Terminal, TriangleAlert } from "lucide-react";
+import { CheckCircle2, Circle, Eye, ListChecks, Play, Terminal, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { buildRunnableDoc, isPythonFile } from "@/lib/engines/studio-project";
 import { runPython } from "@/lib/engines/pyodide-runner";
 import { explainError } from "@/lib/engines/error-anatomy";
+import { DEFAULT_BRIEF, briefProgress, evaluateBrief } from "@/lib/engines/project-brief";
 import { useStudioProject } from "./useStudioProject";
 
 interface LogLine {
@@ -25,7 +26,7 @@ export function RunPreview() {
   const [srcDoc, setSrcDoc] = useState<string | null>(null);
   const [runId, setRunId] = useState(0);
   const [logs, setLogs] = useState<LogLine[]>([]);
-  const [tab, setTab] = useState<"preview" | "console">("preview");
+  const [tab, setTab] = useState<"preview" | "console" | "tasks">("preview");
   const [busy, setBusy] = useState(false);
   const noEntry = useRef(false);
 
@@ -79,6 +80,8 @@ export function RunPreview() {
   }, []);
 
   const errorCount = logs.filter((l) => l.level === "error").length;
+  const taskResults = evaluateBrief(DEFAULT_BRIEF, files);
+  const donePct = briefProgress(taskResults);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -93,6 +96,12 @@ export function RunPreview() {
               {errorCount}
             </span>
           )}
+        </TabButton>
+        <TabButton active={tab === "tasks"} onClick={() => setTab("tasks")}>
+          <ListChecks className="h-3.5 w-3.5" /> Tasks
+          <span className="ml-1 rounded-full bg-black/10 px-1.5 text-[0.6rem] font-bold dark:bg-white/15">
+            {donePct}%
+          </span>
         </TabButton>
         <button
           type="button"
@@ -126,7 +135,7 @@ export function RunPreview() {
               className="h-full w-full border-0 bg-white"
             />
           )
-        ) : (
+        ) : tab === "console" ? (
           <div className="h-full overflow-y-auto p-3 font-mono text-xs">
             {logs.length === 0 ? (
               <p className="opacity-50">Output appears here when your code runs.</p>
@@ -134,8 +143,49 @@ export function RunPreview() {
               logs.map((l, i) => <ConsoleLine key={i} line={l} />)
             )}
           </div>
+        ) : (
+          <TasksPanel results={taskResults} pct={donePct} />
         )}
       </div>
+    </div>
+  );
+}
+
+// The build brief + acceptance criteria, ticked off deterministically as the
+// learner's code meets them (no AI decides done-ness).
+function TasksPanel({
+  results,
+  pct,
+}: {
+  results: { id: string; label: string; passed: boolean }[];
+  pct: number;
+}) {
+  return (
+    <div className="h-full overflow-y-auto p-4 text-sm">
+      <h3 className="font-display text-base font-extrabold">{DEFAULT_BRIEF.title}</h3>
+      <p className="mt-0.5 opacity-70">{DEFAULT_BRIEF.story}</p>
+      <div className="my-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-meadow to-brand transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <ul className="space-y-2">
+        {results.map((r) => (
+          <li key={r.id} className="flex items-start gap-2">
+            {r.passed ? (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-meadow" />
+            ) : (
+              <Circle className="mt-0.5 h-4 w-4 shrink-0 opacity-40" />
+            )}
+            <span className={r.passed ? "opacity-60 line-through" : ""}>{r.label}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-4 text-xs opacity-55">
+        These tick off automatically as your code meets them — press Run to see your
+        page, and watch the list complete.
+      </p>
     </div>
   );
 }
