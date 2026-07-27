@@ -20,6 +20,8 @@ import {
   type SkillStatus,
 } from "@/lib/engines/skill-graph";
 import { getMyMathMastery } from "@/app/actions/math-fix";
+import { loadMyStudioProject } from "@/app/actions/studio";
+import { detectCodeSkills } from "@/lib/engines/code-skills";
 
 const FOUNDATION_ICON: Record<FoundationId, LucideIcon> = {
   programming: Code2,
@@ -32,11 +34,17 @@ export function SkillMap() {
 
   useEffect(() => {
     let alive = true;
-    getMyMathMastery()
-      .then((rows) => {
+    Promise.all([getMyMathMastery(), loadMyStudioProject()])
+      .then(([rows, studio]) => {
         if (!alive) return;
-        const keys = rows.filter((r) => r.mastered).map((r) => mathEvidenceKey(r.topicId));
-        setAchieved(new Set(keys));
+        const keys = new Set<string>();
+        // Maths skills: mastered Math Fix topics.
+        for (const r of rows) if (r.mastered) keys.add(mathEvidenceKey(r.topicId));
+        // Programming skills: concepts the learner's Studio code actually uses.
+        if (studio.project) {
+          for (const k of detectCodeSkills(studio.project.files)) keys.add(k);
+        }
+        setAchieved(keys);
       })
       .catch(() => alive && setAchieved(new Set()));
     return () => {
@@ -104,9 +112,9 @@ export function SkillMap() {
       </div>
 
       <p className="mx-auto mt-10 max-w-2xl text-center text-sm opacity-55">
-        Right now skills light up from mastered Math Fix™ topics. As more of
-        LogicLand reports evidence — missions, Studio projects, quizzes — the rest
-        of the map will come alive too.
+        Skills light up from real evidence — mastered Math Fix™ topics and the
+        concepts your Studio code actually uses. Build something in Studio and
+        watch more of the map come alive.
       </p>
     </main>
   );

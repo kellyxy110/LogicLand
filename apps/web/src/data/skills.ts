@@ -14,6 +14,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Putting steps in the right order.",
     prereqs: [],
+    evidence: ["code:sequence"],
   },
   {
     id: "variables",
@@ -21,6 +22,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Storing and naming a value.",
     prereqs: [],
+    evidence: ["code:variables"],
   },
   {
     id: "loops",
@@ -28,6 +30,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Repeating steps without rewriting them.",
     prereqs: ["sequence"],
+    evidence: ["code:loops"],
   },
   {
     id: "conditions",
@@ -35,6 +38,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Making choices with if / else.",
     prereqs: ["sequence"],
+    evidence: ["code:conditions"],
   },
   {
     id: "functions",
@@ -42,6 +46,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Naming a block of steps to reuse it.",
     prereqs: ["variables", "loops"],
+    evidence: ["code:functions"],
   },
   {
     id: "events",
@@ -49,6 +54,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Making things happen on a click or key.",
     prereqs: ["conditions"],
+    evidence: ["code:events"],
   },
   {
     id: "debugging",
@@ -63,6 +69,7 @@ export const SKILLS: Skill[] = [
     foundation: "programming",
     blurb: "Holding many values together.",
     prereqs: ["variables", "loops"],
+    evidence: ["code:data-structures"],
   },
 
   // ── Mathematics & Computational Reasoning ───────────────────────────────
