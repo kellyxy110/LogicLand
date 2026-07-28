@@ -1,12 +1,22 @@
 // Typed client for the LogicLand Intelligence Engine (FastAPI).
 // All AI + curriculum intelligence flows through here — never call providers
-// directly from the frontend.
+// directly from the frontend. This module is SERVER-ONLY: it reads the shared
+// service secret and attaches it to every engine call (ADR-024 handshake).
 import { ENGINE_URL } from "@logicland/shared";
+
+// Shared secret the engine requires in X-Service-Token (ADR-024). Server-only —
+// NEVER a NEXT_PUBLIC_* value. When unset (local dev / engine not yet deployed),
+// no header is sent and the engine, if its own token is empty, stays open.
+const SERVICE_TOKEN = process.env.SERVICE_TOKEN ?? "";
 
 async function engineFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${ENGINE_URL}/api${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: {
+      "Content-Type": "application/json",
+      ...(SERVICE_TOKEN ? { "X-Service-Token": SERVICE_TOKEN } : {}),
+      ...init?.headers,
+    },
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Engine ${path} failed: ${res.status}`);

@@ -63,9 +63,14 @@ export async function explainMathAction(
   const base = process.env.LOGICLAND_ENGINE_URL;
   if (base) {
     try {
+      const serviceToken = process.env.SERVICE_TOKEN ?? "";
       const res = await fetch(`${base.replace(/\/$/, "")}/api/math-fix/explain`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          // ADR-024 service-auth handshake (server-only secret).
+          ...(serviceToken ? { "X-Service-Token": serviceToken } : {}),
+        },
         body: JSON.stringify({
           topic: input.topicId,
           prompt: input.prompt,
