@@ -1,29 +1,54 @@
-# Render blueprint for the LogicLand Intelligence Engine (FastAPI).
-# Deploy: render.com -> New -> Blueprint -> connect kellyxy110/LogicLand.
-# Render builds the Docker image in logicland-engine/ and runs uvicorn on $PORT.
+# Render Blueprint (repo root) for the LogicLand Intelligence Engine (ADR-024).
+# Must live at the repository root for Render to auto-detect it. `rootDir` scopes
+# the build to the engine subdirectory of this monorepo.
+# Deploy: render.com -> New -> Blueprint -> connect kellyxy110/LogicLand
+#   (or: `render blueprint launch` once the CLI is authenticated).
+# Secrets are `sync: false` — set them in the Render dashboard / via the CLI;
+# never committed. See docs/engine-deployment.md.
 services:
   - type: web
     name: logicland-engine
     runtime: docker
     rootDir: logicland-engine
     dockerfilePath: ./Dockerfile
-    plan: free
+    plan: starter
+    region: oregon
     healthCheckPath: /health
-    autoDeploy: true
+    autoDeploy: false # promote intentionally
+    # Render auto-restarts a crashed instance; the health check gates traffic.
     envVars:
       - key: ENVIRONMENT
         value: production
+      - key: DEBUG
+        value: "false"
       - key: LOG_LEVEL
         value: INFO
-      # Allow the deployed web app to call the engine.
+      - key: JSON_LOGS
+        value: "true"
+      # Explicit https allow-list of the web app origin(s).
       - key: CORS_ORIGINS
         value: https://logicland.vercel.app
-      # AI provider (OpenAI-compatible). Set the key in the Render dashboard.
+      # Shared secret the Next.js server sends in X-Service-Token (ADR-024).
+      - key: SERVICE_TOKEN
+        sync: false
+      - key: SERVICE_AUTH_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS
+        value: "120"
+      - key: RATE_LIMIT_WINDOW_S
+        value: "60"
+      - key: DATABASE_URL
+        sync: false
+      # AI provider (OpenAI-compatible). Gateway degrades to deterministic
+      # fallback when unset (ADR-023), so these are optional to boot. Currently
+      # wired for Groq; set LLM_BASE_URL + LLM_API_KEY as secrets.
       - key: LLM_PROVIDER
-        value: openai
-      - key: LLM_BASE_URL
-        value: https://api.openai.com/v1
-      - key: LLM_MODEL
-        value: gpt-4o-mini
+        value: openai-compatible
       - key: LLM_API_KEY
-        sync: false # set as a secret in the Render dashboard
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: LLM_CHILD_SAFETY_ENABLED
+        value: "true"

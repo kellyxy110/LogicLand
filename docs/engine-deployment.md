@@ -87,11 +87,32 @@ Requests without the header get `401`; probes/docs are always exempt.
 Two manifests are provided (pick one host; both are examples, not the only
 options):
 
-### Render (`render.yaml`)
-1. New → Blueprint → point at the repo; Render reads `logicland-engine/render.yaml`.
-2. Fill the `sync: false` secrets in the dashboard (`SERVICE_TOKEN`,
-   `CORS_ORIGINS`, `DATABASE_URL`, `LLM_API_KEY`, `LLM_BASE_URL`).
+### Render (`render.yaml` at repo root)
+The Blueprint lives at the **repository root** (`/render.yaml`) with
+`rootDir: logicland-engine` so Render auto-detects it and builds the engine's
+Docker image.
+1. render.com → New → **Blueprint** → connect `kellyxy110/LogicLand`
+   (or, with the CLI authenticated: `render blueprint launch`).
+2. Fill the `sync: false` secrets (`SERVICE_TOKEN`, `DATABASE_URL`,
+   `LLM_API_KEY`, `LLM_BASE_URL`). `CORS_ORIGINS` is pinned to
+   `https://logicland.vercel.app`.
 3. Health check path is `/health`. `autoDeploy: false` — promote intentionally.
+   Render auto-restarts a crashed instance.
+
+**Authentication needed:** deploying requires the Render CLI to be logged in
+(`render login`, interactive) or a `RENDER_API_KEY`. The Blueprint + Docker image
++ env contract are otherwise complete.
+
+**`SERVICE_TOKEN` handling:** generate a strong value and store it in **both** the
+Render engine env and the Vercel server env (same value); never in
+`NEXT_PUBLIC_*`, browser requests, logs, or source. E.g. once both CLIs are
+authenticated, set it without printing:
+```bash
+TOKEN=$(openssl rand -hex 32)
+printf '%s' "$TOKEN" | render env set SERVICE_TOKEN --service logicland-engine   # engine
+printf '%s' "$TOKEN" | vercel env add SERVICE_TOKEN production                    # web
+unset TOKEN
+```
 
 ### Fly.io (`fly.toml`)
 ```bash
