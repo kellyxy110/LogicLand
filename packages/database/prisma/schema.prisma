@@ -118,6 +118,7 @@ model Student {
   studioProject     StudioProject?
   typingStat        TypingStat?
   mathMastery       MathMastery[]
+  shareGrants       ShareGrant[]
 }
 
 // ---------------------------------------------------------------------------
@@ -418,4 +419,94 @@ model Notification {
   recipientId String
   recipient   User             @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   createdAt   DateTime         @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Consent-gated public sharing (ADR-020). Private by default. A minor's work
+// never becomes publicly discoverable without verified adult approval; every
+// visibility change is auditable and revocable. The feature ships behind the
+// SHARING_ENABLED flag until the full moderation/consent workflow is verified.
+// ---------------------------------------------------------------------------
+enum Visibility {
+  PRIVATE
+  TEACHER_ONLY
+  PARENT_ONLY
+  CLASSROOM
+  SCHOOL
+  UNLISTED_PORTFOLIO
+  ANONYMOUS_SHOWCASE
+  PUBLIC_SHOWCASE
+  COMPETITION_SHOWCASE
+}
+
+enum ConsentState {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+  EXPIRED
+}
+
+// One consent record per (learner, subject) share request. The single source of
+// truth for what visibility a project currently holds and how it got there.
+model ShareGrant {
+  id                   String       @id @default(cuid())
+  studentId            String // owner (Student)
+  student              Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectType          String // "studio_project" | "portfolio"
+  subjectId            String
+  requestedVisibility  Visibility   @default(PRIVATE)
+  // What is actually live now; only moves to requestedVisibility once APPROVED
+  // and (for public modes) moderation clears. Lowering is immediate.
+  effectiveVisibility  Visibility   @default(PRIVATE)
+  state                ConsentState @default(PENDING)
+  policyVersion        String // CONSENT_POLICY_VERSION at request time
+  token                String       @unique // unguessable; scopes any share link
+  requestedById        String // userId who requested
+  learnerAcknowledged  Boolean      @default(false)
+  // not_run | passed | blocked | human_pending | human_approved | human_rejected
+  moderationStatus     String       @default("not_run")
+  moderationFindings   Json? // non-leaking finding labels only
+  expiresAt            DateTime?
+  revokedAt            DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  approvals ConsentApproval[]
+  audits    ShareAudit[]
+
+  @@index([studentId])
+  @@index([subjectType, subjectId])
+  @@index([state])
+}
+
+// One row per approver decision on a grant (parent/guardian/teacher/school admin,
+// learner acknowledgement, or platform moderation).
+model ConsentApproval {
+  id            String     @id @default(cuid())
+  grantId       String
+  grant         ShareGrant @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  approverRole  String // PARENT | GUARDIAN | TEACHER | SCHOOL_ADMIN | LEARNER | PLATFORM
+  approverUserId String // approver identity (Clerk user id)
+  approved      Boolean // false = explicit rejection
+  note          String?
+  createdAt     DateTime   @default(now())
+
+  @@unique([grantId, approverRole, approverUserId])
+  @@index([grantId])
+}
+
+// Append-only audit trail. Preserved even after revocation (only the internal
+// record survives a takedown).
+model ShareAudit {
+  id        String     @id @default(cuid())
+  grantId   String
+  grant     ShareGrant @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  actorId   String
+  actorRole String?
+  action    String // requested | acknowledged | approved | rejected | revoked | visibility_changed | moderated
+  detail    String?
+  createdAt DateTime   @default(now())
+
+  @@index([grantId])
 }

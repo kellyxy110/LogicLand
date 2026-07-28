@@ -214,7 +214,49 @@ experience. Sibling products integrate later without entangling LogicLand's core
 immediate re-platforming — this names the boundary we build toward, not a
 rewrite.
 
-## ADR-020 Consent-gated public sharing (DRAFT — awaiting policy sign-off)
+## ADR-020 Consent-gated public sharing (ACCEPTED 2026-07-28 — implemented, flag-gated)
+**Status:** *Accepted & implemented behind `SHARING_ENABLED` (default OFF).
+Policy signed off by the owner. Private by default; no minor's work becomes
+publicly discoverable automatically. Openly-discoverable minor modes remain gated
+behind `SHARING_PUBLIC_MINORS_ENABLED` until a verified human-moderation queue
+exists.*
+**Policy (signed off):**
+- **Default:** every learner project is `PRIVATE`.
+- **Age bands & approvals:** *Under 13* → verified parent/guardian approval +
+  (teacher/school when school-managed) + learner acknowledgement; the learner
+  **cannot** override a rejection. *13–17* → learner request + verified
+  parent/guardian approval + (teacher/school when school-managed). *18+* →
+  publishes directly, subject to moderation.
+- **Visibility modes (9):** `PRIVATE`, `TEACHER_ONLY`, `PARENT_ONLY`,
+  `CLASSROOM`, `SCHOOL`, `UNLISTED_PORTFOLIO`, `ANONYMOUS_SHOWCASE`,
+  `PUBLIC_SHOWCASE`, `COMPETITION_SHOWCASE`.
+- **Minor-safe public display** (`minorSafePublicProfile`): never exposes legal
+  name, email, phone, precise location, school/class/address, personal socials,
+  repo creds, chat history, or un-approved assessment notes/teacher comments.
+  Shows only first name + optional initial / approved display name, avatar, a
+  **broad age band**, and a broad region **only when separately approved**.
+  Anonymous modes drop identity entirely.
+- **Consent records** (`ShareGrant` + `ConsentApproval`): learner, project,
+  requested visibility, approver role + identity, status, **policy version**,
+  timestamps, expiry, revocation time, moderation status, and a full audit trail
+  (`ShareAudit`). Consent is explicit, versioned, revocable, auditable,
+  project-scoped, and re-requested when visibility materially changes.
+- **Revocation:** forces `PRIVATE` immediately, records `revokedAt`, and (wired
+  for) removal from discovery/showcases/search + cache/CDN invalidation; only the
+  internal audit record survives a takedown.
+- **Moderation** (`sharing-moderation.ts`, deterministic, ADR-015): automated
+  privacy + secret/credential scanning + PII detection + prohibited-content
+  checks run before any link-exposed publication; human review is additionally
+  required before a **minor's** work is openly discoverable. `block`-severity
+  findings hard-stop publication; findings are surfaced without echoing secrets.
+**Implementation:** policy engine `lib/engines/sharing.ts`; moderation
+`lib/engines/sharing-moderation.ts`; data model `ShareGrant`/`ConsentApproval`/
+`ShareAudit` (+ `Visibility`/`ConsentState` enums, migrated additively to Neon);
+persistence `packages/database/src/sharing.ts`; server actions
+`app/actions/sharing.ts`; UI `features/sharing/SharePanel.tsx` + `/student/share`;
+flags `lib/flags.ts`. 26 engine tests. **The original draft below is superseded.**
+
+### ADR-020 (original draft, superseded)
 **Status:** *Draft. Data model + flow designed; NOT implemented. Public
 visibility stays OFF until the owner signs off on the consent policy.*
 **Context:** learners (aged 5–10 and up) will want to share projects and

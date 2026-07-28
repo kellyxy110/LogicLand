@@ -61,3 +61,14 @@ export {
   type GitHubConnectionInput,
   type GitHubConnectionView,
 } from "./github";
+export {
+  upsertShareRequest,
+  getGrant,
+  getGrantForSubject,
+  getPublicGrantByToken,
+  recordApproval,
+  setLearnerAcknowledged,
+  applyGrantResolution,
+  revokeGrant,
+  type CreateGrantInput,
+} from "./sharing";
