@@ -70,8 +70,49 @@ export async function upsertShareRequest(input: CreateGrantInput): Promise<Share
 export async function getGrant(grantId: string) {
   return prisma.shareGrant.findUnique({
     where: { id: grantId },
-    include: { approvals: true, audits: { orderBy: { createdAt: "asc" } } },
+    include: {
+      approvals: true,
+      audits: { orderBy: { createdAt: "asc" } },
+      // The OWNER of the grant — resolution must use the learner's age/context,
+      // never the caller's (an approver is not the learner).
+      student: { select: { id: true, displayName: true, ageYears: true, parentId: true } },
+    },
   });
+}
+
+export interface PendingApproval {
+  grantId: string;
+  studentName: string;
+  subjectType: string;
+  requestedVisibility: string;
+  moderationStatus: string;
+  createdAt: Date;
+}
+
+/** Pending share requests a given parent (by Clerk user id) is asked to decide,
+ * across all of their children. Excludes requests they've already decided. */
+export async function listPendingApprovalsForParentUser(parentUserId: string): Promise<PendingApproval[]> {
+  const parent = await prisma.parent.findUnique({
+    where: { userId: parentUserId },
+    include: { students: { select: { id: true, displayName: true } } },
+  });
+  if (!parent || parent.students.length === 0) return [];
+  const nameById = new Map(parent.students.map((s) => [s.id, s.displayName]));
+  const grants = await prisma.shareGrant.findMany({
+    where: { studentId: { in: parent.students.map((s) => s.id) }, state: "PENDING" },
+    include: { approvals: true },
+    orderBy: { updatedAt: "desc" },
+  });
+  return grants
+    .filter((g) => !g.approvals.some((a) => a.approverRole === "PARENT" && a.approverUserId === parentUserId))
+    .map((g) => ({
+      grantId: g.id,
+      studentName: nameById.get(g.studentId) ?? "Your child",
+      subjectType: g.subjectType,
+      requestedVisibility: g.requestedVisibility,
+      moderationStatus: g.moderationStatus,
+      createdAt: g.createdAt,
+    }));
 }
 
 export async function getGrantForSubject(subjectType: string, subjectId: string) {

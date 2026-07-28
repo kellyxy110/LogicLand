@@ -56,6 +56,14 @@ publication. `block` findings hard-stop; findings are surfaced without echoing t
 secret. Human review is additionally required for a minor's openly-discoverable
 modes. Runs with no network/model calls.
 
+## Approver surface
+
+Parents review pending requests for their children at **`/parent/approvals`**
+(`myPendingApprovals` → `ApprovalQueue` → `decideShare` with the `PARENT` role).
+A request whose moderation is `blocked` can't be approved until fixed. Rejections
+are final for an under-13 (the policy engine forbids self-override). The queue is
+empty and inert while `SHARING_ENABLED` is off.
+
 ## Revocation
 
 Any approver (or the platform) can revoke. Revocation forces `PRIVATE`

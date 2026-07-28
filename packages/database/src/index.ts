@@ -70,5 +70,7 @@ export {
   setLearnerAcknowledged,
   applyGrantResolution,
   revokeGrant,
+  listPendingApprovalsForParentUser,
   type CreateGrantInput,
+  type PendingApproval,
 } from "./sharing";

@@ -9,10 +9,12 @@ import {
   getGrant,
   getGrantForSubject,
   getStudioProject,
+  listPendingApprovalsForParentUser,
   recordApproval,
   revokeGrant,
   setLearnerAcknowledged,
   upsertShareRequest,
+  type PendingApproval,
 } from "@logicland/database";
 import { currentStudent } from "@/lib/current-student";
 import { SHARING_ENABLED, SHARING_PUBLIC_MINORS_ENABLED } from "@/lib/flags";
@@ -65,10 +67,10 @@ async function resolveGrant(grantId: string, actorId: string): Promise<ShareStat
   const grant = await getGrant(grantId);
   if (!grant) return PRIVATE_STATUS;
 
-  const student = await currentStudent();
-  // school-management isn't modelled in the schema yet; treat as self-managed for
-  // now (adds no teacher/school approver). Revisit when a School/Class link exists.
-  const ctx = { ageYears: student.ageYears, schoolManaged: false };
+  // Resolution MUST use the grant OWNER's context, never the caller's (the caller
+  // may be an approving parent). school-management isn't modelled yet → false.
+  const owner = grant.student;
+  const ctx = { ageYears: owner?.ageYears ?? null, schoolManaged: false };
   const requirement = requiredApprovals(grant.requestedVisibility, ctx);
 
   // Moderation for any link-exposed target.
@@ -103,7 +105,7 @@ async function resolveGrant(grantId: string, actorId: string): Promise<ShareStat
   const publicAllowed =
     !isPublicDiscovery(grant.requestedVisibility) ||
     (SHARING_ENABLED &&
-      (ageCategory(student.ageYears) === "adult_18_plus" || SHARING_PUBLIC_MINORS_ENABLED));
+      (ageCategory(owner?.ageYears ?? null) === "adult_18_plus" || SHARING_PUBLIC_MINORS_ENABLED));
   if (SHARING_ENABLED && consentOk && moderationOk && publicAllowed) {
     effective = grant.requestedVisibility;
   }
@@ -182,3 +184,14 @@ export async function revokeShare(grantId: string, role?: ApproverRole): Promise
   await revokeGrant(grantId, userId, role);
   return resolveGrant(grantId, userId);
 }
+
+// --- Approver (parent) surface -------------------------------------------------
+
+/** Pending share requests this parent is asked to decide, across their children. */
+export async function myPendingApprovals(): Promise<PendingApproval[]> {
+  if (!SHARING_ENABLED) return [];
+  const { userId } = await auth();
+  if (!userId) return [];
+  return listPendingApprovalsForParentUser(userId);
+}
+
