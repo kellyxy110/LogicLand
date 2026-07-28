@@ -3,6 +3,12 @@
 The integration is **fully implemented and dormant** until three secrets are
 set. Nothing else is missing. See ADR-022 in `docs/decision.md`.
 
+> **Production domain confirmed 2026-07-28** (via `vercel project ls`, account
+> kellyxy110): `https://logicland.vercel.app`. The production callback is
+> therefore **`https://logicland.vercel.app/api/github/callback`**. Do not use
+> placeholder credentials in production — keep the app dormant until the real
+> Client ID + Secret are set.
+
 ## 1. Register a GitHub OAuth app
 GitHub → Settings → Developer settings → **OAuth Apps** → New OAuth App.
 - **Homepage URL:** `https://logicland.vercel.app`

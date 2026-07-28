@@ -47,6 +47,28 @@ checked; any misconfiguration (debug on, `CORS_ORIGINS=*`, missing
 `SERVICE_TOKEN`, safety off) **aborts startup** with a logged reason. The engine
 never serves half-configured.
 
+## AI Gateway env contract (ADR-023)
+
+The gateway is **fail-safe by design**: with none of these set, every model call
+cleanly returns the caller's deterministic explanation (verified — see
+`test_no_provider_takes_fallback_immediately`, and the web `explainMathAction`
+falls back to a worked example on any engine error). Set them only to activate
+live LLM traffic.
+
+| Var | Required for live AI | Notes |
+|---|---|---|
+| `LLM_PROVIDER` | yes | `openai` or `openai-compatible`. |
+| `LLM_BASE_URL` | yes | Provider endpoint (e.g. Groq `https://api.groq.com/openai/v1`). |
+| `LLM_API_KEY` | yes | Secret. Empty ⇒ gateway stays on deterministic fallback. |
+| `LLM_MODEL` | optional | Registry routes per task; this is only the provider-default. |
+| `LLM_TEMPERATURE` / `LLM_MAX_TOKENS` | optional | Defaults 0.7 / 1200. |
+| `LLM_CHILD_SAFETY_ENABLED` | yes | Must stay `true`. |
+
+**Child-facing production caveat (ADR-009):** the currently-wired provider (Groq)
+is `privacy_class="standard"`, fine for dev/staging + content generation. A
+production **child-facing tutor** should route to a zero-retention provider — a
+config + one registry entry, not code.
+
 ## Web ⇆ engine handshake (coordinated rollout)
 
 Service auth only activates once `SERVICE_TOKEN` is set. To adopt without an
