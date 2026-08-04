@@ -11,7 +11,10 @@ services:
     runtime: docker
     rootDir: logicland-engine
     dockerfilePath: ./Dockerfile
-    plan: starter
+    # Free plan avoids a billing gate; it cold-starts after idle (the web app's
+    # 6s timeout + deterministic fallback absorb that). Upgrade to `starter` once
+    # billing is approved, for always-on production.
+    plan: free
     region: oregon
     healthCheckPath: /health
     autoDeploy: false # promote intentionally
