@@ -54,7 +54,11 @@ export interface ProofIssue {
 export interface ProofValidation {
   valid: boolean;
   reachedGoal: boolean;
+  /** Hard structural errors — these make the proof invalid. */
   issues: ProofIssue[];
+  /** Non-fatal hints: dangling reasoning, rule/kind mismatches. `valid` ignores
+   * these, so a warned proof can still be complete (ADR-025). */
+  warnings: ProofIssue[];
 }
 
 /**
@@ -63,11 +67,18 @@ export interface ProofValidation {
  *   • references must exist and precede the step (no self/forward refs)
  *   • every step needs a statement
  *   • the proof must start from at least one assumption and END on a goal step
+ * Plus non-fatal `warnings` (unused steps, rule↔kind mismatches) that guide
+ * without blocking. Rules decide, never an LLM (ADR-015).
  */
 export function validateProof(proof: Proof): ProofValidation {
   const issues: ProofIssue[] = [];
+  const warnings: ProofIssue[] = [];
   const pos = new Map<string, number>();
   proof.steps.forEach((s, i) => pos.set(s.id, i));
+
+  // Which steps are cited by some later step (for dangling-reasoning warnings).
+  const referenced = new Set<string>();
+  for (const s of proof.steps) for (const r of s.refs) referenced.add(r);
 
   let hasAssumption = false;
   proof.steps.forEach((step, i) => {
@@ -78,6 +89,9 @@ export function validateProof(proof: Proof): ProofValidation {
       hasAssumption = true;
       if (step.refs.length > 0) {
         issues.push({ stepId: step.id, message: "An assumption doesn't follow from earlier steps." });
+      }
+      if (step.rule && step.rule !== "given") {
+        warnings.push({ stepId: step.id, message: "Assumptions are usually justified “Given”." });
       }
     } else {
       if (step.refs.length === 0) {
@@ -91,11 +105,22 @@ export function validateProof(proof: Proof): ProofValidation {
           issues.push({ stepId: step.id, message: "You can only build on earlier steps." });
         }
       }
+      if (step.rule === "given") {
+        warnings.push({ stepId: step.id, message: "“Given” is for assumptions — pick the rule you used." });
+      }
+    }
+
+    // Dangling reasoning: a non-goal step nothing later builds on.
+    if (step.kind !== "goal" && !referenced.has(step.id) && step.statement.trim()) {
+      warnings.push({ stepId: step.id, message: "Nothing later uses this step — is it needed?" });
     }
   });
 
   const last = proof.steps[proof.steps.length - 1];
   const reachedGoal = !!last && last.kind === "goal";
+  if (last && last.kind === "goal" && last.rule && last.rule !== "therefore") {
+    warnings.push({ stepId: last.id, message: "A goal usually concludes with “Therefore”." });
+  }
   if (!hasAssumption) {
     issues.push({ message: "Start from at least one assumption (a “Given”)." });
   }
@@ -103,7 +128,7 @@ export function validateProof(proof: Proof): ProofValidation {
     issues.push({ message: "End with a goal step — your conclusion." });
   }
 
-  return { valid: issues.length === 0, reachedGoal, issues };
+  return { valid: issues.length === 0, reachedGoal, issues, warnings };
 }
 
 const step = (id: string, kind: StepKind, statement: string, rule: string, refs: string[] = []): ProofStep => ({
@@ -141,4 +166,112 @@ export const PROOF_TEMPLATES: Proof[] = [
 
 export function proofTemplateById(id: string): Proof | undefined {
   return PROOF_TEMPLATES.find((p) => p.id === id);
+}
+
+// --- Project Graph contract (ADR-025) --------------------------------------
+// A proof projects to the SAME {nodes, edges} shape the Canvas produces, so the
+// Project Graph can ingest either. A ref "A follows from B" is a directed edge
+// A --depends-on--> B.
+export interface ProofGraphNode {
+  id: string;
+  kind: StepKind;
+  label: string;
+}
+export interface ProofGraph {
+  nodes: ProofGraphNode[];
+  edges: { id: string; from: string; to: string; relation: "depends-on" }[];
+}
+
+const firstLine = (s: string): string => s.split("\n").map((l) => l.trim()).find(Boolean)?.slice(0, 60) ?? "";
+
+export function proofToGraph(proof: Proof): ProofGraph {
+  const nodes: ProofGraphNode[] = proof.steps.map((s) => ({
+    id: s.id,
+    kind: s.kind,
+    label: firstLine(s.statement) || s.kind,
+  }));
+  const edges: ProofGraph["edges"] = [];
+  for (const s of proof.steps) {
+    for (const r of s.refs) {
+      edges.push({ id: `${s.id}->${r}`, from: s.id, to: r, relation: "depends-on" });
+    }
+  }
+  return { nodes, edges };
+}
+
+// --- Import from a Canvas graph (the ADR-021/025 seam) ----------------------
+// A minimal shape matching canvas-doc's `toGraph()` output — declared locally so
+// the two engines stay decoupled (no import cycle).
+export interface ImportGraphNode {
+  id: string;
+  kind: string;
+  label: string;
+}
+export interface ImportGraphEdge {
+  id: string;
+  from: string;
+  to: string;
+  relation: "depends-on" | "explains" | "leads-to";
+}
+export interface ImportGraph {
+  nodes: ImportGraphNode[];
+  edges: ImportGraphEdge[];
+}
+
+/**
+ * Build a proof DRAFT from a Canvas graph, deterministically:
+ *   • an edge's meaning is normalised to "X follows from Y" (X.refs += Y):
+ *       depends-on  from→to      ⇒ from follows from to
+ *       leads-to    from→to      ⇒ to follows from from
+ *       explains    from→to      ⇒ to follows from from
+ *   • nodes are ordered so each step's references come before it (topological;
+ *     a cycle falls back to input order, which validateProof will then flag);
+ *   • roots (follow from nothing) become assumptions, the last node the goal.
+ * The result is editable in the workshop — a starting scaffold, not a verdict.
+ */
+export function proofFromCanvasGraph(graph: ImportGraph, title = "Imported from Canvas"): Proof {
+  const ids = graph.nodes.map((n) => n.id);
+  const idSet = new Set(ids);
+  const deps = new Map<string, Set<string>>(ids.map((id) => [id, new Set<string>()]));
+  const addDep = (of: string, on: string) => {
+    if (of !== on && idSet.has(of) && idSet.has(on)) deps.get(of)!.add(on);
+  };
+  for (const e of graph.edges) {
+    if (e.relation === "depends-on") addDep(e.from, e.to);
+    else addDep(e.to, e.from); // leads-to / explains
+  }
+
+  // Kahn topological sort: a node emits only after all nodes it depends on.
+  const order: string[] = [];
+  const remaining = new Set(ids);
+  const emitted = new Set<string>();
+  let progress = true;
+  while (remaining.size && progress) {
+    progress = false;
+    for (const id of ids) {
+      if (!remaining.has(id)) continue;
+      const ready = [...deps.get(id)!].every((d) => emitted.has(d) || !idSet.has(d));
+      if (ready) {
+        order.push(id);
+        emitted.add(id);
+        remaining.delete(id);
+        progress = true;
+      }
+    }
+  }
+  // Any leftovers (a cycle) keep their original order; validation will flag them.
+  for (const id of ids) if (remaining.has(id)) order.push(id);
+
+  const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
+  const steps: ProofStep[] = order.map((id, i) => {
+    const node = nodeById.get(id)!;
+    const refs = [...deps.get(id)!];
+    const isLast = i === order.length - 1;
+    const kind: StepKind = isLast ? "goal" : refs.length === 0 ? "assumption" : "step";
+    const rule = kind === "assumption" ? "given" : kind === "goal" ? "therefore" : "definition";
+    return { id, kind, statement: node.label, rule, refs };
+  });
+
+  const goalStatement = steps[steps.length - 1]?.statement ?? "";
+  return { id: `from-canvas-${Date.now().toString(36)}`, title, goal: goalStatement, steps };
 }

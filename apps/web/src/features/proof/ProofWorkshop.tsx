@@ -4,16 +4,21 @@
 // template, then edit: change statements, pick justification rules, and cite
 // which earlier steps each line follows from.
 import { Card } from "@logicland/ui";
-import { CheckCircle2, Plus, ScrollText, Trash2, TriangleAlert } from "lucide-react";
+import { CheckCircle2, Info, Plus, ScrollText, Share2, Trash2, TriangleAlert } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   PROOF_TEMPLATES,
   RULES,
+  proofFromCanvasGraph,
+  proofToGraph,
   validateProof,
   type Proof,
   type ProofStep,
   type StepKind,
 } from "@/lib/engines/proof";
+import { migrateDoc, toGraph, type CanvasDoc } from "@/lib/engines/canvas-doc";
+
+const CANVAS_DOC_KEYS = ["logicland:canvas:doc:v2", "logicland:canvas:doc:v1"];
 
 let counter = 0;
 const newId = () => `p-${Date.now().toString(36)}-${++counter}`;
@@ -27,19 +32,58 @@ const KIND_LABEL: Record<StepKind, string> = {
 export function ProofWorkshop() {
   const [proof, setProof] = useState<Proof>(() => structuredClone(PROOF_TEMPLATES[0]));
 
+  const [importNote, setImportNote] = useState<string | null>(null);
+
   const validation = useMemo(() => validateProof(proof), [proof]);
-  const issuesByStep = useMemo(() => {
-    const m = new Map<string, string[]>();
+  const byStep = useMemo(() => {
+    const errs = new Map<string, string[]>();
+    const warns = new Map<string, string[]>();
     for (const iss of validation.issues) {
-      if (iss.stepId) m.set(iss.stepId, [...(m.get(iss.stepId) ?? []), iss.message]);
+      if (iss.stepId) errs.set(iss.stepId, [...(errs.get(iss.stepId) ?? []), iss.message]);
     }
-    return m;
+    for (const w of validation.warnings) {
+      if (w.stepId) warns.set(w.stepId, [...(warns.get(w.stepId) ?? []), w.message]);
+    }
+    return { errs, warns };
   }, [validation]);
   const generalIssues = validation.issues.filter((i) => !i.stepId);
+  const generalWarnings = validation.warnings.filter((w) => !w.stepId);
+  const graph = useMemo(() => proofToGraph(proof), [proof]);
 
   const loadTemplate = (id: string) => {
     const t = PROOF_TEMPLATES.find((p) => p.id === id);
     if (t) setProof(structuredClone(t));
+  };
+
+  // Import the learner's Canvas graph as a proof draft (ADR-025 seam). Reads the
+  // autosaved canvas from localStorage — deterministic, offline, no network.
+  const importFromCanvas = () => {
+    setImportNote(null);
+    try {
+      let raw: string | null = null;
+      for (const k of CANVAS_DOC_KEYS) {
+        raw = window.localStorage.getItem(k);
+        if (raw) break;
+      }
+      if (!raw) {
+        setImportNote("No saved canvas found. Build one in the Canvas first, then import it here.");
+        return;
+      }
+      const doc = migrateDoc(JSON.parse(raw) as Partial<CanvasDoc>);
+      const g = toGraph(doc);
+      if (g.nodes.length === 0) {
+        setImportNote("Your canvas has no blocks to import yet.");
+        return;
+      }
+      setProof(proofFromCanvasGraph(g, doc.title || "Imported from Canvas"));
+      setImportNote(
+        `Imported ${g.nodes.length} block${g.nodes.length === 1 ? "" : "s"} and ${g.edges.length} link${
+          g.edges.length === 1 ? "" : "s"
+        } — edit the steps and rules to finish the proof.`,
+      );
+    } catch {
+      setImportNote("Couldn't read the saved canvas.");
+    }
   };
 
   const patchStep = (id: string, patch: Partial<ProofStep>) =>
@@ -74,21 +118,41 @@ export function ProofWorkshop() {
       <header className="mb-4 flex flex-wrap items-center gap-2">
         <ScrollText className="h-5 w-5 text-indigo-500" />
         <h1 className="font-display text-2xl font-extrabold">Proof Workshop</h1>
-        <label className="ml-auto flex items-center gap-2 text-sm font-semibold">
-          <span className="opacity-60">Proof</span>
-          <select
-            value={proof.id.startsWith("p-") ? "" : proof.id}
-            onChange={(e) => e.target.value && loadTemplate(e.target.value)}
-            className="rounded-lg border-2 border-brand/20 bg-transparent px-2 py-1 outline-none focus:border-brand"
+        <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 text-[0.65rem] font-bold text-indigo-500">
+          {graph.nodes.length} steps · {graph.edges.length} links
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={importFromCanvas}
+            className="inline-flex items-center gap-1.5 rounded-lg border-2 border-brand/30 px-2.5 py-1 text-sm font-bold text-brand hover:border-brand/60"
           >
-            {PROOF_TEMPLATES.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.title}
-              </option>
-            ))}
-          </select>
-        </label>
+            <Share2 className="h-4 w-4" /> Import from Canvas
+          </button>
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <span className="opacity-60">Proof</span>
+            <select
+              value={proof.id.startsWith("p-") || proof.id.startsWith("from-canvas") ? "" : proof.id}
+              onChange={(e) => e.target.value && loadTemplate(e.target.value)}
+              className="rounded-lg border-2 border-brand/20 bg-transparent px-2 py-1 outline-none focus:border-brand"
+            >
+              <option value="">Custom / imported</option>
+              {PROOF_TEMPLATES.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </header>
+
+      {importNote && (
+        <div className="mb-4 flex items-start gap-2 rounded-2xl border-2 border-brand/20 bg-brand/5 p-3 text-sm">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+          <span>{importNote}</span>
+        </div>
+      )}
 
       <Card className="mb-4 border-2 border-indigo-500/20 bg-indigo-500/5">
         <p className="text-xs font-bold uppercase tracking-wide text-indigo-500">Prove</p>
@@ -96,7 +160,7 @@ export function ProofWorkshop() {
       </Card>
 
       {/* Live validation */}
-      <div className="mb-4">
+      <div className="mb-4 space-y-2">
         {validation.valid ? (
           <div className="flex items-center gap-2 rounded-2xl border-2 border-meadow/40 bg-meadow/5 p-3 text-sm font-bold text-meadow">
             <CheckCircle2 className="h-5 w-5" /> Valid proof — every step follows, and you reached the goal.
@@ -115,16 +179,40 @@ export function ProofWorkshop() {
             )}
           </div>
         )}
+        {/* Non-fatal hints — shown even when the proof is valid. */}
+        {(generalWarnings.length > 0 || validation.warnings.some((w) => w.stepId)) && (
+          <div className="rounded-2xl border border-sky-400/30 bg-sky-400/5 p-3 text-xs">
+            <p className="flex items-center gap-1.5 font-bold text-sky-600 dark:text-sky-300">
+              <Info className="h-3.5 w-3.5" /> Hints — optional, they will not block your proof
+            </p>
+            {generalWarnings.length > 0 && (
+              <ul className="mt-1 list-disc pl-5 opacity-80">
+                {generalWarnings.map((w, k) => (
+                  <li key={k}>{w.message}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Steps */}
       <ol className="space-y-3">
         {proof.steps.map((s, i) => {
           const earlier = proof.steps.slice(0, i);
-          const stepIssues = issuesByStep.get(s.id) ?? [];
+          const stepIssues = byStep.errs.get(s.id) ?? [];
+          const stepWarnings = byStep.warns.get(s.id) ?? [];
           return (
             <li key={s.id}>
-              <Card className={stepIssues.length ? "border-2 border-amber-400/40" : ""}>
+              <Card
+                className={
+                  stepIssues.length
+                    ? "border-2 border-amber-400/40"
+                    : stepWarnings.length
+                      ? "border border-sky-400/30"
+                      : ""
+                }
+              >
                 <div className="flex items-center gap-2">
                   <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand/10 text-xs font-bold text-brand">
                     {i + 1}
@@ -195,6 +283,13 @@ export function ProofWorkshop() {
                   <ul className="mt-2 space-y-0.5 text-xs text-amber-600 dark:text-amber-300">
                     {stepIssues.map((m, k) => (
                       <li key={k}>• {m}</li>
+                    ))}
+                  </ul>
+                )}
+                {stepWarnings.length > 0 && (
+                  <ul className="mt-1 space-y-0.5 text-xs text-sky-600 dark:text-sky-300">
+                    {stepWarnings.map((m, k) => (
+                      <li key={k}>◦ {m}</li>
                     ))}
                   </ul>
                 )}
