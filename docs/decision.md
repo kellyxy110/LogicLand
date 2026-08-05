@@ -569,3 +569,43 @@ integer divisors) keep it fast and simple at the cost of not handling
 irrational-coefficient or multi-variable input, which the engine reports
 honestly rather than guessing. Reuses, rather than forks, Graph Explorer's
 parser — the two engines now share one safe expression front end.
+
+## ADR-029 Geometry Lab — deterministic construction, measurement and transforms
+**Context:** MathLab listed Geometry Lab ("construct, measure and transform")
+as "soon". Unlike algebra, geometry's payoff is visual and spatial — a learner
+needs to *see* a shape and its transform, not just read a formula — while
+still keeping every number a real computation (ADR-015), not an AI guess.
+**Decision:** a pure `lib/engines/geometry.ts` operating on `Point[]` polygons
+in the plane: `distance`/`midpoint`/`angleDeg` (law-of-cosines via the dot
+product) as primitives; `polygonArea` (shoelace formula) and
+`polygonPerimeter`/`sideLengths`/`interiorAngles` built on them;
+`classifyTriangleBySides`/`classifyTriangleByAngles` for the equilateral/
+isosceles/scalene and right/acute/obtuse labels. Four closed-form rigid/scale
+transforms — `translate`, `rotate` (about any center), `reflect` (x-axis,
+y-axis, y=x, y=-x), `scale` (about any center) — each pure and independently
+tested (rotation is checked against a known 90° case and for area
+preservation, since a rigid transform must not change it). `measureShape` and
+`applyTransform` wrap these into the same `Step[]` contract as Algebra Studio
+(ADR-028) — never just a number, always the working. `/mathlab/geometry`
+(`GeometryLab.tsx`) renders shapes on a self-contained SVG grid — Measure mode
+shows one shape + its step list, Transform mode overlays a grey "before" and a
+coloured "after" for translate/rotate/reflect/scale with adjustable
+parameters. Geometry Lab flips to `live` (7/12 MathLab labs live).
+**Caught during verification:** the Equilateral-triangle preset's half-base
+was hand-rounded to 2 decimal places, so its three sides measured
+6.93/6.92/6.93 — close enough to look right but wrong enough to make
+`classifyTriangleBySides` report **"isosceles" instead of "equilateral,"**
+undermining the tool's "every step is computed, never guessed" promise on its
+own default preset. Fixed by deriving the half-base from
+`height * 2/sqrt(3)` at full floating-point precision instead of a rounded
+literal; a regression test (`SHAPE_PRESETS` describe block) pins the correct
+classification so a future preset edit can't silently reintroduce the drift.
+Caught by browser-verifying the shipped feature rather than trusting the unit
+tests alone — the unit tests used exact-integer fixtures and never exercised
+the actual preset data.
+**Consequences:** geometry now has the same computed-not-guessed guarantee as
+algebra, with a shared `Step[]` shape across both — a `/lab/graph`-style
+ingestion into the Project Graph (ADR-026) is a natural next step. The lesson
+generalises: **hand-authored numeric preset/fixture data needs the same
+scrutiny as engine code** — round a coordinate and a downstream classifier can
+silently lie.

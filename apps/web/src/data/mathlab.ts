@@ -67,7 +67,8 @@ export const MATHLABS: MathLab[] = [
     description: "Interactive constructions, angles, transformations and geometric proofs.",
     icon: "shapes",
     gradient: "from-sky-500 to-cyan-600",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/geometry",
   },
   {
     id: "graph-explorer",
