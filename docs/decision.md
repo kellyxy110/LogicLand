@@ -445,3 +445,40 @@ resists floods, is debuggable via correlated JSON logs, and self-rejects unsound
 production config. **Blocker to go live: choose a deploy host + set the secrets
 (`SERVICE_TOKEN`, `CORS_ORIGINS`, `DATABASE_URL`, optional `LLM_*`) and set the
 same `SERVICE_TOKEN` in the web app so it sends the header.**
+**Status (2026-08-05): LIVE.** Deployed on Render (free plan) at
+`https://logicland-engine.onrender.com`; `/health` and `/ready` green; service
+auth verified (401 without token, 200 with); Groq LLM reachable
+(`source:"ai"`); the same `SERVICE_TOKEN` is set in the Vercel server env and
+both engine URLs (`NEXT_PUBLIC_ENGINE_URL`, `LOGICLAND_ENGINE_URL`) point at it.
+
+## ADR-025 LogicLand Canvas V2 — the semantic layer becomes a graph
+**Context:** ADR-021 shipped a semantic-block layer over Excalidraw but left its
+integration seams as *contracts only*: blocks were a flat list, links between
+them (the units Proof Workshop and the Project Graph need) did not exist, and
+nothing consumed the now-live engine. A flat list under-serves the moat —
+structured, machine-readable work — because relationships are where the meaning
+is (this equation *depends on* that one; this step *leads to* the next).
+**Decision:** extend the pure engine (`lib/engines/canvas-doc.ts`), never fork:
+- **Typed directed edges** between blocks — `CanvasRelation = depends-on |
+  explains | leads-to` — with `linkBlocks`/`unlinkBlocks`/`canLink`. Self-loops
+  and exact duplicates are rejected; removing a block **prunes** every edge that
+  touched it (no dangling edges); the same rule runs on load via `migrateDoc`.
+- **Authoring ops:** `moveBlock` (bounds-safe reorder) and `duplicateBlock`.
+- **`toGraph()`** — the stable `{nodes, edges}` projection the **Project Graph**
+  ingests. It excludes the freehand scene by construction.
+- **Deterministic `blockInsight()`** — an offline, never-an-LLM observation
+  (bracket balance, line/word counts) shown before any AI call.
+- **Engine-backed explain** — `explainCanvasBlock` server action calls the
+  scaffolded tutor (hint, never the final answer) through the service-token
+  handshake and **always degrades** to a deterministic local hint (the Math Fix
+  fail-safe pattern). Exercises the ADR-024 engine that just went live.
+- **`exportMarkdown()`** (fenced code + a Connections list) alongside JSON/text;
+  all exports are self-contained (no external calls).
+- **v1→v2 migration** (`migrateDoc`) + a bumped `:v2` storage key that still
+  recovers `:v1` work; graph/linking is a **Builder+** capability (ADR-012),
+  like code/equation blocks.
+**Consequences:** the canvas is now a small typed knowledge graph, not a list —
+directly consumable by Proof Workshop (equation `depends-on`/`explains` chains)
+and the Project Graph (`toGraph`), while staying pure, deterministic and
+offline-capable. The engine seam is real (not a stub) yet safe: no engine, no
+provider, or an unsafe answer all fall back to a local hint.
