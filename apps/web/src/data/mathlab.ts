@@ -97,7 +97,8 @@ export const MATHLABS: MathLab[] = [
     description: "Averages, spread, probability and simulations you can run and see.",
     icon: "barchart",
     gradient: "from-lime-500 to-green-600",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/statistics",
   },
   {
     id: "calculus-visualizer",

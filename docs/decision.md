@@ -655,3 +655,40 @@ them uniformly. The lesson from ADR-029 generalises again: **a step trace's
 labels are part of its correctness surface**, not decoration — verify what a
 label claims against what the code actually iterates over, the same way
 you'd verify a return value.
+
+## ADR-031 Statistics Lab — exact-fraction probability + a reproducible simulator
+**Context:** MathLab listed Statistics Lab ("averages, spread, probability and
+simulations you can run and see") as "soon". Statistics is the one MathLab
+domain where randomness is the subject, not a shortcut — a simulator that
+never varies would misteach the law of large numbers. The tension with
+ADR-015 ("deterministic evaluation, AI never grades") is resolved by scope:
+randomness governs *what happens in the simulated experiment*, never *whether
+an answer is graded correct* — and a given seed always reproduces the same
+run, so "run it again" is a real, inspectable rerun, not an unrepeatable event.
+**Decision:** a pure `lib/engines/statistics.ts` with three tools:
+- **Descriptive Stats**: mean, median, mode (all ties returned, empty when
+  every value is unique — no fake mode), range, and **both** population and
+  sample variance/standard deviation shown side by side (the n vs. n−1
+  distinction is a common misconception; showing both instead of picking one
+  makes it visible rather than hiding it).
+- **Probability**: reuses Algebra Studio's `Fraction`/`frac`/`fractionToString`
+  (ADR-028) rather than reimplementing rational arithmetic — a small library
+  of named events over three experiments (coin, die, standard 52-card deck)
+  computed as `favorable/total`, exact and reduced (`4/52` reports as `1/13`).
+- **Simulate**: a `mulberry32` seeded PRNG (small, fast, deterministic given a
+  seed — not cryptographic, which is fine for a classroom simulator) drives up
+  to 20,000 trials; each outcome's empirical frequency is reported next to its
+  theoretical probability so the convergence (or, on a small run, the
+  *non*-convergence) is the visible lesson. "Run again" advances the seed
+  rather than reaching for real entropy, so the same seed value always
+  replays identically — verified by a determinism test (`simulate` with the
+  same seed twice) alongside a convergence test (20,000 trials lands within 2
+  percentage points of theoretical).
+- `/mathlab/statistics` (`StatisticsLab.tsx`): three mode tabs, a small CSS-bar
+  histogram for the simulator. Statistics Lab flips to `live` (8/12 labs).
+**Consequences:** the three most recent MathLab engines (Algebra, Statistics)
+now literally share a `Fraction` implementation — one exact-rational-arithmetic
+core underlies both, rather than two. The simulator is a deliberate, scoped
+exception to "no randomness" elsewhere in MathLab; documenting the boundary
+here (random *experiment outcome*, never random *grading*) is meant to keep
+that exception from creeping into labs where it wouldn't belong.
