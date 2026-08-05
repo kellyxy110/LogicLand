@@ -57,7 +57,8 @@ export const MATHLABS: MathLab[] = [
     description: "Expand, factor, simplify and solve — with each step explained.",
     icon: "variable",
     gradient: "from-violet-500 to-purple-600",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/algebra",
   },
   {
     id: "geometry-lab",

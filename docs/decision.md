@@ -529,3 +529,43 @@ expression engine the Algebra Studio and Calculus Visualizer can build on. Cost:
 the parser is hand-written (well-tested: precedence, associativity, implicit
 multiplication, error paths, sampling gaps) rather than pulled from a library —
 deliberate, to keep the safety guarantee auditable and the bundle small.
+
+## ADR-028 Algebra Studio — exact symbolic algebra, no computer-algebra library
+**Context:** MathLab listed Algebra Studio ("expand, factor, simplify and solve
+— with each step explained") as "soon", and ADR-027 explicitly built Graph
+Explorer's parser to be reusable here. Symbolic algebra is a step up from
+numeric evaluation: it must never round (`0.1 + 0.2` errors are unacceptable
+when the answer is a fraction), and per the deterministic-evaluation principle
+(ADR-015) the AI must never compute or grade the maths — every step has to be
+a real, checkable computation.
+**Decision:** a pure `lib/engines/algebra.ts` built on top of Graph Explorer's
+`parseExpression`/`Node` AST (ADR-027) — parsed once, never re-implemented:
+- **Exact `Fraction` arithmetic** (`{num, den}`, always reduced, sign on the
+  numerator) underlies everything — no floating-point coefficients anywhere.
+- **`Polynomial`** = an ascending coefficient array in one variable. AST →
+  polynomial goes through an uncombined **term list** first (`toTerms`, which
+  distributes `*`/`^`/`/`-by-constant across sums) so `expand` can show a real
+  "distribute" step before `combineTerms` collapses like terms — the same core
+  path powers `simplify`, just framed differently.
+- **`factorExpression`**: pulls a GCF, then repeatedly finds a rational root
+  via the rational-root theorem (bounded divisor search over the cleared-
+  denominator integer coefficients) and synthetically divides it out — this
+  single loop factors linear, quadratic, cubic, or higher, stopping at an
+  honest **"can't factor further over the rationals"** when no rational root
+  exists (never a fake or approximate factorization).
+- **`solveEquation`**: parses `lhs = rhs`, moves everything to one side, then
+  branches on degree — identity/contradiction (0), isolate (1), quadratic
+  formula with an **exact rational-root shortcut before falling back to a
+  labelled decimal approximation** for irrational roots (2), or the same
+  rational-root reduction loop as factoring for degree ≥ 3.
+- Every operation returns `Step[]` (never just an answer) — mirrors Proof
+  Workshop's "show the reasoning" contract, not just Math Fix's right/wrong.
+- `/mathlab/algebra` (`AlgebraStudio.tsx`): four mode tabs (Simplify/Expand/
+  Factor/Solve) sharing one input + preset row + step list, styled like Graph
+  Explorer. Algebra Studio flips to `live` in `data/mathlab.ts`.
+**Consequences:** a real, auditable computer-algebra core (29 unit tests) with
+no floating-point drift and no library black box — the search bounds (small
+integer divisors) keep it fast and simple at the cost of not handling
+irrational-coefficient or multi-variable input, which the engine reports
+honestly rather than guessing. Reuses, rather than forks, Graph Explorer's
+parser — the two engines now share one safe expression front end.
