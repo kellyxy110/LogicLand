@@ -609,3 +609,49 @@ ingestion into the Project Graph (ADR-026) is a natural next step. The lesson
 generalises: **hand-authored numeric preset/fixture data needs the same
 scrutiny as engine code** — round a coordinate and a downstream classifier can
 silently lie.
+
+## ADR-030 Number Theory — trial division, Euclid, square-and-multiply, sieve
+**Context:** MathLab listed Number Theory ("divisibility, primes, modular
+arithmetic") as "soon". Unlike the continuous-domain labs (Algebra, Geometry),
+number theory's algorithms are the *point* — a learner should see the
+Euclidean algorithm grind down to a GCD, not just receive one, and see why
+modular exponentiation doesn't just loop the exponent's value in multiplies.
+**Decision:** a pure `lib/engines/number-theory.ts`, bounded so nothing can
+hang the UI (`MAX_FACTORIZE = 10,000,000`, `MAX_SIEVE = 1,000`):
+- **Factorize**: trial division up to `sqrt(n)`, each division step shown;
+  emits `PrimeFactor[]`, all divisors (built by taking the Cartesian product
+  of each prime's power range, not by scanning `1..n`), divisor sum, and a
+  perfect/abundant/deficient classification (skipped for primes — always
+  deficient, not pedagogically interesting).
+- **GCD & LCM**: the Euclidean algorithm traced step-by-step
+  (`a = q×b + r`, recurse on `(b, r)`), LCM from `a×b÷gcd`.
+- **Modular Arithmetic**: `modPow` via square-and-multiply, walking the
+  exponent's bits LSB-first exactly as the algorithm does — the step trace
+  labels each bit by its true position so "why does this only take log(exp)
+  steps" is visible, not hand-waved.
+- **Prime Sieve**: a standard Sieve of Eratosthenes (`Uint8Array` composite
+  flags, inner loop starts at `n*n`), rendered as a coloured number grid
+  (`/mathlab/number-theory`, Prime Sieve mode) so "crossing off multiples"
+  is literally what the learner sees happen.
+- All four return `{ok, steps, result}` — the shared shape used by Algebra
+  Studio (028) and Geometry Lab (029) — or a friendly `{ok:false, error}` for
+  bad/out-of-range input, never a crash or an approximate answer.
+**Caught during implementation review (before shipping):** the first draft of
+`modularArithmetic`'s bit-index labels counted **down** from
+`bits.length - 1` (as if reading the exponent MSB-first), but the
+square-and-multiply loop itself consumes bits **LSB-first** (`e & 1`, then
+`e >>= 1`) — so the labels described a different algorithm than the one
+running underneath them. The computed `result` was already correct (the label
+is cosmetic to the number), but a "see every step" pedagogical tool that
+mislabels its own steps defeats its purpose. Fixed by counting `bitIndex` up
+from 0 in the same direction the loop actually consumes bits, with a test
+(`"traces square-and-multiply with correct bit order"`) asserting the exact
+label for a known exponent (10 = `0b1010`, bits 1 and 3 set) so the direction
+can't silently drift back.
+**Consequences:** MathLab reaches 7/12 live; the three engines (Algebra,
+Geometry, Number Theory) now share one `Step[]`/`{ok,...}` contract, so a
+future "show your work" export or Project Graph ingestion point could treat
+them uniformly. The lesson from ADR-029 generalises again: **a step trace's
+labels are part of its correctness surface**, not decoration — verify what a
+label claims against what the code actually iterates over, the same way
+you'd verify a return value.

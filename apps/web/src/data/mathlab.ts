@@ -87,7 +87,8 @@ export const MATHLABS: MathLab[] = [
     description: "Divisibility, primes, modular arithmetic and the beauty of whole numbers.",
     icon: "hash",
     gradient: "from-amber-500 to-yellow-500",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/number-theory",
   },
   {
     id: "statistics-lab",
