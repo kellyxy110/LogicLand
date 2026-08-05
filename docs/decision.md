@@ -692,3 +692,51 @@ core underlies both, rather than two. The simulator is a deliberate, scoped
 exception to "no randomness" elsewhere in MathLab; documenting the boundary
 here (random *experiment outcome*, never random *grading*) is meant to keep
 that exception from creeping into labs where it wouldn't belong.
+
+## ADR-032 Calculus Visualizer — numeric derivatives, trapezoid integrals, two-sided limits
+**Context:** MathLab listed Calculus Visualizer ("limits, gradients, areas
+under curves") as "soon". Calculus is the domain most tempting to fake with a
+symbolic-differentiation/CAS dependency; ADR-015 rules that out — every value
+shown must be a real, bounded numeric computation the learner could redo by
+hand, not a black-box symbolic result.
+**Decision:** a pure `lib/engines/calculus.ts` built directly on Graph
+Explorer's safe expression parser (`parseExpression`/`evaluateAt`, ADR-027) —
+no symbolic engine, no `eval`:
+- **Derivative**: central-difference `(f(a+h) − f(a−h)) / 2h` at shrinking
+  `h` (0.1 → 0.0001), so the estimate's stabilization *is* the step trace;
+  builds a tangent line from the final estimate.
+- **Integral**: trapezoid rule at growing `n` (4 → 1024 panels), same
+  stabilizing-trace idea; a separate midpoint-rule rectangle set (`n` fixed,
+  modest) drives the visualization only, kept apart from the accuracy figures
+  so the picture and the number don't have to agree pixel-for-pixel.
+- **Limit**: evaluates from both sides at shrinking deltas (0.1 → 0.000001)
+  and classifies the result as agreeing (limit exists), disagreeing (a jump),
+  or unbounded (`|value| > 1e4` at the tightest delta — a vertical asymptote,
+  distinct from a bounded jump like `sign(x)`).
+- `/mathlab/calculus` (`CalculusVisualizer.tsx`): three mode tabs, each with
+  an SVG plot alongside the step list. Calculus Visualizer flips to `live`
+  (9/12 labs).
+**Caught during implementation review (before shipping):** three bugs, none
+caught by a user — all from re-reading the code and its tests before trusting
+them:
+1. `limitAt`'s left-side delta array was `.reverse()`d while the right-side
+   array was not, so `array[length-1]` (meant to be "closest approach") pulled
+   the *farthest* left-side sample instead of the closest — the two sides
+   were being compared at mismatched distances from `a`. Fixed by keeping
+   both arrays in the same farthest-to-closest order.
+2. The original "unbounded" check only tested `!Number.isFinite(...)`, which
+   never fires for `1/x` near 0 (still a large but finite float at any
+   representable delta) — a real vertical asymptote was reported as an
+   ordinary jump discontinuity. Fixed by adding a tighter delta (1e-6) and a
+   magnitude threshold (`UNBOUNDED_THRESHOLD = 1e4`).
+3. `DerivativePlot`'s `f(a)` lookup searched the plotted sample grid for a
+   point within `1e-6` of `x = a` — a search that almost never matches, since
+   sample spacing is roughly 0.05 over a 10-unit window. Fixed by calling
+   `evaluateAt` directly instead of searching the plot's own samples.
+**Consequences:** MathLab reaches 9/12 live; Calculus Visualizer is the third
+engine (after Algebra Studio and Statistics Lab) to sit directly on top of
+Graph Explorer's expression parser rather than re-implementing it, and the
+third lab in a row where a step-trace or plot bug was caught by rereading the
+code against its own stated contract before it ever reached a user — the
+lesson from ADR-029/ADR-030 (a step trace's labels, and here also a plot's
+derived points, are part of the correctness surface) keeps paying for itself.

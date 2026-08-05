@@ -107,7 +107,8 @@ export const MATHLABS: MathLab[] = [
     description: "Limits, gradients, areas under curves — the ideas of calculus, made visual.",
     icon: "activity",
     gradient: "from-orange-500 to-red-500",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/calculus",
   },
   {
     id: "olympiad",
