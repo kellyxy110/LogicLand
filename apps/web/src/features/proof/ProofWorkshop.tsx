@@ -4,8 +4,8 @@
 // template, then edit: change statements, pick justification rules, and cite
 // which earlier steps each line follows from.
 import { Card } from "@logicland/ui";
-import { CheckCircle2, Info, Plus, ScrollText, Share2, Trash2, TriangleAlert } from "lucide-react";
-import { useMemo, useState } from "react";
+import { CheckCircle2, GitBranch, Info, Plus, ScrollText, Share2, Trash2, TriangleAlert } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PROOF_TEMPLATES,
   RULES,
@@ -19,6 +19,8 @@ import {
 import { migrateDoc, toGraph, type CanvasDoc } from "@/lib/engines/canvas-doc";
 
 const CANVAS_DOC_KEYS = ["logicland:canvas:doc:v2", "logicland:canvas:doc:v1"];
+/** Shared with the Project Graph (ADR-026), which reads the current proof. */
+export const PROOF_STORAGE_KEY = "logicland:proof:current:v1";
 
 let counter = 0;
 const newId = () => `p-${Date.now().toString(36)}-${++counter}`;
@@ -49,6 +51,15 @@ export function ProofWorkshop() {
   const generalIssues = validation.issues.filter((i) => !i.stepId);
   const generalWarnings = validation.warnings.filter((w) => !w.stepId);
   const graph = useMemo(() => proofToGraph(proof), [proof]);
+
+  // Persist the current proof so the Project Graph can aggregate it (ADR-026).
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PROOF_STORAGE_KEY, JSON.stringify(proof));
+    } catch {
+      /* storage unavailable — the workshop still works */
+    }
+  }, [proof]);
 
   const loadTemplate = (id: string) => {
     const t = PROOF_TEMPLATES.find((p) => p.id === id);
@@ -129,6 +140,12 @@ export function ProofWorkshop() {
           >
             <Share2 className="h-4 w-4" /> Import from Canvas
           </button>
+          <a
+            href="/lab/graph"
+            className="inline-flex items-center gap-1.5 rounded-lg border-2 border-indigo-500/20 px-2.5 py-1 text-sm font-bold text-indigo-500 hover:border-indigo-500/50"
+          >
+            <GitBranch className="h-4 w-4" /> Project Graph
+          </a>
           <label className="flex items-center gap-2 text-sm font-semibold">
             <span className="opacity-60">Proof</span>
             <select

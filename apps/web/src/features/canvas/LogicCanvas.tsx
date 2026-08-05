@@ -7,7 +7,7 @@
 // workspace around it.
 import { Card } from "@logicland/ui";
 import dynamic from "next/dynamic";
-import { ArrowDown, ArrowUp, Copy, Download, History, Link2, Save, Sparkles, Trash2, Unlink } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Download, GitBranch, History, Link2, Save, Sparkles, Trash2, Unlink } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAgeMode } from "@/features/age-mode/AgeModeProvider";
 import { explainCanvasBlock, type ExplainBlockResult } from "@/app/actions/canvas";
@@ -164,6 +164,14 @@ export function LogicCanvas() {
           </span>
         )}
         <div className="ml-auto flex items-center gap-1.5">
+          {graphOn && (
+            <a
+              href="/lab/graph"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold text-indigo-500 opacity-80 hover:opacity-100"
+            >
+              <GitBranch className="h-3.5 w-3.5" /> Graph
+            </a>
+          )}
           <button
             type="button"
             onClick={saveVersion}

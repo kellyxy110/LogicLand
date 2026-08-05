@@ -482,3 +482,28 @@ directly consumable by Proof Workshop (equation `depends-on`/`explains` chains)
 and the Project Graph (`toGraph`), while staying pure, deterministic and
 offline-capable. The engine seam is real (not a stub) yet safe: no engine, no
 provider, or an unsafe answer all fall back to a local hint.
+
+## ADR-026 Project Graph — one cross-artifact map of a learner's thinking
+**Context:** ADR-025 gave the Canvas and the Proof Workshop a shared
+`{nodes, edges}` projection, but nothing yet *aggregated* them. A learner's work
+is scattered across artifacts; the pedagogical payoff of the graph layer only
+appears when those artifacts are seen as one connected structure (what rests on
+what, what's foundational, what's a dead end).
+**Decision:** a pure `lib/engines/project-graph.ts` that ingests each artifact's
+graph under a **source namespace** (`canvas:` / `proof:` / `skill:`) so ids never
+collide, `mergeGraphs` them, and computes structure deterministically:
+`roots` (foundational), `leaves` (conclusions), `orphans` (unconnected),
+`nodeDepth` + `topologicalLayers` (cycle-safe tiers for layout),
+`longestChainLength`, and `validateGraph` (duplicate ids, dangling edges,
+self-loops, cycles via DFS colouring — mirroring the skill-graph checker).
+Ingest accepts the minimal `{nodes, edges}` shape both engines already emit, so
+the engines stay decoupled (no import cycle). The `/lab/graph` view reads the
+autosaved Canvas and Proof from localStorage, merges them, and renders a
+**deterministic tiered SVG** (foundational tier at the top, arrows pointing from
+a piece to what it builds on), with a stat strip and structural warnings; the
+Proof Workshop now persists its current proof so the map can include it.
+**Consequences:** the three units (Canvas, Proof, Graph) now form one loop — a
+learner sketches linked blocks, pulls them into a proof, and sees the whole
+structure as a map. All offline, deterministic, no LLM. `skill:` is reserved so
+the curriculum skill-graph can join the same map later; server-side persistence
+replaces localStorage when the artifacts move to the DB.
