@@ -507,3 +507,25 @@ learner sketches linked blocks, pulls them into a proof, and sees the whole
 structure as a map. All offline, deterministic, no LLM. `skill:` is reserved so
 the curriculum skill-graph can join the same map later; server-side persistence
 replaces localStorage when the artifacts move to the DB.
+
+## ADR-027 Graph Explorer — a safe expression engine + deterministic plotter
+**Context:** MathLab listed Graph Explorer as "soon". Plotting `f(x)` needs to
+evaluate arbitrary user expressions — and the child-safety + no-secrets rules
+forbid `eval` or any dynamic code execution, while the deterministic-evaluation
+principle (ADR-015) forbids asking an LLM to compute maths.
+**Decision:** a pure `lib/engines/graph-explorer.ts`: a tokenizer + a
+**precedence-climbing parser** that turns an expression into a typed AST, and a
+numeric evaluator — never `eval`, never the network. Supports `+ - * / ^`, unary
+minus (bound looser than `^`, so `-x^2 = -(x^2)`), parentheses, implicit
+multiplication (`2x`, `3sin(x)`, `2(x+1)`), the constants `pi`/`e`, and the
+functions `sin cos tan sqrt abs ln log exp`. Parse failures return a friendly
+message (not an exception); domain errors (`1/0`, `sqrt(-1)`) yield non-finite
+values, not throws. `sampleFunction` walks the domain and reports finite y-range
+for auto-scaling. The `/mathlab/graph` view maps samples to a self-contained SVG
+(axes, grid, curve segments that **break at gaps/asymptotes**, x-intercept
+markers), with presets and domain controls. Graph Explorer flips to `live`.
+**Consequences:** a safe, exciting, fully deterministic plotter, and a reusable
+expression engine the Algebra Studio and Calculus Visualizer can build on. Cost:
+the parser is hand-written (well-tested: precedence, associativity, implicit
+multiplication, error paths, sampling gaps) rather than pulled from a library —
+deliberate, to keep the safety guarantee auditable and the bundle small.

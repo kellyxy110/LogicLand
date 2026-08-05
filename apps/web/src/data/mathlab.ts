@@ -72,10 +72,11 @@ export const MATHLABS: MathLab[] = [
     id: "graph-explorer",
     name: "Graph Explorer",
     tagline: "See functions come alive.",
-    description: "Plot and manipulate functions, intersections, gradients and families of curves.",
+    description: "Type a function of x and plot it — lines, curves and waves, with x-intercepts marked.",
     icon: "linechart",
     gradient: "from-emerald-500 to-teal-600",
-    status: "soon",
+    status: "live",
+    href: "/mathlab/graph",
   },
   {
     id: "number-theory",
